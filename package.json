@@ -1,0 +1,31 @@
+{
+  "name": "sub-atomic-7",
+  "version": "0.1.0",
+  "description": "Entity-driven web application framework with sub-atomic composition and seven-layer architecture",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "check": "bun run typecheck",
+    "typecheck": "tsc --noEmit",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "clean": "rm -rf node_modules bun.lock"
+  },
+  "author": "Bogdan Manea",
+  "license": "MIT",
+  "dependencies": {
+    "elysia": "^1.4.16"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

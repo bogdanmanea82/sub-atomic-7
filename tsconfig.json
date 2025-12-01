@@ -1,0 +1,50 @@
+{
+  "compilerOptions": {
+    /* Environment - Bun optimized */
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "allowJs": true,
+
+    /* Type Checking - STRICT MODE FULLY ENABLED */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+
+    /* Completeness */
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+
+    /* Path Mappings - Seven Layer Architecture */
+    "baseUrl": "./src",
+    "paths": {
+      "@config/*": ["config/*"],
+      "@model/*": ["model/*"],
+      "@model-service/*": ["model-service/*"],
+      "@controller/*": ["controller/*"],
+      "@view-service/*": ["view-service/*"],
+      "@view/*": ["view/*"],
+      "@types/*": ["types/*"],
+      "@utils/*": ["utils/*"]
+    }
+  },
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules"]
+}
