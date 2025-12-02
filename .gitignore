@@ -44,3 +44,7 @@ temp/
 
 # Database
 *.sql.backup
+
+# Claude Code (AI assistant configuration)
+CLAUDE.md
+.claude/
