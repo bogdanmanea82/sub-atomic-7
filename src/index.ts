@@ -1,6 +1,8 @@
 import { Elysia } from "elysia";
+import { GameDomainController } from "@controller/entities/game-domain";
 
 const app = new Elysia()
+  .use(GameDomainController)
   .get("/", () => ({
     name: "sub-atomic-7",
     status: "operational",

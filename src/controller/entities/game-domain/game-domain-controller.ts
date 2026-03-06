@@ -1,17 +1,27 @@
 // src/controller/entities/game-domain/game-domain-controller.ts
-// Layer 3 organism — registers all GameDomain HTTP routes with middleware
+// Layer 3 organism — mounts both JSON API routes and HTML page routes for GameDomain
 
 import { Elysia } from "elysia";
 import { GameDomainService } from "@model-service/entities/game-domain";
-import { errorHandlerPlugin, validateRequestPlugin } from "../../atoms/middleware";
+import {
+  errorHandlerPlugin,
+  validateRequestPlugin,
+} from "../../atoms/middleware";
 import { createCrudRoutes } from "../../molecules/crud-routes";
+import { GameDomainPages } from "./game-domain-pages";
 
 /**
- * Complete HTTP controller for GameDomain.
- * Mounts error handling, request validation, and all CRUD routes.
- * Layer 3 depends only on Layer 2 (GameDomainService) — never on Layer 1 directly.
+ * JSON API at /api/game-domains — consumed by Layer 6 fetch() calls.
+ * validateRequestPlugin enforces application/json content-type.
  */
-export const GameDomainController = new Elysia()
+const GameDomainApi = new Elysia()
   .use(errorHandlerPlugin)
   .use(validateRequestPlugin)
-  .use(createCrudRoutes("/game-domains", GameDomainService));
+  .use(createCrudRoutes("/api/game-domains", GameDomainService));
+
+/**
+ * Complete GameDomain controller — mounts API and browser-facing page routes.
+ */
+export const GameDomainController = new Elysia()
+  .use(GameDomainApi)
+  .use(GameDomainPages);

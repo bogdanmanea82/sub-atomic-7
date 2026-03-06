@@ -1,0 +1,29 @@
+// src/view-service/molecules/views/build-detail-view.ts
+// Transforms a single entity into a detail view model
+
+import type { EntityConfig } from "@config/types";
+import type { DetailView } from "../../types";
+import { prepareField } from "../../atoms/field-display";
+
+/**
+ * Builds a detail view model from a single entity record.
+ * Includes all fields except those marked displayFormat "hidden".
+ * The title uses the entity's name field if available, otherwise falls back to displayName.
+ */
+export function buildDetailView(
+  entity: Record<string, unknown>,
+  config: EntityConfig
+): DetailView {
+  const visibleFields = config.fields.filter(
+    (f) => f.displayFormat !== "hidden"
+  );
+
+  const nameValue = entity["name"];
+  const title =
+    typeof nameValue === "string" ? nameValue : config.displayName;
+
+  return {
+    title,
+    fields: visibleFields.map((field) => prepareField(entity, field)),
+  };
+}

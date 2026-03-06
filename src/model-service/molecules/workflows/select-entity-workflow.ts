@@ -17,11 +17,8 @@ interface EntityModel<TEntity> {
  */
 export type SelectWorkflowResult<TEntity> =
   | { readonly success: true; readonly data: TEntity }
-  | {
-      readonly success: false;
-      readonly stage: "database";
-      readonly error: string;
-    };
+  | { readonly success: false; readonly stage: "not_found"; readonly error: string }
+  | { readonly success: false; readonly stage: "database"; readonly error: string };
 
 /**
  * Fetches a single entity by ID and deserializes it into a typed result.
@@ -38,7 +35,7 @@ export async function selectEntityWorkflow<TEntity>(
   if (!row) {
     return {
       success: false,
-      stage: "database",
+      stage: "not_found",
       error: `${config.displayName} with id ${id} not found`,
     };
   }
