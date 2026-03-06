@@ -5,7 +5,7 @@
  * Supported field data types in the system.
  * These map to database column types and TypeScript types.
  */
-export type FieldType = "string" | "integer" | "boolean" | "timestamp" | "uuid";
+export type FieldType = "string" | "integer" | "boolean" | "timestamp" | "uuid" | "reference";
 
 /**
  * Display format hints for the view layer.
@@ -17,6 +17,7 @@ export type DisplayFormat =
   | "number"
   | "toggle"
   | "datetime"
+  | "select"
   | "hidden";
 
 /**
@@ -77,6 +78,17 @@ export interface UuidFieldConfig extends BaseFieldConfig {
 }
 
 /**
+ * Reference field configuration for foreign keys.
+ * Points to another entity's ID — rendered as a dropdown in forms.
+ */
+export interface ReferenceFieldConfig extends BaseFieldConfig {
+  readonly type: "reference";
+  readonly targetEntity: string;
+  readonly targetTable: string;
+  readonly targetDisplayField: string;
+}
+
+/**
  * Union type representing any valid field configuration.
  * The discriminant is the `type` property.
  */
@@ -85,4 +97,5 @@ export type FieldConfig =
   | IntegerFieldConfig
   | BooleanFieldConfig
   | TimestampFieldConfig
-  | UuidFieldConfig;
+  | UuidFieldConfig
+  | ReferenceFieldConfig;

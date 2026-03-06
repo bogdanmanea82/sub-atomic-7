@@ -11,18 +11,18 @@ describe("deserializeEntity (GameDomain)", () => {
       id: "abc-123",
       name: "Fantasy World",
       description: "A fantasy setting",
-      isActive: true,
-      createdAt: new Date("2025-06-15T10:30:00.000Z"),
-      updatedAt: new Date("2025-06-15T10:30:00.000Z"),
+      is_active: true,
+      created_at: new Date("2025-06-15T10:30:00.000Z"),
+      updated_at: new Date("2025-06-15T10:30:00.000Z"),
     };
     const result = deserializeEntity(GAME_DOMAIN_CONFIG, row) as Record<string, unknown>;
 
     expect(result["id"]).toBe("abc-123");
     expect(result["name"]).toBe("Fantasy World");
     expect(result["description"]).toBe("A fantasy setting");
-    expect(result["isActive"]).toBe(true);
-    expect(result["createdAt"]).toBeInstanceOf(Date);
-    expect(result["updatedAt"]).toBeInstanceOf(Date);
+    expect(result["is_active"]).toBe(true);
+    expect(result["created_at"]).toBeInstanceOf(Date);
+    expect(result["updated_at"]).toBeInstanceOf(Date);
   });
 
   // ── Null handling ──────────────────────────────────────────────────────
@@ -32,9 +32,9 @@ describe("deserializeEntity (GameDomain)", () => {
       id: "abc-123",
       name: "Minimal",
       description: null,
-      isActive: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      is_active: false,
+      created_at: new Date(),
+      updated_at: new Date(),
     };
     const result = deserializeEntity(GAME_DOMAIN_CONFIG, row) as Record<string, unknown>;
     expect(result["description"]).toBeNull();
@@ -47,12 +47,12 @@ describe("deserializeEntity (GameDomain)", () => {
       id: "abc",
       name: "Test",
       description: null,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      is_active: true,
+      created_at: new Date(),
+      updated_at: new Date(),
     };
     const result = deserializeEntity(GAME_DOMAIN_CONFIG, row) as Record<string, unknown>;
-    expect(result["isActive"]).toBe(true);
+    expect(result["is_active"]).toBe(true);
   });
 
   it("handles PostgreSQL native false", () => {
@@ -60,12 +60,12 @@ describe("deserializeEntity (GameDomain)", () => {
       id: "abc",
       name: "Test",
       description: null,
-      isActive: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      is_active: false,
+      created_at: new Date(),
+      updated_at: new Date(),
     };
     const result = deserializeEntity(GAME_DOMAIN_CONFIG, row) as Record<string, unknown>;
-    expect(result["isActive"]).toBe(false);
+    expect(result["is_active"]).toBe(false);
   });
 
   // ── Boolean from SQLite fallback (integer) ─────────────────────────────
@@ -75,12 +75,12 @@ describe("deserializeEntity (GameDomain)", () => {
       id: "abc",
       name: "Test",
       description: null,
-      isActive: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      is_active: 1,
+      created_at: new Date(),
+      updated_at: new Date(),
     };
     const result = deserializeEntity(GAME_DOMAIN_CONFIG, row) as Record<string, unknown>;
-    expect(result["isActive"]).toBe(true);
+    expect(result["is_active"]).toBe(true);
   });
 
   it("handles SQLite integer 0 as false", () => {
@@ -88,12 +88,12 @@ describe("deserializeEntity (GameDomain)", () => {
       id: "abc",
       name: "Test",
       description: null,
-      isActive: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      is_active: 0,
+      created_at: new Date(),
+      updated_at: new Date(),
     };
     const result = deserializeEntity(GAME_DOMAIN_CONFIG, row) as Record<string, unknown>;
-    expect(result["isActive"]).toBe(false);
+    expect(result["is_active"]).toBe(false);
   });
 
   // ── Timestamp deserialization ──────────────────────────────────────────
@@ -104,13 +104,13 @@ describe("deserializeEntity (GameDomain)", () => {
       id: "abc",
       name: "Test",
       description: null,
-      isActive: true,
-      createdAt: dbDate,
-      updatedAt: dbDate,
+      is_active: true,
+      created_at: dbDate,
+      updated_at: dbDate,
     };
     const result = deserializeEntity(GAME_DOMAIN_CONFIG, row) as Record<string, unknown>;
-    expect(result["createdAt"]).toBeInstanceOf(Date);
-    expect((result["createdAt"] as Date).toISOString()).toBe("2025-01-15T08:00:00.000Z");
+    expect(result["created_at"]).toBeInstanceOf(Date);
+    expect((result["created_at"] as Date).toISOString()).toBe("2025-01-15T08:00:00.000Z");
   });
 
   // ── UUID passthrough ───────────────────────────────────────────────────
@@ -120,9 +120,9 @@ describe("deserializeEntity (GameDomain)", () => {
       id: "550e8400-e29b-41d4-a716-446655440000",
       name: "Test",
       description: null,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      is_active: true,
+      created_at: new Date(),
+      updated_at: new Date(),
     };
     const result = deserializeEntity(GAME_DOMAIN_CONFIG, row) as Record<string, unknown>;
     expect(result["id"]).toBe("550e8400-e29b-41d4-a716-446655440000");

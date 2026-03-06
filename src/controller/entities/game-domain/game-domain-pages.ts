@@ -12,6 +12,8 @@ import {
   duplicatePage,
 } from "@view/entities/game-domain";
 import { errorHandlerPlugin } from "../../atoms/middleware";
+import { extractPagination } from "../../sub-atoms/request";
+import { buildPaginationMeta } from "@view-service/sub-atoms/pagination";
 
 const BASE_PATH = "/game-domains";
 const FIELD_CONFIG_JSON = GameDomainViewService.prepareBrowserFieldConfig();
@@ -30,12 +32,15 @@ export const GameDomainPages = new Elysia()
   .use(errorHandlerPlugin)
 
   // ── List ────────────────────────────────────────────────────────────────
-  .get(BASE_PATH, async ({ set }) => {
+  .get(BASE_PATH, async ({ query, set }) => {
     setHtml(set.headers);
-    const result = await GameDomainService.findMany();
+    const pagination = extractPagination(query as Record<string, string>);
+    const result = await GameDomainService.findManyPaginated(pagination);
     if (!result.success) return `<p>Error loading records.</p>`;
+    const paginationMeta = buildPaginationMeta(result.totalCount, pagination.page, pagination.pageSize);
     const view = GameDomainViewService.prepareListView(
       result.data as unknown as Record<string, unknown>[],
+      paginationMeta,
     );
     return listPage(view, BASE_PATH);
   })

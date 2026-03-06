@@ -15,7 +15,7 @@ export function formField(field: FormField): string {
   return `
     <div class="form-field${field.required ? " form-field--required" : ""}${errorClass}">
       <label for="${field.name}">${escapeHtml(field.label)}</label>
-      ${input(field.name, field.inputType, field.value, field.required)}
+      ${input(field.name, field.inputType, field.value, field.required, field.options)}
       ${errorHtml}
     </div>`;
 }

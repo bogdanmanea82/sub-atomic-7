@@ -2,7 +2,7 @@
 // Builds form field definitions for create and edit forms
 
 import type { EntityConfig, FieldConfig } from "@config/types";
-import type { FormView, FormField } from "../../types";
+import type { FormView, FormField, SelectOption } from "../../types";
 
 /**
  * Maps a DisplayFormat to an HTML input type.
@@ -19,6 +19,8 @@ function mapInputType(field: FieldConfig): string {
       return "checkbox";
     case "datetime":
       return "datetime-local";
+    case "select":
+      return "select";
     default:
       return "text";
   }
@@ -33,6 +35,7 @@ export function buildFormView(
   config: EntityConfig,
   currentValues?: Record<string, unknown>,
   errors?: Record<string, string>,
+  selectOptions?: Record<string, readonly SelectOption[]>,
 ): FormView {
   const editableFields = config.fields.filter(
     (f) =>
@@ -49,8 +52,10 @@ export function buildFormView(
       value: currentValues ? (currentValues[field.name] ?? null) : null,
       required: field.required,
     };
+    const options = selectOptions?.[field.name];
+    const withOptions = options ? { ...base, options } : base;
     const error = errors?.[field.name];
-    return error ? { ...base, error } : base;
+    return error ? { ...withOptions, error } : withOptions;
   });
 
   const title = currentValues

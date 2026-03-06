@@ -18,6 +18,11 @@ import {
   type SelectManyWorkflowResult,
 } from "../../molecules/workflows/select-many-workflow";
 import {
+  selectManyPaginatedWorkflow,
+  type SelectManyPaginatedResult,
+} from "../../molecules/workflows/select-many-paginated-workflow";
+import type { PaginationParams } from "@model/universal/sub-atoms/types/pagination-params";
+import {
   updateEntityWorkflow,
   type UpdateWorkflowResult,
 } from "../../molecules/workflows/update-entity-workflow";
@@ -58,6 +63,14 @@ export const GameDomainService = {
   ): Promise<SelectManyWorkflowResult<GameDomain>> {
     const db = getConnection();
     return selectManyWorkflow(db, GameDomainModel, conditions);
+  },
+
+  async findManyPaginated(
+    pagination: PaginationParams,
+    conditions?: Record<string, unknown>,
+  ): Promise<SelectManyPaginatedResult<GameDomain>> {
+    const db = getConnection();
+    return selectManyPaginatedWorkflow(db, GameDomainModel, pagination, conditions);
   },
 
   async update(

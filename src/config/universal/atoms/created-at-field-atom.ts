@@ -8,7 +8,7 @@ import { DISPLAY_FORMATS, FIELD_MARKERS } from "../sub-atoms/";
  * Auto-set on creation, system-managed, shown in lists.
  */
 export const CREATED_AT_FIELD_ATOM = {
-  name: "createdAt",
+  name: "created_at",
   type: "timestamp",
   label: "Created",
   ...FIELD_MARKERS.system,

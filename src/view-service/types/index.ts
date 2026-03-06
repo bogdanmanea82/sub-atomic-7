@@ -3,7 +3,9 @@ export type {
   DisplayField,
   ListViewRow,
   ListView,
+  PaginationMeta,
   DetailView,
   FormField,
   FormView,
+  SelectOption,
 } from "./view-models";

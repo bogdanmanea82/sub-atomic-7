@@ -138,6 +138,75 @@ function init(): void {
     });
     return;
   }
+
+  // ── Game Subdomains ────────────────────────────────────────────────────
+
+  // /game-subdomains/new — create form
+  if (path === "/game-subdomains/new") {
+    initFormController({
+      formSelector: ".entity-form",
+      apiUrl: "/api/game-subdomains",
+      method: "POST",
+      redirectUrl: "/game-subdomains",
+      fields: readFieldConfig(),
+      successMessage: "Game Subdomain created successfully",
+    });
+    return;
+  }
+
+  // /game-subdomains/:id/duplicate
+  const subDuplicateMatch = path.match(/^\/game-subdomains\/([^/]+)\/duplicate$/);
+  if (subDuplicateMatch) {
+    showDuplicateNotice();
+    initFormController({
+      formSelector: ".entity-form",
+      apiUrl: "/api/game-subdomains",
+      method: "POST",
+      redirectUrl: "/game-subdomains",
+      fields: readFieldConfig(),
+      successMessage: "Game Subdomain duplicated successfully",
+    });
+    return;
+  }
+
+  // /game-subdomains/:id/edit
+  const subEditMatch = path.match(/^\/game-subdomains\/([^/]+)\/edit$/);
+  if (subEditMatch) {
+    const id = subEditMatch[1] as string;
+    initFormController({
+      formSelector: ".entity-form",
+      apiUrl: `/api/game-subdomains/${id}`,
+      method: "PUT",
+      redirectUrl: `/game-subdomains/${id}`,
+      fields: readFieldConfig(),
+      successMessage: "Game Subdomain updated successfully",
+    });
+    return;
+  }
+
+  // /game-subdomains/:id — detail page
+  const subDetailMatch = path.match(/^\/game-subdomains\/([^/]+)$/);
+  if (subDetailMatch) {
+    const id = subDetailMatch[1] as string;
+    initDetailController({
+      deleteFormSelector: "form[action$='/delete']",
+      apiUrl: `/api/game-subdomains/${id}`,
+      entityName: document.querySelector("h1")?.textContent ?? "this record",
+      redirectUrl: "/game-subdomains",
+    });
+    return;
+  }
+
+  // /game-subdomains — list page
+  if (path === "/game-subdomains") {
+    initListController({
+      tableSelector: ".data-table",
+      rowSelector: ".data-table tbody tr",
+      apiBasePath: "/api/game-subdomains",
+      redirectUrl: "/game-subdomains",
+    });
+    return;
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);

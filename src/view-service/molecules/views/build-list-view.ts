@@ -2,16 +2,20 @@
 // Transforms an array of entities into a complete list view model
 
 import type { EntityConfig } from "@config/types";
-import type { ListView, ListViewRow } from "../../types";
+import type { ListView, ListViewRow, PaginationMeta } from "../../types";
 import { prepareField } from "../../atoms/field-display";
+import type { ReferenceLookup } from "../../atoms/field-display";
 
 /**
  * Builds a complete list view model from an array of raw entity records.
  * Visible columns are all fields except those marked displayFormat "hidden".
+ * referenceLookup resolves foreign key UUIDs to display names.
  */
 export function buildListView(
   entities: Record<string, unknown>[],
-  config: EntityConfig
+  config: EntityConfig,
+  referenceLookup?: ReferenceLookup,
+  pagination?: PaginationMeta,
 ): ListView {
   const visibleFields = config.fields.filter(
     (f) => f.displayFormat !== "hidden"
@@ -24,13 +28,14 @@ export function buildListView(
 
   const rows: ListViewRow[] = entities.map((entity) => ({
     id: entity["id"] as string,
-    fields: visibleFields.map((field) => prepareField(entity, field)),
+    fields: visibleFields.map((field) => prepareField(entity, field, referenceLookup)),
   }));
 
   return {
     title: config.pluralDisplayName,
     columns,
     rows,
-    count: entities.length,
+    count: pagination ? pagination.totalCount : entities.length,
+    pagination,
   };
 }

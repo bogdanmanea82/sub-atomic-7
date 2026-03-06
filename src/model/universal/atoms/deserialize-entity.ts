@@ -55,7 +55,8 @@ function deserializeField(field: FieldConfig, value: unknown): unknown {
       return deserializeDatetime(value as Date);
 
     case "uuid":
-      // UUIDs come from database as strings - pass through
+    case "reference":
+      // UUIDs and reference IDs come from database as strings — pass through
       return value;
 
     default:

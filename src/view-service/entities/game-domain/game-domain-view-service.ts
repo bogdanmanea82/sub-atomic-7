@@ -2,7 +2,7 @@
 // Layer 4 organism — complete view preparation interface for GameDomain
 
 import { GAME_DOMAIN_CONFIG } from "@config/entities/game-domain";
-import type { ListView, DetailView, FormView } from "../../types";
+import type { ListView, DetailView, FormView, PaginationMeta } from "../../types";
 import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig } from "../../molecules/views";
 
 /**
@@ -10,8 +10,11 @@ import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig 
  * Layer 5 views and Layer 3 controllers call this — not the molecules directly.
  */
 export const GameDomainViewService = {
-  prepareListView(entities: Record<string, unknown>[]): ListView {
-    return buildListView(entities, GAME_DOMAIN_CONFIG);
+  prepareListView(
+    entities: Record<string, unknown>[],
+    pagination?: PaginationMeta,
+  ): ListView {
+    return buildListView(entities, GAME_DOMAIN_CONFIG, undefined, pagination);
   },
 
   prepareDetailView(entity: Record<string, unknown>): DetailView {

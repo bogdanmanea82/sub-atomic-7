@@ -1,7 +1,7 @@
 // src/config/factories/base-entity-config-factory.ts
 // Abstract base factory for entity configuration
 
-import type { EntityConfig, FieldConfig, PermissionConfig } from "../types";
+import type { EntityConfig, FieldConfig, PermissionConfig, RelationshipConfig } from "../types";
 import { AUDIT_FIELDS, STANDARD_ENTITY_FIELDS } from "../universal/molecules";
 
 /**
@@ -14,6 +14,7 @@ export abstract class BaseEntityConfigFactory {
    * Template method that assembles all pieces.
    */
   create(): EntityConfig {
+    const relationships = this.getRelationships();
     return {
       name: this.getEntityName(),
       tableName: this.getTableName(),
@@ -21,6 +22,7 @@ export abstract class BaseEntityConfigFactory {
       pluralDisplayName: this.getPluralDisplayName(),
       fields: this.buildFields(),
       permissions: this.getPermissions(),
+      ...(relationships.length > 0 ? { relationships } : {}),
     };
   }
 
@@ -30,8 +32,12 @@ export abstract class BaseEntityConfigFactory {
   protected abstract getPluralDisplayName(): string;
   protected abstract getPermissions(): PermissionConfig;
 
-  // Hook method - subclasses CAN override to add entity-specific fields
+  // Hook methods - subclasses CAN override to add entity-specific fields/relationships
   protected getEntitySpecificFields(): readonly FieldConfig[] {
+    return [];
+  }
+
+  protected getRelationships(): readonly RelationshipConfig[] {
     return [];
   }
 
@@ -41,9 +47,12 @@ export abstract class BaseEntityConfigFactory {
   }
 
   protected buildFields(): readonly FieldConfig[] {
+    const [idField, ...restStandard] = STANDARD_ENTITY_FIELDS;
+    const entityFields = this.getEntitySpecificFields();
     return [
-      ...STANDARD_ENTITY_FIELDS,
-      ...this.getEntitySpecificFields(),
+      idField,
+      ...entityFields,
+      ...restStandard,
       ...AUDIT_FIELDS,
     ] as const;
   }

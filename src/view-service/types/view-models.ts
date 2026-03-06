@@ -22,6 +22,19 @@ export interface ListViewRow {
 }
 
 /**
+ * Pagination metadata for list views.
+ * Computed from totalCount and current page/pageSize.
+ */
+export interface PaginationMeta {
+  readonly currentPage: number;
+  readonly totalPages: number;
+  readonly totalCount: number;
+  readonly pageSize: number;
+  readonly hasNext: boolean;
+  readonly hasPrev: boolean;
+}
+
+/**
  * Complete data for rendering a list page.
  */
 export interface ListView {
@@ -29,6 +42,7 @@ export interface ListView {
   readonly columns: readonly { readonly name: string; readonly label: string }[];
   readonly rows: readonly ListViewRow[];
   readonly count: number;
+  readonly pagination?: PaginationMeta;
 }
 
 /**
@@ -37,6 +51,14 @@ export interface ListView {
 export interface DetailView {
   readonly title: string;
   readonly fields: readonly DisplayField[];
+}
+
+/**
+ * A label/value pair for select dropdown options.
+ */
+export interface SelectOption {
+  readonly label: string;
+  readonly value: string;
 }
 
 /**
@@ -49,6 +71,7 @@ export interface FormField {
   readonly value: unknown;
   readonly required: boolean;
   readonly error?: string;
+  readonly options?: readonly SelectOption[];
 }
 
 /**

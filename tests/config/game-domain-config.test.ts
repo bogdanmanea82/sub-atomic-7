@@ -27,9 +27,9 @@ describe("GAME_DOMAIN_CONFIG", () => {
 
   // ── Field order and names ──────────────────────────────────────────────
 
-  it("has fields in correct order: id, name, description, isActive, createdAt, updatedAt", () => {
+  it("has fields in correct order: id, name, description, is_active, created_at, updated_at", () => {
     const names = GAME_DOMAIN_CONFIG.fields.map((f) => f.name);
-    expect(names).toEqual(["id", "name", "description", "isActive", "createdAt", "updatedAt"]);
+    expect(names).toEqual(["id", "name", "description", "is_active", "created_at", "updated_at"]);
   });
 
   // ── ID field ───────────────────────────────────────────────────────────
@@ -69,35 +69,35 @@ describe("GAME_DOMAIN_CONFIG", () => {
     }
   });
 
-  // ── isActive field ─────────────────────────────────────────────────────
+  // ── is_active field ─────────────────────────────────────────────────────
 
-  it("isActive is a required boolean with default true", () => {
-    const isActive = GAME_DOMAIN_CONFIG.fields.find((f) => f.name === "isActive");
-    expect(isActive).toBeDefined();
-    expect(isActive!.type).toBe("boolean");
-    expect(isActive!.required).toBe(true);
-    if (isActive!.type === "boolean") {
-      expect(isActive!.defaultValue).toBe(true);
+  it("is_active is a required boolean with default true", () => {
+    const is_active = GAME_DOMAIN_CONFIG.fields.find((f) => f.name === "is_active");
+    expect(is_active).toBeDefined();
+    expect(is_active!.type).toBe("boolean");
+    expect(is_active!.required).toBe(true);
+    if (is_active!.type === "boolean") {
+      expect(is_active!.defaultValue).toBe(true);
     }
   });
 
   // ── Timestamp fields ──────────────────────────────────────────────────
 
-  it("createdAt is auto-set on create", () => {
-    const createdAt = GAME_DOMAIN_CONFIG.fields.find((f) => f.name === "createdAt");
-    expect(createdAt).toBeDefined();
-    expect(createdAt!.type).toBe("timestamp");
-    if (createdAt!.type === "timestamp") {
-      expect(createdAt!.autoSet).toBe("create");
+  it("created_at is auto-set on create", () => {
+    const created_at = GAME_DOMAIN_CONFIG.fields.find((f) => f.name === "created_at");
+    expect(created_at).toBeDefined();
+    expect(created_at!.type).toBe("timestamp");
+    if (created_at!.type === "timestamp") {
+      expect(created_at!.autoSet).toBe("create");
     }
   });
 
-  it("updatedAt is auto-set on update", () => {
-    const updatedAt = GAME_DOMAIN_CONFIG.fields.find((f) => f.name === "updatedAt");
-    expect(updatedAt).toBeDefined();
-    expect(updatedAt!.type).toBe("timestamp");
-    if (updatedAt!.type === "timestamp") {
-      expect(updatedAt!.autoSet).toBe("update");
+  it("updated_at is auto-set on update", () => {
+    const updated_at = GAME_DOMAIN_CONFIG.fields.find((f) => f.name === "updated_at");
+    expect(updated_at).toBeDefined();
+    expect(updated_at!.type).toBe("timestamp");
+    if (updated_at!.type === "timestamp") {
+      expect(updated_at!.autoSet).toBe("update");
     }
   });
 

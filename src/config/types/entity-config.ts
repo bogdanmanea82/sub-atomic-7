@@ -2,6 +2,7 @@
 // Type definitions for entity configuration - the complete specification for an entity
 
 import type { FieldConfig } from "./field-config";
+import type { RelationshipConfig } from "./relationship-config";
 
 /**
  * Permission levels for entity operations.
@@ -33,4 +34,5 @@ export interface EntityConfig {
   readonly pluralDisplayName: string;
   readonly fields: readonly FieldConfig[];
   readonly permissions: PermissionConfig;
+  readonly relationships?: readonly RelationshipConfig[];
 }

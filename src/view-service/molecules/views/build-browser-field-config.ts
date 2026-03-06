@@ -11,7 +11,7 @@ import type { EntityConfig } from "@config/types";
 interface BrowserField {
   readonly name: string;
   readonly label: string;
-  readonly type: "string" | "integer" | "boolean" | "timestamp" | "uuid";
+  readonly type: "string" | "integer" | "boolean" | "timestamp" | "uuid" | "reference";
   readonly required: boolean;
   readonly minLength?: number;
   readonly maxLength?: number;

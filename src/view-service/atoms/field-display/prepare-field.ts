@@ -11,26 +11,37 @@ import {
 } from "../../sub-atoms/formatters";
 
 /**
+ * A lookup map for resolving reference field UUIDs to display names.
+ * Keyed by field name, value is a map of UUID → display name.
+ */
+export type ReferenceLookup = Record<string, Record<string, string>>;
+
+/**
  * Prepares a single field value for display based on its FieldConfig.
  * Dispatches to the appropriate formatter via switch on field.type.
- * Returns a DisplayField with the formatted string value and original raw value.
+ * For reference fields, resolves the UUID to a display name via the lookup map.
  */
 export function prepareField(
   entity: Record<string, unknown>,
-  field: FieldConfig
+  field: FieldConfig,
+  referenceLookup?: ReferenceLookup,
 ): DisplayField {
   const rawValue = entity[field.name];
 
   return {
     name: field.name,
     label: field.label,
-    value: formatFieldValue(rawValue, field),
+    value: formatFieldValue(rawValue, field, referenceLookup),
     rawValue,
     displayFormat: field.displayFormat,
   };
 }
 
-function formatFieldValue(value: unknown, field: FieldConfig): string {
+function formatFieldValue(
+  value: unknown,
+  field: FieldConfig,
+  referenceLookup?: ReferenceLookup,
+): string {
   if (value === null || value === undefined) {
     return "—";
   }
@@ -50,6 +61,11 @@ function formatFieldValue(value: unknown, field: FieldConfig): string {
 
     case "uuid":
       return value as string;
+
+    case "reference": {
+      const lookup = referenceLookup?.[field.name];
+      return lookup?.[value as string] ?? String(value);
+    }
 
     default:
       return String(value);

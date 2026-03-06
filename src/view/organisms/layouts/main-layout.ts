@@ -11,6 +11,7 @@ function navigation(currentPath: string): string {
       <ul class="main-nav__links">
         ${navItem("Home", "/", currentPath === "/")}
         ${navItem("Game Domains", "/game-domains", currentPath.startsWith("/game-domains"))}
+        ${navItem("Game Subdomains", "/game-subdomains", currentPath.startsWith("/game-subdomains"))}
       </ul>
     </nav>`;
 }
@@ -62,9 +63,9 @@ export function mainLayout(content: string, title: string, currentPath: string =
     .entity-form { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 640px; }
     .form-field { margin-bottom: 1.25rem; }
     .form-field label { display: block; font-weight: 600; margin-bottom: 0.35rem; font-size: 0.9rem; }
-    .form-field input, .form-field textarea { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+    .form-field input, .form-field textarea, .form-field select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
     .form-field textarea { min-height: 100px; resize: vertical; }
-    .form-field--invalid input, .form-field--invalid textarea { border-color: #dc3545; }
+    .form-field--invalid input, .form-field--invalid textarea, .form-field--invalid select { border-color: #dc3545; }
     .field-error { display: block; color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem; }
     .form-actions { display: flex; gap: 1rem; margin-top: 1.5rem; align-items: center; }
     .detail-list { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
@@ -121,6 +122,16 @@ export function mainLayout(content: string, title: string, currentPath: string =
 
     /* Duplicate notice */
     .duplicate-notice { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; max-width: 640px; font-size: 0.9rem; }
+
+    /* Pagination */
+    .pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 1.25rem; padding: 0.75rem 0; }
+    .pagination__info { font-size: 0.85rem; color: #666; }
+    .pagination__links { display: flex; align-items: center; gap: 0.25rem; }
+    .pagination__link { padding: 0.4rem 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85rem; color: #333; text-decoration: none; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+    .pagination__link:hover:not(.pagination__link--disabled):not(.pagination__link--active) { background: #f0f0f0; border-color: #bbb; }
+    .pagination__link--active { background: #1a1a2e; color: white; border-color: #1a1a2e; font-weight: 600; }
+    .pagination__link--disabled { color: #bbb; cursor: default; border-color: #eee; }
+    .pagination__ellipsis { padding: 0.4rem 0.35rem; color: #999; font-size: 0.85rem; }
   </style>
 </head>
 <body>

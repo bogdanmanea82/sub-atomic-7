@@ -15,9 +15,9 @@ describe("buildSelectQuery", () => {
     expect(result.sql).toContain('"id"');
     expect(result.sql).toContain('"name"');
     expect(result.sql).toContain('"description"');
-    expect(result.sql).toContain('"isActive"');
-    expect(result.sql).toContain('"createdAt"');
-    expect(result.sql).toContain('"updatedAt"');
+    expect(result.sql).toContain('"is_active"');
+    expect(result.sql).toContain('"created_at"');
+    expect(result.sql).toContain('"updated_at"');
     expect(result.sql).toContain("FROM game_domain");
     expect(result.params).toEqual([]);
   });
@@ -31,9 +31,9 @@ describe("buildSelectQuery", () => {
   it("handles multiple conditions with AND", () => {
     const result = buildSelectQuery(GAME_DOMAIN_CONFIG, {
       name: "Test",
-      isActive: true,
+      is_active: true,
     });
-    expect(result.sql).toContain('WHERE "name" = ? AND "isActive" = ?');
+    expect(result.sql).toContain('WHERE "name" = ? AND "is_active" = ?');
     expect(result.params).toEqual(["Test", true]);
   });
 
@@ -46,7 +46,7 @@ describe("buildSelectQuery", () => {
 
 describe("buildInsertQuery", () => {
   it("builds INSERT with quoted fields and params", () => {
-    const data = { id: "abc", name: "Test", isActive: true };
+    const data = { id: "abc", name: "Test", is_active: true };
     const result = buildInsertQuery(GAME_DOMAIN_CONFIG, data);
     expect(result.sql).toContain("INSERT INTO game_domain");
     expect(result.sql).toContain('"id"');
@@ -71,7 +71,7 @@ describe("buildUpdateQuery", () => {
   });
 
   it("handles multiple fields and conditions", () => {
-    const data = { name: "New", isActive: false };
+    const data = { name: "New", is_active: false };
     const conditions = { id: "abc" };
     const result = buildUpdateQuery(GAME_DOMAIN_CONFIG, data, conditions);
     expect(result.params).toEqual(["New", false, "abc"]);

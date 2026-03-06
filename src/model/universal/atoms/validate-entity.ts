@@ -99,8 +99,8 @@ function validateField(field: FieldConfig, value: unknown): unknown {
       return validateDatetime(value as string, field.name);
 
     case "uuid":
-      // UUID validation is typically just required check + format
-      // For now, pass through - could add UUID format validation sub-atom later
+    case "reference":
+      // UUID and reference fields pass through — required check above is sufficient
       return value;
 
     default:

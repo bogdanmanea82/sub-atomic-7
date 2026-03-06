@@ -75,7 +75,8 @@ function serializeField(field: FieldConfig, value: unknown): unknown {
       return serializeDatetime(value as Date);
 
     case "uuid":
-      // UUIDs are already strings - pass through
+    case "reference":
+      // UUIDs and reference IDs are already strings — pass through
       return value;
 
     default:

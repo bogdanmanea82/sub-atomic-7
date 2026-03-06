@@ -8,6 +8,7 @@ export type {
   FieldConfig,
   FieldType,
   IntegerFieldConfig,
+  ReferenceFieldConfig,
   StringFieldConfig,
   TimestampFieldConfig,
   UuidFieldConfig,

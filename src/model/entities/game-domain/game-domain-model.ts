@@ -10,8 +10,11 @@
   import { serializeEntity } from "../../universal/atoms/serialize-entity";
   import { deserializeEntity } from "../../universal/atoms/deserialize-entity";
   import { createEntity } from "../../universal/molecules/create-entity";
+  import type { PaginationParams } from "../../universal/sub-atoms/types/pagination-params";
   import {
     buildSelectQuery,
+    buildPaginatedSelectQuery,
+    buildCountQuery,
     buildUpdateQuery,
     buildDeleteQuery,
   } from "../../universal/atoms/build-query";
@@ -24,9 +27,9 @@
     readonly id: string;
     readonly name: string;
     readonly description: string | null;
-    readonly isActive: boolean;
-    readonly createdAt: Date;
-    readonly updatedAt: Date;
+    readonly is_active: boolean;
+    readonly created_at: Date;
+    readonly updated_at: Date;
   };
 
   /**
@@ -53,6 +56,14 @@
 
     prepareSelect(conditions?: Record<string, unknown>): PreparedQuery {
       return buildSelectQuery(GAME_DOMAIN_CONFIG, conditions);
+    },
+
+    preparePaginatedSelect(pagination: PaginationParams, conditions?: Record<string, unknown>): PreparedQuery {
+      return buildPaginatedSelectQuery(GAME_DOMAIN_CONFIG, pagination, conditions);
+    },
+
+    prepareCount(conditions?: Record<string, unknown>): PreparedQuery {
+      return buildCountQuery(GAME_DOMAIN_CONFIG, conditions);
     },
 
     prepareUpdate(data: Record<string, unknown>, conditions: Record<string, unknown>): PreparedQuery {

@@ -8,7 +8,7 @@ import { DISPLAY_FORMATS, FIELD_MARKERS } from "../sub-atoms";
  * Boolean toggle with default true, shown in lists.
  */
 export const IS_ACTIVE_FIELD_ATOM = {
-  name: "isActive",
+  name: "is_active",
   type: "boolean",
   label: "Active",
   ...FIELD_MARKERS.required,

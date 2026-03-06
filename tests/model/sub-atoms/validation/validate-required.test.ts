@@ -13,8 +13,8 @@ describe("validateRequired", () => {
   });
 
   it("returns the value when a boolean is provided", () => {
-    expect(validateRequired(true, "isActive")).toBe(true);
-    expect(validateRequired(false, "isActive")).toBe(false);
+    expect(validateRequired(true, "is_active")).toBe(true);
+    expect(validateRequired(false, "is_active")).toBe(false);
   });
 
   it("returns the value when an empty string is provided", () => {

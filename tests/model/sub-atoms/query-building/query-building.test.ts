@@ -12,8 +12,8 @@ import { queryBuildValues } from "@model/universal/sub-atoms/query-building/quer
 
 describe("queryBuildSelect", () => {
   it("builds SELECT with quoted field names", () => {
-    const result = queryBuildSelect("game_domain", ["id", "name", "isActive"]);
-    expect(result).toBe('SELECT "id", "name", "isActive" FROM game_domain');
+    const result = queryBuildSelect("game_domain", ["id", "name", "is_active"]);
+    expect(result).toBe('SELECT "id", "name", "is_active" FROM game_domain');
   });
 
   it("uses * when fields array is empty", () => {
@@ -26,9 +26,9 @@ describe("queryBuildSelect", () => {
     expect(result).toBe('SELECT "name" FROM game_domain');
   });
 
-  it("quotes camelCase fields for PostgreSQL compatibility", () => {
-    const result = queryBuildSelect("game_domain", ["createdAt", "updatedAt"]);
-    expect(result).toBe('SELECT "createdAt", "updatedAt" FROM game_domain');
+  it("quotes snake_case fields for PostgreSQL compatibility", () => {
+    const result = queryBuildSelect("game_domain", ["created_at", "updated_at"]);
+    expect(result).toBe('SELECT "created_at", "updated_at" FROM game_domain');
   });
 });
 
@@ -40,10 +40,10 @@ describe("queryBuildInsert", () => {
   it("builds INSERT with quoted fields and placeholders", () => {
     const result = queryBuildInsert("game_domain", {
       name: "Test",
-      isActive: true,
+      is_active: true,
     });
     expect(result.sql).toBe(
-      'INSERT INTO game_domain ("name", "isActive") VALUES (?, ?)'
+      'INSERT INTO game_domain ("name", "is_active") VALUES (?, ?)'
     );
     expect(result.params).toEqual(["Test", true]);
   });
@@ -84,10 +84,10 @@ describe("queryBuildUpdate", () => {
   it("builds UPDATE SET with quoted fields", () => {
     const result = queryBuildUpdate("game_domain", {
       name: "Updated",
-      isActive: false,
+      is_active: false,
     });
     expect(result.sql).toBe(
-      'UPDATE game_domain SET "name" = ?, "isActive" = ?'
+      'UPDATE game_domain SET "name" = ?, "is_active" = ?'
     );
     expect(result.params).toEqual(["Updated", false]);
   });
@@ -111,8 +111,8 @@ describe("queryBuildWhere", () => {
   });
 
   it("joins multiple conditions with AND", () => {
-    const result = queryBuildWhere({ name: "Test", isActive: true });
-    expect(result.sql).toBe('WHERE "name" = ? AND "isActive" = ?');
+    const result = queryBuildWhere({ name: "Test", is_active: true });
+    expect(result.sql).toBe('WHERE "name" = ? AND "is_active" = ?');
     expect(result.params).toEqual(["Test", true]);
   });
 
@@ -135,15 +135,15 @@ describe("queryBuildWhere", () => {
 
 describe("queryBuildValues", () => {
   it("builds VALUES clause for a single row", () => {
-    const result = queryBuildValues([{ name: "A", isActive: true }]);
+    const result = queryBuildValues([{ name: "A", is_active: true }]);
     expect(result.sql).toBe("VALUES (?, ?)");
     expect(result.params).toEqual(["A", true]);
   });
 
   it("builds VALUES clause for multiple rows", () => {
     const result = queryBuildValues([
-      { name: "A", isActive: true },
-      { name: "B", isActive: false },
+      { name: "A", is_active: true },
+      { name: "B", is_active: false },
     ]);
     expect(result.sql).toBe("VALUES (?, ?), (?, ?)");
     expect(result.params).toEqual(["A", true, "B", false]);

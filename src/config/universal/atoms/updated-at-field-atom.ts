@@ -7,7 +7,7 @@ import { DISPLAY_FORMATS, FIELD_MARKERS } from "../sub-atoms";
  * Modified on update, system-managed, shown in lists.
  */
 export const UPDATED_AT_FIELD_ATOM = {
-  name: "updatedAt",
+  name: "updated_at",
   type: "timestamp",
   label: "Updated",
   ...FIELD_MARKERS.system,
