@@ -12,6 +12,8 @@ function navigation(currentPath: string): string {
         ${navItem("Home", "/", currentPath === "/")}
         ${navItem("Game Domains", "/game-domains", currentPath.startsWith("/game-domains"))}
         ${navItem("Game Subdomains", "/game-subdomains", currentPath.startsWith("/game-subdomains"))}
+        ${navItem("Game Categories", "/game-categories", currentPath.startsWith("/game-categories"))}
+        ${navItem("Game Subcategories", "/game-subcategories", currentPath.startsWith("/game-subcategories"))}
       </ul>
     </nav>`;
 }

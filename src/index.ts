@@ -1,14 +1,20 @@
 import { Elysia } from "elysia";
 import { GameDomainController } from "@controller/entities/game-domain";
 import { GameSubdomainController } from "@controller/entities/game-subdomain";
+import { GameCategoryController } from "@controller/entities/game-category";
+import { GameSubcategoryController } from "@controller/entities/game-subcategory";
 import { GameDomainService } from "@model-service/entities/game-domain";
 import { GameSubdomainService } from "@model-service/entities/game-subdomain";
+import { GameCategoryService } from "@model-service/entities/game-category";
+import { GameSubcategoryService } from "@model-service/entities/game-subcategory";
 import { homePage } from "@view/organisms/pages";
 import type { EntityCardData } from "@view/organisms/pages";
 
 const app = new Elysia()
   .use(GameDomainController)
   .use(GameSubdomainController)
+  .use(GameCategoryController)
+  .use(GameSubcategoryController)
   // Serve the browser bundle as a static asset
   .get("/public/main.js", () => Bun.file("public/main.js"))
   // Home page — HTML with live entity counts
@@ -16,15 +22,23 @@ const app = new Elysia()
     set.headers["content-type"] = "text/html; charset=utf-8";
 
     // Fetch entity counts for the dashboard cards
-    const [gameDomainResult, gameSubdomainResult] = await Promise.all([
+    const [gameDomainResult, gameSubdomainResult, gameCategoryResult, gameSubcategoryResult] = await Promise.all([
       GameDomainService.findMany(),
       GameSubdomainService.findMany(),
+      GameCategoryService.findMany(),
+      GameSubcategoryService.findMany(),
     ]);
     const gameDomainCount = gameDomainResult.success
       ? (gameDomainResult.data as unknown[]).length
       : 0;
     const gameSubdomainCount = gameSubdomainResult.success
       ? (gameSubdomainResult.data as unknown[]).length
+      : 0;
+    const gameCategoryCount = gameCategoryResult.success
+      ? (gameCategoryResult.data as unknown[]).length
+      : 0;
+    const gameSubcategoryCount = gameSubcategoryResult.success
+      ? (gameSubcategoryResult.data as unknown[]).length
       : 0;
 
     const entities: EntityCardData[] = [
@@ -41,6 +55,20 @@ const app = new Elysia()
         href: "/game-subdomains",
         count: gameSubdomainCount,
         icon: "🗂️",
+      },
+      {
+        name: "Game Categories",
+        description: "Classify content within subdomains — the third level of the hierarchy.",
+        href: "/game-categories",
+        count: gameCategoryCount,
+        icon: "📂",
+      },
+      {
+        name: "Game Subcategories",
+        description: "Fine-grained classification within categories — the deepest hierarchy level.",
+        href: "/game-subcategories",
+        count: gameSubcategoryCount,
+        icon: "📑",
       },
     ];
 

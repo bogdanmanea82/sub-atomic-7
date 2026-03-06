@@ -9,7 +9,7 @@ import { initFormController } from "./organisms/controllers";
 import { initDetailController } from "./organisms/controllers";
 import { consumeFlashMessage } from "./sub-atoms/utilities";
 import { showToast } from "./molecules/ui";
-import { showDuplicateNotice, attachNameAvailabilityHandler } from "./atoms/handlers";
+import { showDuplicateNotice, attachNameAvailabilityHandler, attachCascadeDropdownHandler } from "./atoms/handlers";
 
 /**
  * Reads field config from the embedded <script id="field-config"> tag.
@@ -204,6 +204,210 @@ function init(): void {
       rowSelector: ".data-table tbody tr",
       apiBasePath: "/api/game-subdomains",
       redirectUrl: "/game-subdomains",
+    });
+    return;
+  }
+
+  // ── Game Categories ──────────────────────────────────────────────────
+
+  /** Shared cascade config: domain dropdown filters the subdomain dropdown */
+  const categoryCascadeOptions = {
+    parentSelector: '[name="game_domain_id"]',
+    childSelector: '[name="game_subdomain_id"]',
+    apiUrl: "/api/game-subdomains",
+    filterParam: "game_domain_id",
+    labelField: "name",
+    valueField: "id",
+    placeholder: "-- Select Subdomain --",
+  };
+
+  // /game-categories/new — create form with cascading dropdown
+  if (path === "/game-categories/new") {
+    initFormController({
+      formSelector: ".entity-form",
+      apiUrl: "/api/game-categories",
+      method: "POST",
+      redirectUrl: "/game-categories",
+      fields: readFieldConfig(),
+      successMessage: "Game Category created successfully",
+    });
+    const catForm = document.querySelector<HTMLFormElement>(".entity-form");
+    if (catForm) {
+      attachCascadeDropdownHandler(catForm, categoryCascadeOptions);
+    }
+    return;
+  }
+
+  // /game-categories/:id/duplicate
+  const catDuplicateMatch = path.match(/^\/game-categories\/([^/]+)\/duplicate$/);
+  if (catDuplicateMatch) {
+    showDuplicateNotice();
+    initFormController({
+      formSelector: ".entity-form",
+      apiUrl: "/api/game-categories",
+      method: "POST",
+      redirectUrl: "/game-categories",
+      fields: readFieldConfig(),
+      successMessage: "Game Category duplicated successfully",
+    });
+    const dupForm = document.querySelector<HTMLFormElement>(".entity-form");
+    if (dupForm) {
+      attachCascadeDropdownHandler(dupForm, categoryCascadeOptions);
+    }
+    return;
+  }
+
+  // /game-categories/:id/edit
+  const catEditMatch = path.match(/^\/game-categories\/([^/]+)\/edit$/);
+  if (catEditMatch) {
+    const id = catEditMatch[1] as string;
+    initFormController({
+      formSelector: ".entity-form",
+      apiUrl: `/api/game-categories/${id}`,
+      method: "PUT",
+      redirectUrl: `/game-categories/${id}`,
+      fields: readFieldConfig(),
+      successMessage: "Game Category updated successfully",
+    });
+    const editForm = document.querySelector<HTMLFormElement>(".entity-form");
+    if (editForm) {
+      attachCascadeDropdownHandler(editForm, categoryCascadeOptions);
+    }
+    return;
+  }
+
+  // /game-categories/:id — detail page
+  const catDetailMatch = path.match(/^\/game-categories\/([^/]+)$/);
+  if (catDetailMatch) {
+    const id = catDetailMatch[1] as string;
+    initDetailController({
+      deleteFormSelector: "form[action$='/delete']",
+      apiUrl: `/api/game-categories/${id}`,
+      entityName: document.querySelector("h1")?.textContent ?? "this record",
+      redirectUrl: "/game-categories",
+    });
+    return;
+  }
+
+  // /game-categories — list page
+  if (path === "/game-categories") {
+    initListController({
+      tableSelector: ".data-table",
+      rowSelector: ".data-table tbody tr",
+      apiBasePath: "/api/game-categories",
+      redirectUrl: "/game-categories",
+    });
+    return;
+  }
+
+  // ── Game Subcategories ───────────────────────────────────────────────
+
+  /** Cascade config for subcategory forms: domain→subdomain, subdomain→category */
+  const subcatDomainToSubdomain = {
+    parentSelector: '[name="game_domain_id"]',
+    childSelector: '[name="game_subdomain_id"]',
+    apiUrl: "/api/game-subdomains",
+    filterParam: "game_domain_id",
+    labelField: "name",
+    valueField: "id",
+    placeholder: "-- Select Subdomain --",
+  };
+
+  const subcatSubdomainToCategory = {
+    parentSelector: '[name="game_subdomain_id"]',
+    childSelector: '[name="game_category_id"]',
+    apiUrl: "/api/game-categories",
+    filterParam: "game_subdomain_id",
+    labelField: "name",
+    valueField: "id",
+    placeholder: "-- Select Category --",
+  };
+
+  /** Attaches both cascade handlers and clears downstream dropdowns on parent change */
+  function attachSubcategoryCascades(form: HTMLFormElement): void {
+    attachCascadeDropdownHandler(form, subcatDomainToSubdomain);
+    attachCascadeDropdownHandler(form, subcatSubdomainToCategory);
+
+    // When domain changes, also reset the category dropdown (it depends on subdomain)
+    const domainSelect = form.querySelector<HTMLSelectElement>('[name="game_domain_id"]');
+    const categorySelect = form.querySelector<HTMLSelectElement>('[name="game_category_id"]');
+    if (domainSelect && categorySelect) {
+      domainSelect.addEventListener("change", () => {
+        categorySelect.innerHTML = '<option value="">-- Select Category --</option>';
+        categorySelect.value = "";
+      });
+    }
+  }
+
+  // /game-subcategories/new
+  if (path === "/game-subcategories/new") {
+    initFormController({
+      formSelector: ".entity-form",
+      apiUrl: "/api/game-subcategories",
+      method: "POST",
+      redirectUrl: "/game-subcategories",
+      fields: readFieldConfig(),
+      successMessage: "Game Subcategory created successfully",
+    });
+    const form = document.querySelector<HTMLFormElement>(".entity-form");
+    if (form) attachSubcategoryCascades(form);
+    return;
+  }
+
+  // /game-subcategories/:id/duplicate
+  const subcatDuplicateMatch = path.match(/^\/game-subcategories\/([^/]+)\/duplicate$/);
+  if (subcatDuplicateMatch) {
+    showDuplicateNotice();
+    initFormController({
+      formSelector: ".entity-form",
+      apiUrl: "/api/game-subcategories",
+      method: "POST",
+      redirectUrl: "/game-subcategories",
+      fields: readFieldConfig(),
+      successMessage: "Game Subcategory duplicated successfully",
+    });
+    const form = document.querySelector<HTMLFormElement>(".entity-form");
+    if (form) attachSubcategoryCascades(form);
+    return;
+  }
+
+  // /game-subcategories/:id/edit
+  const subcatEditMatch = path.match(/^\/game-subcategories\/([^/]+)\/edit$/);
+  if (subcatEditMatch) {
+    const id = subcatEditMatch[1] as string;
+    initFormController({
+      formSelector: ".entity-form",
+      apiUrl: `/api/game-subcategories/${id}`,
+      method: "PUT",
+      redirectUrl: `/game-subcategories/${id}`,
+      fields: readFieldConfig(),
+      successMessage: "Game Subcategory updated successfully",
+    });
+    const form = document.querySelector<HTMLFormElement>(".entity-form");
+    if (form) attachSubcategoryCascades(form);
+    return;
+  }
+
+  // /game-subcategories/:id — detail page
+  const subcatDetailMatch = path.match(/^\/game-subcategories\/([^/]+)$/);
+  if (subcatDetailMatch) {
+    const id = subcatDetailMatch[1] as string;
+    initDetailController({
+      deleteFormSelector: "form[action$='/delete']",
+      apiUrl: `/api/game-subcategories/${id}`,
+      entityName: document.querySelector("h1")?.textContent ?? "this record",
+      redirectUrl: "/game-subcategories",
+    });
+    return;
+  }
+
+  // /game-subcategories — list page
+  if (path === "/game-subcategories") {
+    initListController({
+      tableSelector: ".data-table",
+      rowSelector: ".data-table tbody tr",
+      apiBasePath: "/api/game-subcategories",
+      redirectUrl: "/game-subcategories",
     });
     return;
   }
