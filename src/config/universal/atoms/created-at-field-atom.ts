@@ -1,7 +1,7 @@
 // src/config/universal/atoms/created-at-field-atom.ts
 // CreatedAt field atom - timestamp for record creation
 
-import { DISPLAY_FORMATS, FIELD_MARKERS } from "../sub-atoms/";
+import { DISPLAY_FORMATS, FIELD_MARKERS } from "../sub-atoms";
 
 /**
  * CreatedAt field configuration.

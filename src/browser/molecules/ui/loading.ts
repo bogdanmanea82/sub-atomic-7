@@ -2,6 +2,8 @@
 // Full-page loading overlay shown during async operations (form submit, delete).
 // Prevents double-submit by covering the page with a visual indicator.
 
+import { injectStylesOnce } from "../../sub-atoms/utilities";
+
 const OVERLAY_ID = "loading-overlay";
 
 const LOADING_STYLES = `
@@ -19,16 +21,6 @@ const LOADING_STYLES = `
   @keyframes spin { to { transform: rotate(360deg); } }
 `;
 
-let stylesInjected = false;
-
-function injectStyles(): void {
-  if (stylesInjected) return;
-  const style = document.createElement("style");
-  style.textContent = LOADING_STYLES;
-  document.head.appendChild(style);
-  stylesInjected = true;
-}
-
 /**
  * Shows a full-page loading overlay with a spinner.
  * Call hideLoading() to remove it.
@@ -37,7 +29,7 @@ export function showLoading(): void {
   // Don't stack multiple overlays
   if (document.getElementById(OVERLAY_ID)) return;
 
-  injectStyles();
+  injectStylesOnce("loading", LOADING_STYLES);
 
   const overlay = document.createElement("div");
   overlay.id = OVERLAY_ID;

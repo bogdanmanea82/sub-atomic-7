@@ -2,6 +2,8 @@
 // Displays and clears validation error messages next to form fields
 // and as a summary above the form.
 
+import { escapeText, injectStylesOnce } from "../../sub-atoms/utilities";
+
 const ERROR_STYLES = `
   .field-error {
     color: #dc3545; font-size: 0.8rem; margin-top: 0.25rem;
@@ -22,16 +24,6 @@ const ERROR_STYLES = `
   }
 `;
 
-let stylesInjected = false;
-
-function injectStyles(): void {
-  if (stylesInjected) return;
-  const style = document.createElement("style");
-  style.textContent = ERROR_STYLES;
-  document.head.appendChild(style);
-  stylesInjected = true;
-}
-
 /**
  * Shows or clears an error message next to a single form field.
  * Adds the invalid class to the parent .form-field for border highlighting.
@@ -41,7 +33,7 @@ export function displayFieldError(
   input: HTMLElement,
   error: string | null
 ): void {
-  injectStyles();
+  injectStylesOnce("validation", ERROR_STYLES);
 
   const wrapper = input.closest(".form-field");
   if (!wrapper) return;
@@ -69,7 +61,7 @@ export function displayFormErrors(
   form: HTMLFormElement,
   errors: string[]
 ): void {
-  injectStyles();
+  injectStylesOnce("validation", ERROR_STYLES);
   clearFormErrors(form);
 
   if (errors.length === 0) return;
@@ -100,11 +92,4 @@ export function clearAllFieldErrors(form: HTMLFormElement): void {
   for (const el of form.querySelectorAll(".form-field--invalid")) {
     el.classList.remove("form-field--invalid");
   }
-}
-
-/** Prevents HTML injection in error messages. */
-function escapeText(text: string): string {
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
 }

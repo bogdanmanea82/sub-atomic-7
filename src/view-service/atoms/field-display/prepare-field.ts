@@ -2,19 +2,13 @@
 // Dispatches to the correct formatter based on field type and config
 
 import type { FieldConfig } from "@config/types";
-import type { DisplayField } from "../../types";
+import type { DisplayField, ReferenceLookup } from "../../types";
 import {
   formatText,
   formatNumber,
   formatBoolean,
   formatDatetime,
 } from "../../sub-atoms/formatters";
-
-/**
- * A lookup map for resolving reference field UUIDs to display names.
- * Keyed by field name, value is a map of UUID → display name.
- */
-export type ReferenceLookup = Record<string, Record<string, string>>;
 
 /**
  * Prepares a single field value for display based on its FieldConfig.

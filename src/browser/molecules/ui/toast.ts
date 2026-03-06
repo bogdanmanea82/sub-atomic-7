@@ -3,6 +3,8 @@
 // Creates its own container element on first use — no server-rendered HTML needed.
 // Supports a dismiss button and configurable display duration.
 
+import { injectStylesOnce } from "../../sub-atoms/utilities";
+
 /** Visual style of the toast notification. */
 export type ToastType = "success" | "error" | "info";
 
@@ -37,20 +39,12 @@ const TOAST_STYLES = `
   .toast--fade-out { opacity: 0; }
 `;
 
-let stylesInjected = false;
-
 /** Ensures the toast container and styles exist in the DOM. */
 function getContainer(): HTMLElement {
   let container = document.getElementById(CONTAINER_ID);
   if (container) return container;
 
-  // Inject styles on first use
-  if (!stylesInjected) {
-    const style = document.createElement("style");
-    style.textContent = TOAST_STYLES;
-    document.head.appendChild(style);
-    stylesInjected = true;
-  }
+  injectStylesOnce("toast", TOAST_STYLES);
 
   container = document.createElement("div");
   container.id = CONTAINER_ID;

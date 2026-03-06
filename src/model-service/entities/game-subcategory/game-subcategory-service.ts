@@ -31,6 +31,9 @@ import {
   deleteEntityWorkflow,
   type DeleteWorkflowResult,
 } from "../../molecules/workflows/delete-entity-workflow";
+import { checkNameUniqueness } from "../../atoms/uniqueness";
+
+const NAME_ERROR = "A Game Subcategory with this name already exists in this category.";
 
 export const GameSubcategoryService = {
   async create(
@@ -38,20 +41,12 @@ export const GameSubcategoryService = {
   ): Promise<CreateWorkflowResult<GameSubcategory>> {
     const db = getConnection();
 
-    // Business rule: name must be unique within the parent GameCategory
     const name = input["name"];
     const gameCategoryId = input["game_category_id"];
     if (typeof name === "string" && name.trim() !== "" && typeof gameCategoryId === "string") {
-      const existing = await selectManyWorkflow(db, GameSubcategoryModel, {
-        name,
-        game_category_id: gameCategoryId,
-      });
-      if (existing.success && existing.data.length > 0) {
-        return {
-          success: false,
-          stage: "validation",
-          errors: { name: "A Game Subcategory with this name already exists in this category." },
-        };
+      const check = await checkNameUniqueness(db, GameSubcategoryModel, name, NAME_ERROR, { game_category_id: gameCategoryId });
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { name: check.error } };
       }
     }
 
@@ -87,16 +82,9 @@ export const GameSubcategoryService = {
     const name = data["name"];
     const gameCategoryId = data["game_category_id"];
     if (typeof name === "string" && name.trim() !== "" && typeof gameCategoryId === "string") {
-      const existing = await selectManyWorkflow(db, GameSubcategoryModel, {
-        name,
-        game_category_id: gameCategoryId,
-      });
-      if (existing.success && existing.data.some((d) => d.id !== id)) {
-        return {
-          success: false,
-          stage: "validation",
-          errors: { name: "A Game Subcategory with this name already exists in this category." },
-        };
+      const check = await checkNameUniqueness(db, GameSubcategoryModel, name, NAME_ERROR, { game_category_id: gameCategoryId }, id);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { name: check.error } };
       }
     }
 

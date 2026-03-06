@@ -10,38 +10,18 @@ import {
   makeAuthorizeMiddleware,
   validateRequestPlugin,
 } from "../../atoms/middleware";
+import { makeCheckNameHandler } from "../../atoms/handlers";
 import { createCrudRoutes } from "../../molecules/crud-routes";
 import { GameSubdomainPages } from "./game-subdomain-pages";
 
-/**
- * JSON API at /api/game-subdomains.
- * The check-name route accepts game_domain_id to scope uniqueness.
- */
 const GameSubdomainApi = new Elysia()
   .use(errorHandlerPlugin)
   .use(authenticatePlugin)
   .use(makeAuthorizeMiddleware(GAME_SUBDOMAIN_CONFIG.permissions))
   .use(validateRequestPlugin)
-  .get("/api/game-subdomains/check-name", async ({ query }) => {
-    const q = query as Record<string, string>;
-    const name = q["name"] ?? "";
-    const gameDomainId = q["gameDomainId"] ?? "";
-    const excludeId = q["excludeId"] ?? "";
-    if (name.trim() === "" || gameDomainId.trim() === "") {
-      return { available: false };
-    }
-    const result = await GameSubdomainService.findMany({
-      name,
-      game_domain_id: gameDomainId,
-    });
-    if (!result.success) {
-      return { available: false };
-    }
-    const conflicts = excludeId
-      ? result.data.filter((d) => (d as unknown as { id: string }).id !== excludeId)
-      : result.data;
-    return { available: conflicts.length === 0 };
-  })
+  .get("/api/game-subdomains/check-name", makeCheckNameHandler(
+    GameSubdomainService, "gameDomainId", "game_domain_id",
+  ))
   .use(createCrudRoutes("/api/game-subdomains", GameSubdomainService));
 
 /**

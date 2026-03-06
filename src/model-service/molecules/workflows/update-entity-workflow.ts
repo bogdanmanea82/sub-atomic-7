@@ -9,7 +9,7 @@ import { updateRecord, selectById } from "../../atoms/crud";
  * Minimum interface any Layer 1 model organism must satisfy
  * to be used with this workflow.
  */
-interface EntityModel<TEntity> {
+interface UpdateEntityModel<TEntity> {
   prepareSelect(conditions?: Record<string, unknown>): PreparedQuery;
   prepareUpdate(
     data: Record<string, unknown>,
@@ -45,7 +45,7 @@ export type UpdateWorkflowResult<TEntity> =
  */
 export async function updateEntityWorkflow<TEntity>(
   db: SQL,
-  model: EntityModel<TEntity>,
+  model: UpdateEntityModel<TEntity>,
   id: string,
   data: Record<string, unknown>,
 ): Promise<UpdateWorkflowResult<TEntity>> {

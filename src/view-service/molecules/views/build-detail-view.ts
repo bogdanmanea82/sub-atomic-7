@@ -2,9 +2,8 @@
 // Transforms a single entity into a detail view model
 
 import type { EntityConfig } from "@config/types";
-import type { DetailView } from "../../types";
+import type { DetailView, ReferenceLookup } from "../../types";
 import { prepareField } from "../../atoms/field-display";
-import type { ReferenceLookup } from "../../atoms/field-display";
 
 /**
  * Builds a detail view model from a single entity record.

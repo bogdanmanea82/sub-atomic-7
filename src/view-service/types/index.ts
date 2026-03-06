@@ -8,4 +8,5 @@ export type {
   FormField,
   FormView,
   SelectOption,
+  ReferenceLookup,
 } from "./view-models";

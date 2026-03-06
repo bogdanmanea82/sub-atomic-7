@@ -5,7 +5,6 @@ import type { SQL } from "bun";
 import type { PreparedQuery } from "@model/universal/sub-atoms/types/prepared-query";
 import type { PaginationParams } from "@model/universal/sub-atoms/types/pagination-params";
 import { selectMany } from "../../atoms/crud";
-import { executeSelect } from "../../sub-atoms/database";
 
 /**
  * The minimum interface a model organism must satisfy for paginated queries.
@@ -48,7 +47,7 @@ export async function selectManyPaginatedWorkflow<TEntity>(
 
     const [rows, countRows] = await Promise.all([
       selectMany(db, dataQuery),
-      executeSelect(db, countQuery),
+      selectMany(db, countQuery),
     ]);
 
     const totalCount = (countRows[0]?.["total"] as number) ?? 0;

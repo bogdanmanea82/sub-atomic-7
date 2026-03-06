@@ -2,6 +2,8 @@
 // Confirmation dialog that returns a Promise<boolean>.
 // Used by the delete handler to ask "Are you sure?" before destructive actions.
 
+import { escapeText, injectStylesOnce } from "../../sub-atoms/utilities";
+
 const MODAL_STYLES = `
   .modal-overlay {
     position: fixed; inset: 0; z-index: 10000;
@@ -34,22 +36,12 @@ const MODAL_STYLES = `
   }
 `;
 
-let stylesInjected = false;
-
-function injectStyles(): void {
-  if (stylesInjected) return;
-  const style = document.createElement("style");
-  style.textContent = MODAL_STYLES;
-  document.head.appendChild(style);
-  stylesInjected = true;
-}
-
 /**
  * Shows a confirmation modal and resolves to true (confirmed) or false (cancelled).
  * The modal is created, shown, and removed entirely in this function — no leftover DOM.
  */
 export function confirmModal(title: string, message: string): Promise<boolean> {
-  injectStyles();
+  injectStylesOnce("modal", MODAL_STYLES);
 
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
@@ -93,11 +85,4 @@ export function confirmModal(title: string, message: string): Promise<boolean> {
 
     document.body.appendChild(overlay);
   });
-}
-
-/** Simple text escaping to prevent HTML injection in modal content. */
-function escapeText(text: string): string {
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
 }

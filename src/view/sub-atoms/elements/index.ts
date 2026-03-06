@@ -4,3 +4,7 @@ export { button, submitButton } from "./button";
 export { link } from "./link";
 export { badge } from "./badge";
 export { input } from "./input";
+export { deleteForm } from "./delete-form";
+export { NAV_ITEMS } from "./nav-config";
+export type { NavItemConfig } from "./nav-config";
+export { globalStyles } from "./global-styles";

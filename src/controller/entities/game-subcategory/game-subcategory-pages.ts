@@ -17,82 +17,12 @@ import {
 } from "@view/entities/game-subcategory";
 import { errorHandlerPlugin } from "../../atoms/middleware";
 import { extractPagination } from "../../sub-atoms/request";
+import { setHtml } from "../../sub-atoms/response";
+import { fetchOptions, buildReferenceLookup } from "../../sub-atoms/options";
 import { buildPaginationMeta } from "@view-service/sub-atoms/pagination";
-import type { SelectOption } from "@view-service/types";
-import type { ReferenceLookup } from "@view-service/atoms/field-display";
 
 const BASE_PATH = "/game-subcategories";
 const FIELD_CONFIG_JSON = GameSubcategoryViewService.prepareBrowserFieldConfig();
-
-function setHtml(headers: Record<string, string | number>): void {
-  headers["content-type"] = "text/html; charset=utf-8";
-}
-
-async function getDomainOptions(): Promise<readonly SelectOption[]> {
-  const result = await GameDomainService.findMany();
-  if (!result.success) return [];
-  return result.data.map((d) => ({
-    label: (d as unknown as { name: string }).name,
-    value: (d as unknown as { id: string }).id,
-  }));
-}
-
-async function getAllSubdomainOptions(): Promise<readonly SelectOption[]> {
-  const result = await GameSubdomainService.findMany();
-  if (!result.success) return [];
-  return result.data.map((d) => ({
-    label: (d as unknown as { name: string }).name,
-    value: (d as unknown as { id: string }).id,
-  }));
-}
-
-async function getAllCategoryOptions(): Promise<readonly SelectOption[]> {
-  const result = await GameCategoryService.findMany();
-  if (!result.success) return [];
-  return result.data.map((d) => ({
-    label: (d as unknown as { name: string }).name,
-    value: (d as unknown as { id: string }).id,
-  }));
-}
-
-async function getSubdomainOptionsForDomain(domainId: string): Promise<readonly SelectOption[]> {
-  const result = await GameSubdomainService.findMany({ game_domain_id: domainId });
-  if (!result.success) return [];
-  return result.data.map((d) => ({
-    label: (d as unknown as { name: string }).name,
-    value: (d as unknown as { id: string }).id,
-  }));
-}
-
-async function getCategoryOptionsForSubdomain(subdomainId: string): Promise<readonly SelectOption[]> {
-  const result = await GameCategoryService.findMany({ game_subdomain_id: subdomainId });
-  if (!result.success) return [];
-  return result.data.map((d) => ({
-    label: (d as unknown as { name: string }).name,
-    value: (d as unknown as { id: string }).id,
-  }));
-}
-
-function buildReferenceLookup(
-  domainOptions: readonly SelectOption[],
-  subdomainOptions: readonly SelectOption[],
-  categoryOptions: readonly SelectOption[],
-): ReferenceLookup {
-  const domainMap: Record<string, string> = {};
-  for (const opt of domainOptions) domainMap[opt.value] = opt.label;
-
-  const subdomainMap: Record<string, string> = {};
-  for (const opt of subdomainOptions) subdomainMap[opt.value] = opt.label;
-
-  const categoryMap: Record<string, string> = {};
-  for (const opt of categoryOptions) categoryMap[opt.value] = opt.label;
-
-  return {
-    game_domain_id: domainMap,
-    game_subdomain_id: subdomainMap,
-    game_category_id: categoryMap,
-  };
-}
 
 export const GameSubcategoryPages = new Elysia()
   .use(errorHandlerPlugin)
@@ -103,12 +33,16 @@ export const GameSubcategoryPages = new Elysia()
     const pagination = extractPagination(query as Record<string, string>);
     const [result, domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
       GameSubcategoryService.findManyPaginated(pagination),
-      getDomainOptions(),
-      getAllSubdomainOptions(),
-      getAllCategoryOptions(),
+      fetchOptions(GameDomainService),
+      fetchOptions(GameSubdomainService),
+      fetchOptions(GameCategoryService),
     ]);
     if (!result.success) return `<p>Error loading records.</p>`;
-    const lookup = buildReferenceLookup(domainOptions, subdomainOptions, categoryOptions);
+    const lookup = buildReferenceLookup([
+      { fieldName: "game_domain_id", options: domainOptions },
+      { fieldName: "game_subdomain_id", options: subdomainOptions },
+      { fieldName: "game_category_id", options: categoryOptions },
+    ]);
     const paginationMeta = buildPaginationMeta(result.totalCount, pagination.page, pagination.pageSize);
     const view = GameSubcategoryViewService.prepareListView(
       result.data as unknown as Record<string, unknown>[],
@@ -121,8 +55,10 @@ export const GameSubcategoryPages = new Elysia()
   // ── Create form ────────────────────────────────────────────────────────
   .get(`${BASE_PATH}/new`, async ({ set }) => {
     setHtml(set.headers);
-    const domainOptions = await getDomainOptions();
-    const view = GameSubcategoryViewService.prepareCreateForm(domainOptions, [], []);
+    const domainOptions = await fetchOptions(GameDomainService);
+    const view = GameSubcategoryViewService.prepareCreateForm(
+      { game_domain_id: domainOptions, game_subdomain_id: [], game_category_id: [] },
+    );
     return createPage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
 
@@ -131,15 +67,19 @@ export const GameSubcategoryPages = new Elysia()
     setHtml(set.headers);
     const [result, domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
       GameSubcategoryService.findById(params["id"]),
-      getDomainOptions(),
-      getAllSubdomainOptions(),
-      getAllCategoryOptions(),
+      fetchOptions(GameDomainService),
+      fetchOptions(GameSubdomainService),
+      fetchOptions(GameCategoryService),
     ]);
     if (!result.success) {
       set.status = result.stage === "not_found" ? 404 : 500;
       return `<p>${result.error}</p>`;
     }
-    const lookup = buildReferenceLookup(domainOptions, subdomainOptions, categoryOptions);
+    const lookup = buildReferenceLookup([
+      { fieldName: "game_domain_id", options: domainOptions },
+      { fieldName: "game_subdomain_id", options: subdomainOptions },
+      { fieldName: "game_category_id", options: categoryOptions },
+    ]);
     const view = GameSubcategoryViewService.prepareDetailView(
       result.data as unknown as Record<string, unknown>,
       lookup,
@@ -159,12 +99,13 @@ export const GameSubcategoryPages = new Elysia()
     const domainId = entity["game_domain_id"] as string;
     const subdomainId = entity["game_subdomain_id"] as string;
     const [domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
-      getDomainOptions(),
-      getSubdomainOptionsForDomain(domainId),
-      getCategoryOptionsForSubdomain(subdomainId),
+      fetchOptions(GameDomainService),
+      fetchOptions(GameSubdomainService, { game_domain_id: domainId }),
+      fetchOptions(GameCategoryService, { game_subdomain_id: subdomainId }),
     ]);
     const view = GameSubcategoryViewService.prepareEditForm(
-      domainOptions, subdomainOptions, categoryOptions, entity,
+      { game_domain_id: domainOptions, game_subdomain_id: subdomainOptions, game_category_id: categoryOptions },
+      entity,
     );
     return editPage(view, params["id"], BASE_PATH, FIELD_CONFIG_JSON);
   })
@@ -181,12 +122,13 @@ export const GameSubcategoryPages = new Elysia()
     const domainId = entity["game_domain_id"] as string;
     const subdomainId = entity["game_subdomain_id"] as string;
     const [domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
-      getDomainOptions(),
-      getSubdomainOptionsForDomain(domainId),
-      getCategoryOptionsForSubdomain(subdomainId),
+      fetchOptions(GameDomainService),
+      fetchOptions(GameSubdomainService, { game_domain_id: domainId }),
+      fetchOptions(GameCategoryService, { game_subdomain_id: subdomainId }),
     ]);
     const view = GameSubcategoryViewService.prepareDuplicateForm(
-      domainOptions, subdomainOptions, categoryOptions, entity,
+      { game_domain_id: domainOptions, game_subdomain_id: subdomainOptions, game_category_id: categoryOptions },
+      entity,
     );
     return duplicatePage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
@@ -205,12 +147,13 @@ export const GameSubcategoryPages = new Elysia()
     const domainId = input["game_domain_id"] as string | undefined;
     const subdomainId = input["game_subdomain_id"] as string | undefined;
     const [domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
-      getDomainOptions(),
-      domainId ? getSubdomainOptionsForDomain(domainId) : Promise.resolve([]),
-      subdomainId ? getCategoryOptionsForSubdomain(subdomainId) : Promise.resolve([]),
+      fetchOptions(GameDomainService),
+      domainId ? fetchOptions(GameSubdomainService, { game_domain_id: domainId }) : Promise.resolve([]),
+      subdomainId ? fetchOptions(GameCategoryService, { game_subdomain_id: subdomainId }) : Promise.resolve([]),
     ]);
     const view = GameSubcategoryViewService.prepareCreateForm(
-      domainOptions, subdomainOptions, categoryOptions, input, errors,
+      { game_domain_id: domainOptions, game_subdomain_id: subdomainOptions, game_category_id: categoryOptions },
+      input, errors,
     );
     return createPage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
@@ -230,12 +173,13 @@ export const GameSubcategoryPages = new Elysia()
     const domainId = input["game_domain_id"] as string | undefined;
     const subdomainId = input["game_subdomain_id"] as string | undefined;
     const [domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
-      getDomainOptions(),
-      domainId ? getSubdomainOptionsForDomain(domainId) : Promise.resolve([]),
-      subdomainId ? getCategoryOptionsForSubdomain(subdomainId) : Promise.resolve([]),
+      fetchOptions(GameDomainService),
+      domainId ? fetchOptions(GameSubdomainService, { game_domain_id: domainId }) : Promise.resolve([]),
+      subdomainId ? fetchOptions(GameCategoryService, { game_subdomain_id: subdomainId }) : Promise.resolve([]),
     ]);
     const view = GameSubcategoryViewService.prepareEditForm(
-      domainOptions, subdomainOptions, categoryOptions, input, errors,
+      { game_domain_id: domainOptions, game_subdomain_id: subdomainOptions, game_category_id: categoryOptions },
+      input, errors,
     );
     return editPage(view, id, BASE_PATH, FIELD_CONFIG_JSON);
   })

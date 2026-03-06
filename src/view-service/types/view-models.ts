@@ -81,3 +81,9 @@ export interface FormView {
   readonly title: string;
   readonly fields: readonly FormField[];
 }
+
+/**
+ * Maps reference field names to their UUID-to-name lookup tables.
+ * Used by list and detail views to display parent entity names instead of raw UUIDs.
+ */
+export type ReferenceLookup = Record<string, Record<string, string>>;

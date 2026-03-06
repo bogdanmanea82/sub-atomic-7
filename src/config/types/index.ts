@@ -25,3 +25,5 @@ export type {
   RelationshipConfig,
   RelationshipType,
 } from "./relationship-config";
+
+export type { BrowserFieldConfig } from "./browser-field-config";

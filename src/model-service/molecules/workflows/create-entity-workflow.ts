@@ -7,7 +7,7 @@ import { insertRecord, selectById } from "../../atoms/crud";
  * The minimum interface any Layer 1 model organism must satisfy
  * to be used with this workflow.
  */
-interface EntityModel<TEntity> {
+interface CreateEntityModel<TEntity> {
   prepareCreate(input: Record<string, unknown>): PreparedQuery;
   prepareSelect(conditions?: Record<string, unknown>): PreparedQuery;
   deserialize(row: Record<string, unknown>): TEntity;
@@ -38,7 +38,7 @@ export type CreateWorkflowResult<TEntity> =
  */
 export async function createEntityWorkflow<TEntity>(
   db: SQL,
-  model: EntityModel<TEntity>,
+  model: CreateEntityModel<TEntity>,
   input: Record<string, unknown>,
 ): Promise<CreateWorkflowResult<TEntity>> {
   // Step 1: Generate UUID — system fields are Layer 2's responsibility

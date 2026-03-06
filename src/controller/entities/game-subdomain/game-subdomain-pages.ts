@@ -15,42 +15,12 @@ import {
 } from "@view/entities/game-subdomain";
 import { errorHandlerPlugin } from "../../atoms/middleware";
 import { extractPagination } from "../../sub-atoms/request";
+import { setHtml } from "../../sub-atoms/response";
+import { fetchOptions, buildReferenceLookup } from "../../sub-atoms/options";
 import { buildPaginationMeta } from "@view-service/sub-atoms/pagination";
-import type { SelectOption } from "@view-service/types";
-import type { ReferenceLookup } from "@view-service/atoms/field-display";
 
 const BASE_PATH = "/game-subdomains";
 const FIELD_CONFIG_JSON = GameSubdomainViewService.prepareBrowserFieldConfig();
-
-/** Sets the response content-type to HTML. */
-function setHtml(headers: Record<string, string | number>): void {
-  headers["content-type"] = "text/html; charset=utf-8";
-}
-
-/**
- * Fetches all active GameDomains and returns them as SelectOption[].
- * Used to populate the parent domain dropdown on form pages.
- */
-async function getDomainOptions(): Promise<readonly SelectOption[]> {
-  const result = await GameDomainService.findMany();
-  if (!result.success) return [];
-  return result.data.map((d) => ({
-    label: (d as unknown as { name: string }).name,
-    value: (d as unknown as { id: string }).id,
-  }));
-}
-
-/**
- * Builds a ReferenceLookup from domain options so list/detail views
- * can resolve game_domain_id UUIDs to human-readable domain names.
- */
-function buildDomainLookup(options: readonly SelectOption[]): ReferenceLookup {
-  const map: Record<string, string> = {};
-  for (const opt of options) {
-    map[opt.value] = opt.label;
-  }
-  return { game_domain_id: map };
-}
 
 export const GameSubdomainPages = new Elysia()
   .use(errorHandlerPlugin)
@@ -61,10 +31,10 @@ export const GameSubdomainPages = new Elysia()
     const pagination = extractPagination(query as Record<string, string>);
     const [result, domainOptions] = await Promise.all([
       GameSubdomainService.findManyPaginated(pagination),
-      getDomainOptions(),
+      fetchOptions(GameDomainService),
     ]);
     if (!result.success) return `<p>Error loading records.</p>`;
-    const lookup = buildDomainLookup(domainOptions);
+    const lookup = buildReferenceLookup([{ fieldName: "game_domain_id", options: domainOptions }]);
     const paginationMeta = buildPaginationMeta(result.totalCount, pagination.page, pagination.pageSize);
     const view = GameSubdomainViewService.prepareListView(
       result.data as unknown as Record<string, unknown>[],
@@ -77,8 +47,8 @@ export const GameSubdomainPages = new Elysia()
   // ── Create form (before /:id) ────────────────────────────────────────────
   .get(`${BASE_PATH}/new`, async ({ set }) => {
     setHtml(set.headers);
-    const domainOptions = await getDomainOptions();
-    const view = GameSubdomainViewService.prepareCreateForm(domainOptions);
+    const domainOptions = await fetchOptions(GameDomainService);
+    const view = GameSubdomainViewService.prepareCreateForm({ game_domain_id: domainOptions });
     return createPage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
 
@@ -87,13 +57,13 @@ export const GameSubdomainPages = new Elysia()
     setHtml(set.headers);
     const [result, domainOptions] = await Promise.all([
       GameSubdomainService.findById(params["id"]),
-      getDomainOptions(),
+      fetchOptions(GameDomainService),
     ]);
     if (!result.success) {
       set.status = result.stage === "not_found" ? 404 : 500;
       return `<p>${result.error}</p>`;
     }
-    const lookup = buildDomainLookup(domainOptions);
+    const lookup = buildReferenceLookup([{ fieldName: "game_domain_id", options: domainOptions }]);
     const view = GameSubdomainViewService.prepareDetailView(
       result.data as unknown as Record<string, unknown>,
       lookup,
@@ -109,9 +79,9 @@ export const GameSubdomainPages = new Elysia()
       set.status = 404;
       return `<p>Record not found.</p>`;
     }
-    const domainOptions = await getDomainOptions();
+    const domainOptions = await fetchOptions(GameDomainService);
     const view = GameSubdomainViewService.prepareEditForm(
-      domainOptions,
+      { game_domain_id: domainOptions },
       result.data as unknown as Record<string, unknown>,
     );
     return editPage(view, params["id"], BASE_PATH, FIELD_CONFIG_JSON);
@@ -125,9 +95,9 @@ export const GameSubdomainPages = new Elysia()
       set.status = 404;
       return `<p>Record not found.</p>`;
     }
-    const domainOptions = await getDomainOptions();
+    const domainOptions = await fetchOptions(GameDomainService);
     const view = GameSubdomainViewService.prepareDuplicateForm(
-      domainOptions,
+      { game_domain_id: domainOptions },
       result.data as unknown as Record<string, unknown>,
     );
     return duplicatePage(view, BASE_PATH, FIELD_CONFIG_JSON);
@@ -144,8 +114,8 @@ export const GameSubdomainPages = new Elysia()
     setHtml(set.headers);
     set.status = 422;
     const errors = result.stage === "validation" ? result.errors : undefined;
-    const domainOptions = await getDomainOptions();
-    const view = GameSubdomainViewService.prepareCreateForm(domainOptions, input, errors);
+    const domainOptions = await fetchOptions(GameDomainService);
+    const view = GameSubdomainViewService.prepareCreateForm({ game_domain_id: domainOptions }, input, errors);
     return createPage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
 
@@ -161,8 +131,8 @@ export const GameSubdomainPages = new Elysia()
     setHtml(set.headers);
     set.status = 422;
     const errors = result.stage === "validation" ? result.errors : undefined;
-    const domainOptions = await getDomainOptions();
-    const view = GameSubdomainViewService.prepareEditForm(domainOptions, input, errors);
+    const domainOptions = await fetchOptions(GameDomainService);
+    const view = GameSubdomainViewService.prepareEditForm({ game_domain_id: domainOptions }, input, errors);
     return editPage(view, id, BASE_PATH, FIELD_CONFIG_JSON);
   })
 

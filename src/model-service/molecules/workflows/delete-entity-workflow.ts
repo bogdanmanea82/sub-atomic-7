@@ -9,7 +9,7 @@ import { deleteRecord } from "../../atoms/crud";
  * Minimum interface any Layer 1 model organism must satisfy
  * to be used with this workflow.
  */
-interface EntityModel {
+interface DeleteEntityModel {
   prepareDelete(conditions: Record<string, unknown>): PreparedQuery;
 }
 
@@ -37,7 +37,7 @@ export type DeleteWorkflowResult =
  */
 export async function deleteEntityWorkflow(
   db: SQL,
-  model: EntityModel,
+  model: DeleteEntityModel,
   id: string,
 ): Promise<DeleteWorkflowResult> {
   let query: PreparedQuery;

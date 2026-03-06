@@ -10,13 +10,11 @@ import { validateEntity } from "../../universal/atoms/validate-entity";
 import { serializeEntity } from "../../universal/atoms/serialize-entity";
 import { deserializeEntity } from "../../universal/atoms/deserialize-entity";
 import { createEntity } from "../../universal/molecules/create-entity";
-import {
-  buildSelectQuery,
-  buildPaginatedSelectQuery,
-  buildCountQuery,
-  buildUpdateQuery,
-  buildDeleteQuery,
-} from "../../universal/atoms/build-query";
+import { buildSelectQuery } from "../../universal/atoms/build-select-query";
+import { buildPaginatedSelectQuery } from "../../universal/atoms/build-paginated-select-query";
+import { buildCountQuery } from "../../universal/atoms/build-count-query";
+import { buildUpdateQuery } from "../../universal/atoms/build-update-query";
+import { buildDeleteQuery } from "../../universal/atoms/build-delete-query";
 
 /**
  * The TypeScript type for a deserialized GameSubcategory entity.

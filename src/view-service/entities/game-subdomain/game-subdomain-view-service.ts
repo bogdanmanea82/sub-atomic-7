@@ -2,8 +2,7 @@
 // Layer 4 organism — complete view preparation interface for GameSubdomain
 
 import { GAME_SUBDOMAIN_CONFIG } from "@config/entities/game-subdomain";
-import type { ListView, DetailView, FormView, SelectOption, PaginationMeta } from "../../types";
-import type { ReferenceLookup } from "../../atoms/field-display";
+import type { ListView, DetailView, FormView, SelectOption, PaginationMeta, ReferenceLookup } from "../../types";
 import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig } from "../../molecules/views";
 
 /**
@@ -28,42 +27,29 @@ export const GameSubdomainViewService = {
   },
 
   prepareCreateForm(
-    domainOptions: readonly SelectOption[],
+    selectOptions: Record<string, readonly SelectOption[]>,
     values?: Record<string, unknown>,
     errors?: Record<string, string>,
   ): FormView {
-    return buildFormView(
-      GAME_SUBDOMAIN_CONFIG,
-      values,
-      errors,
-      { game_domain_id: domainOptions },
-    );
+    return buildFormView(GAME_SUBDOMAIN_CONFIG, values, errors, selectOptions);
   },
 
   prepareEditForm(
-    domainOptions: readonly SelectOption[],
+    selectOptions: Record<string, readonly SelectOption[]>,
     currentValues: Record<string, unknown>,
     errors?: Record<string, string>,
   ): FormView {
-    return buildFormView(
-      GAME_SUBDOMAIN_CONFIG,
-      currentValues,
-      errors,
-      { game_domain_id: domainOptions },
-    );
+    return buildFormView(GAME_SUBDOMAIN_CONFIG, currentValues, errors, selectOptions);
   },
 
   prepareDuplicateForm(
-    domainOptions: readonly SelectOption[],
+    selectOptions: Record<string, readonly SelectOption[]>,
     sourceValues: Record<string, unknown>,
   ): FormView {
-    const view = buildFormView(
-      GAME_SUBDOMAIN_CONFIG,
-      sourceValues,
-      undefined,
-      { game_domain_id: domainOptions },
+    return buildFormView(
+      GAME_SUBDOMAIN_CONFIG, sourceValues, undefined, selectOptions,
+      `Duplicate ${GAME_SUBDOMAIN_CONFIG.displayName}`,
     );
-    return { ...view, title: `Duplicate ${GAME_SUBDOMAIN_CONFIG.displayName}` };
   },
 
   prepareBrowserFieldConfig(): string {

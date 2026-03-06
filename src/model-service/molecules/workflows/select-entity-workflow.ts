@@ -9,7 +9,7 @@ import { selectById } from "../../atoms/crud";
  * The minimum interface any Layer 1 model organism must satisfy
  * to be used with this workflow.
  */
-interface EntityModel<TEntity> {
+interface SelectEntityModel<TEntity> {
   prepareSelect(conditions?: Record<string, unknown>): PreparedQuery;
   deserialize(row: Record<string, unknown>): TEntity;
 }
@@ -30,7 +30,7 @@ export type SelectWorkflowResult<TEntity> =
 export async function selectEntityWorkflow<TEntity>(
   db: SQL,
   config: EntityConfig,
-  model: EntityModel<TEntity>,
+  model: SelectEntityModel<TEntity>,
   id: string,
 ): Promise<SelectWorkflowResult<TEntity>> {
   const query = model.prepareSelect({ id });

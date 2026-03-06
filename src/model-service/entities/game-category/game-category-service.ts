@@ -32,6 +32,9 @@ import {
   deleteEntityWorkflow,
   type DeleteWorkflowResult,
 } from "../../molecules/workflows/delete-entity-workflow";
+import { checkNameUniqueness } from "../../atoms/uniqueness";
+
+const NAME_ERROR = "A Game Category with this name already exists in this subdomain.";
 
 export const GameCategoryService = {
   async create(
@@ -39,20 +42,12 @@ export const GameCategoryService = {
   ): Promise<CreateWorkflowResult<GameCategory>> {
     const db = getConnection();
 
-    // Business rule: name must be unique within the parent GameSubdomain
     const name = input["name"];
     const gameSubdomainId = input["game_subdomain_id"];
     if (typeof name === "string" && name.trim() !== "" && typeof gameSubdomainId === "string") {
-      const existing = await selectManyWorkflow(db, GameCategoryModel, {
-        name,
-        game_subdomain_id: gameSubdomainId,
-      });
-      if (existing.success && existing.data.length > 0) {
-        return {
-          success: false,
-          stage: "validation",
-          errors: { name: "A Game Category with this name already exists in this subdomain." },
-        };
+      const check = await checkNameUniqueness(db, GameCategoryModel, name, NAME_ERROR, { game_subdomain_id: gameSubdomainId });
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { name: check.error } };
       }
     }
 
@@ -85,21 +80,12 @@ export const GameCategoryService = {
   ): Promise<UpdateWorkflowResult<GameCategory>> {
     const db = getConnection();
 
-    // Business rule: name must be unique within the parent GameSubdomain,
-    // excluding the record being updated
     const name = data["name"];
     const gameSubdomainId = data["game_subdomain_id"];
     if (typeof name === "string" && name.trim() !== "" && typeof gameSubdomainId === "string") {
-      const existing = await selectManyWorkflow(db, GameCategoryModel, {
-        name,
-        game_subdomain_id: gameSubdomainId,
-      });
-      if (existing.success && existing.data.some((d) => d.id !== id)) {
-        return {
-          success: false,
-          stage: "validation",
-          errors: { name: "A Game Category with this name already exists in this subdomain." },
-        };
+      const check = await checkNameUniqueness(db, GameCategoryModel, name, NAME_ERROR, { game_subdomain_id: gameSubdomainId }, id);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { name: check.error } };
       }
     }
 

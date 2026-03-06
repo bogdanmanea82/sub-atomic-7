@@ -2,9 +2,8 @@
 // Transforms an array of entities into a complete list view model
 
 import type { EntityConfig } from "@config/types";
-import type { ListView, ListViewRow, PaginationMeta } from "../../types";
+import type { ListView, ListViewRow, PaginationMeta, ReferenceLookup } from "../../types";
 import { prepareField } from "../../atoms/field-display";
-import type { ReferenceLookup } from "../../atoms/field-display";
 
 /**
  * Builds a complete list view model from an array of raw entity records.

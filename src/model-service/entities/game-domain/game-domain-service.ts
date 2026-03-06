@@ -30,6 +30,9 @@ import {
   deleteEntityWorkflow,
   type DeleteWorkflowResult,
 } from "../../molecules/workflows/delete-entity-workflow";
+import { checkNameUniqueness } from "../../atoms/uniqueness";
+
+const NAME_ERROR = "A Game Domain with this name already exists.";
 
 export const GameDomainService = {
   async create(
@@ -37,16 +40,11 @@ export const GameDomainService = {
   ): Promise<CreateWorkflowResult<GameDomain>> {
     const db = getConnection();
 
-    // Business rule: name must be unique across all GameDomain records
     const name = input["name"];
     if (typeof name === "string" && name.trim() !== "") {
-      const existing = await selectManyWorkflow(db, GameDomainModel, { name });
-      if (existing.success && existing.data.length > 0) {
-        return {
-          success: false,
-          stage: "validation",
-          errors: { name: "A Game Domain with this name already exists." },
-        };
+      const check = await checkNameUniqueness(db, GameDomainModel, name, NAME_ERROR);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { name: check.error } };
       }
     }
 
@@ -79,16 +77,11 @@ export const GameDomainService = {
   ): Promise<UpdateWorkflowResult<GameDomain>> {
     const db = getConnection();
 
-    // Business rule: name must be unique — exclude the record being updated
     const name = data["name"];
     if (typeof name === "string" && name.trim() !== "") {
-      const existing = await selectManyWorkflow(db, GameDomainModel, { name });
-      if (existing.success && existing.data.some((d) => d.id !== id)) {
-        return {
-          success: false,
-          stage: "validation",
-          errors: { name: "A Game Domain with this name already exists." },
-        };
+      const check = await checkNameUniqueness(db, GameDomainModel, name, NAME_ERROR, undefined, id);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { name: check.error } };
       }
     }
 

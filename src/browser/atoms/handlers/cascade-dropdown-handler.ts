@@ -2,6 +2,13 @@
 // Wires a parent <select> to dynamically filter a child <select> via API fetch.
 // When the parent value changes, fetches filtered options and rebuilds the child dropdown.
 
+import { fetchJson } from "../../sub-atoms/utilities";
+
+interface ApiListResult {
+  readonly success: boolean;
+  readonly data: Record<string, unknown>[];
+}
+
 export interface CascadeDropdownOptions {
   /** CSS selector for the parent dropdown (e.g. '[name="game_domain_id"]') */
   readonly parentSelector: string;
@@ -45,13 +52,7 @@ export function attachCascadeDropdownHandler(
 
     try {
       const url = `${options.apiUrl}?${options.filterParam}=${encodeURIComponent(parentValue)}`;
-      const response = await fetch(url);
-      if (!response.ok) return;
-
-      const result = (await response.json()) as {
-        success: boolean;
-        data: Record<string, unknown>[];
-      };
+      const result = await fetchJson<ApiListResult>(url);
 
       if (!result.success || !Array.isArray(result.data)) return;
 
@@ -62,7 +63,7 @@ export function attachCascadeDropdownHandler(
         child.appendChild(opt);
       }
     } catch {
-      // Network error — leave child with placeholder only
+      // API or network error — leave child with placeholder only
     }
   });
 }

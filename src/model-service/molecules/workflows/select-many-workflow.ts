@@ -9,7 +9,7 @@ import { selectMany } from "../../atoms/crud";
  * The minimum interface any Layer 1 model organism must satisfy
  * to be used with this workflow.
  */
-interface EntityModel<TEntity> {
+interface SelectManyEntityModel<TEntity> {
   prepareSelect(conditions?: Record<string, unknown>): PreparedQuery;
   deserialize(row: Record<string, unknown>): TEntity;
 }
@@ -32,7 +32,7 @@ export type SelectManyWorkflowResult<TEntity> =
  */
 export async function selectManyWorkflow<TEntity>(
   db: SQL,
-  model: EntityModel<TEntity>,
+  model: SelectManyEntityModel<TEntity>,
   conditions?: Record<string, unknown>,
 ): Promise<SelectManyWorkflowResult<TEntity>> {
   try {

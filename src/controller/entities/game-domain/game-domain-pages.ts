@@ -1,5 +1,10 @@
 // src/controller/entities/game-domain/game-domain-pages.ts
-// HTML page routes for GameDomain — server-rendered views for the browser
+// HTML page routes for GameDomain — server-rendered views for the browser.
+//
+// Pages files bridge Layer 3 (HTTP) with Layers 4-5 (presentation).
+// They import from View Service and View — this is by design.
+// The "downward only" rule applies to the Config→Model→Service vertical.
+// Pages are horizontal orchestrators that legitimately span Layers 3-5.
 
 import { Elysia } from "elysia";
 import { GameDomainService } from "@model-service/entities/game-domain";
@@ -13,15 +18,11 @@ import {
 } from "@view/entities/game-domain";
 import { errorHandlerPlugin } from "../../atoms/middleware";
 import { extractPagination } from "../../sub-atoms/request";
+import { setHtml } from "../../sub-atoms/response";
 import { buildPaginationMeta } from "@view-service/sub-atoms/pagination";
 
 const BASE_PATH = "/game-domains";
 const FIELD_CONFIG_JSON = GameDomainViewService.prepareBrowserFieldConfig();
-
-/** Sets the response content-type to HTML. */
-function setHtml(headers: Record<string, string | number>): void {
-  headers["content-type"] = "text/html; charset=utf-8";
-}
 
 /**
  * Server-rendered HTML routes for GameDomain.

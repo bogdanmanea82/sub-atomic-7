@@ -1,7 +1,7 @@
 // src/view/atoms/components/table-row.ts
 
 import type { ListViewRow } from "@view-service/types";
-import { link } from "../../sub-atoms";
+import { link, deleteForm } from "../../sub-atoms";
 
 /**
  * Renders a table row with one <td> per field plus an actions column.
@@ -15,9 +15,7 @@ export function tableRow(row: ListViewRow, basePath: string): string {
         ${link("View", `${basePath}/${row.id}`, "default", "👁")}
         ${link("Edit", `${basePath}/${row.id}/edit`, "secondary", "✏️")}
         ${link("Duplicate", `${basePath}/${row.id}/duplicate`, "secondary", "📋")}
-        <form method="POST" action="${basePath}/${row.id}/delete" style="display:inline">
-          <button type="submit" class="btn btn--danger btn--small">Delete</button>
-        </form>
+        ${deleteForm(`${basePath}/${row.id}/delete`, "Delete", true)}
       </td>
     </tr>`;
 }

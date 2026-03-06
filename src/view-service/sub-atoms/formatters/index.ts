@@ -4,3 +4,4 @@ export { formatNumber } from "./format-number";
 export { formatBoolean, formatBooleanYesNo } from "./format-boolean";
 export { formatText, formatTextTruncated } from "./format-text";
 export { formatStatusClass } from "./format-status";
+export { formatInputType } from "./format-input-type";

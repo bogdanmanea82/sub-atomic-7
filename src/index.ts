@@ -1,8 +1,10 @@
 import { Elysia } from "elysia";
-import { GameDomainController } from "@controller/entities/game-domain";
-import { GameSubdomainController } from "@controller/entities/game-subdomain";
-import { GameCategoryController } from "@controller/entities/game-category";
-import { GameSubcategoryController } from "@controller/entities/game-subcategory";
+import {
+  GameDomainController,
+  GameSubdomainController,
+  GameCategoryController,
+  GameSubcategoryController,
+} from "@controller/entities";
 import { GameDomainService } from "@model-service/entities/game-domain";
 import { GameSubdomainService } from "@model-service/entities/game-subdomain";
 import { GameCategoryService } from "@model-service/entities/game-category";

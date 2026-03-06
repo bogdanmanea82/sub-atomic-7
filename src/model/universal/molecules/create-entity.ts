@@ -7,7 +7,7 @@
   import type { PreparedQuery } from "../sub-atoms/types/prepared-query";
   import { validateEntity } from "../atoms/validate-entity";
   import { serializeEntity } from "../atoms/serialize-entity";
-  import { buildInsertQuery } from "../atoms/build-query";
+  import { buildInsertQuery } from "../atoms/build-insert-query";
 
   /**
    * Prepares a complete INSERT operation for an entity.

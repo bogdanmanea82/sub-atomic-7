@@ -1,11 +1,9 @@
 // tests/model/atoms/build-query.test.ts
 import { describe, it, expect } from "bun:test";
-import {
-  buildSelectQuery,
-  buildInsertQuery,
-  buildUpdateQuery,
-  buildDeleteQuery,
-} from "@model/universal/atoms/build-query";
+import { buildSelectQuery } from "@model/universal/atoms/build-select-query";
+import { buildInsertQuery } from "@model/universal/atoms/build-insert-query";
+import { buildUpdateQuery } from "@model/universal/atoms/build-update-query";
+import { buildDeleteQuery } from "@model/universal/atoms/build-delete-query";
 import { GAME_DOMAIN_CONFIG } from "@config/entities/game-domain";
 
 describe("buildSelectQuery", () => {

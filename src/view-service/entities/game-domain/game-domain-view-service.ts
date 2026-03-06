@@ -36,8 +36,10 @@ export const GameDomainViewService = {
   },
 
   prepareDuplicateForm(sourceValues: Record<string, unknown>): FormView {
-    const view = buildFormView(GAME_DOMAIN_CONFIG, sourceValues);
-    return { ...view, title: `Duplicate ${GAME_DOMAIN_CONFIG.displayName}` };
+    return buildFormView(
+      GAME_DOMAIN_CONFIG, sourceValues, undefined, undefined,
+      `Duplicate ${GAME_DOMAIN_CONFIG.displayName}`,
+    );
   },
 
   prepareBrowserFieldConfig(): string {

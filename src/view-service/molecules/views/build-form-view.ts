@@ -1,30 +1,9 @@
 // src/view-service/molecules/views/build-form-view.ts
 // Builds form field definitions for create and edit forms
 
-import type { EntityConfig, FieldConfig } from "@config/types";
+import type { EntityConfig } from "@config/types";
 import type { FormView, FormField, SelectOption } from "../../types";
-
-/**
- * Maps a DisplayFormat to an HTML input type.
- */
-function mapInputType(field: FieldConfig): string {
-  switch (field.displayFormat) {
-    case "text":
-      return "text";
-    case "textarea":
-      return "textarea";
-    case "number":
-      return "number";
-    case "toggle":
-      return "checkbox";
-    case "datetime":
-      return "datetime-local";
-    case "select":
-      return "select";
-    default:
-      return "text";
-  }
-}
+import { formatInputType } from "../../sub-atoms/formatters";
 
 /**
  * Builds a form view model for a create or edit form.
@@ -36,6 +15,7 @@ export function buildFormView(
   currentValues?: Record<string, unknown>,
   errors?: Record<string, string>,
   selectOptions?: Record<string, readonly SelectOption[]>,
+  titleOverride?: string,
 ): FormView {
   const editableFields = config.fields.filter(
     (f) =>
@@ -48,7 +28,7 @@ export function buildFormView(
     const base: FormField = {
       name: field.name,
       label: field.label,
-      inputType: mapInputType(field),
+      inputType: formatInputType(field),
       value: currentValues ? (currentValues[field.name] ?? null) : null,
       required: field.required,
     };
@@ -58,9 +38,8 @@ export function buildFormView(
     return error ? { ...withOptions, error } : withOptions;
   });
 
-  const title = currentValues
-    ? `Edit ${config.displayName}`
-    : `New ${config.displayName}`;
+  const title = titleOverride
+    ?? (currentValues ? `Edit ${config.displayName}` : `New ${config.displayName}`);
 
   return { title, fields };
 }
