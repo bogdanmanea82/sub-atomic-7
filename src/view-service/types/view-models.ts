@@ -48,6 +48,7 @@ export interface FormField {
   readonly inputType: string;
   readonly value: unknown;
   readonly required: boolean;
+  readonly error?: string;
 }
 
 /**

@@ -2,7 +2,6 @@
 // Universal entity update workflow — validate, write change, fetch updated record
 
 import type { SQL } from "bun";
-import type { EntityConfig } from "@config/types";
 import type { PreparedQuery } from "@model/universal/sub-atoms/types/prepared-query";
 import { updateRecord, selectById } from "../../atoms/crud";
 
@@ -11,6 +10,7 @@ import { updateRecord, selectById } from "../../atoms/crud";
  * to be used with this workflow.
  */
 interface EntityModel<TEntity> {
+  prepareSelect(conditions?: Record<string, unknown>): PreparedQuery;
   prepareUpdate(
     data: Record<string, unknown>,
     conditions: Record<string, unknown>,
@@ -42,11 +42,9 @@ export type UpdateWorkflowResult<TEntity> =
 
 /**
  * Updates an entity by ID, then fetches and returns the updated record.
- * config is needed here (unlike select-many) because selectById requires tableName.
  */
 export async function updateEntityWorkflow<TEntity>(
   db: SQL,
-  config: EntityConfig,
   model: EntityModel<TEntity>,
   id: string,
   data: Record<string, unknown>,
@@ -71,8 +69,9 @@ export async function updateEntityWorkflow<TEntity>(
     return { success: false, stage: "database", error: message };
   }
 
-  // Fetch the updated record back to return the current state
-  const row = await selectById(db, config.tableName, id);
+  // Fetch the updated record back — Layer 1 builds the SELECT query
+  const selectQuery = model.prepareSelect({ id });
+  const row = await selectById(db, selectQuery);
   if (!row) {
     return {
       success: false,

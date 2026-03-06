@@ -6,8 +6,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun --watch src/index.ts",
-    "start": "bun src/index.ts",
+    "build:browser": "bun build src/browser/main.ts --outdir public --minify --target browser",
+    "dev": "bun run build:browser && bun --watch src/index.ts",
+    "start": "bun run build:browser && bun src/index.ts",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "check": "bun run typecheck",

@@ -12,7 +12,7 @@ export function queryBuildWhere(
     return { sql: "", params: [] };
   }
 
-  const whereClause = fields.map((field) => `${field} = ?`).join(" AND ");
+  const whereClause = fields.map((field) => `"${field}" = ?`).join(" AND ");
   const values = fields.map((field) => conditions[field]);
 
   return {

@@ -31,7 +31,21 @@ export const GameDomainService = {
     input: Record<string, unknown>,
   ): Promise<CreateWorkflowResult<GameDomain>> {
     const db = getConnection();
-    return createEntityWorkflow(db, GAME_DOMAIN_CONFIG, GameDomainModel, input);
+
+    // Business rule: name must be unique across all GameDomain records
+    const name = input["name"];
+    if (typeof name === "string" && name.trim() !== "") {
+      const existing = await selectManyWorkflow(db, GameDomainModel, { name });
+      if (existing.success && existing.data.length > 0) {
+        return {
+          success: false,
+          stage: "validation",
+          errors: { name: "A Game Domain with this name already exists." },
+        };
+      }
+    }
+
+    return createEntityWorkflow(db, GameDomainModel, input);
   },
 
   async findById(id: string): Promise<SelectWorkflowResult<GameDomain>> {
@@ -51,9 +65,22 @@ export const GameDomainService = {
     data: Record<string, unknown>,
   ): Promise<UpdateWorkflowResult<GameDomain>> {
     const db = getConnection();
+
+    // Business rule: name must be unique — exclude the record being updated
+    const name = data["name"];
+    if (typeof name === "string" && name.trim() !== "") {
+      const existing = await selectManyWorkflow(db, GameDomainModel, { name });
+      if (existing.success && existing.data.some((d) => d.id !== id)) {
+        return {
+          success: false,
+          stage: "validation",
+          errors: { name: "A Game Domain with this name already exists." },
+        };
+      }
+    }
+
     return updateEntityWorkflow(
       db,
-      GAME_DOMAIN_CONFIG,
       GameDomainModel,
       id,
       data,

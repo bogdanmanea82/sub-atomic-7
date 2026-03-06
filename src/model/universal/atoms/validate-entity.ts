@@ -34,6 +34,10 @@ export function validateEntity(
 
   // Iterate over each field in the entity configuration
   for (const field of config.fields) {
+    // Skip auto-managed fields — these are set by the serializer or database
+    if (field.type === "uuid" && field.autoGenerate) continue;
+    if (field.type === "timestamp" && field.autoSet !== "none") continue;
+
     const value = input[field.name];
 
     try {

@@ -28,6 +28,9 @@ export function serializeEntity(
   for (const field of config.fields) {
     const value = data[field.name];
 
+    // Skip auto-generated UUIDs only when no value is provided
+    if (field.type === "uuid" && field.autoGenerate && (value === null || value === undefined)) continue;
+
     // Handle auto-set timestamps based on operation
     if (field.type === "timestamp" && field.autoSet !== "none") {
       if (field.autoSet === "create" && operation === "create") {

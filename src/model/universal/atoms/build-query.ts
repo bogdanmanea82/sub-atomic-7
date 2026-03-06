@@ -79,7 +79,7 @@ export function buildDeleteQuery(
   const whereClause = queryBuildWhere(conditions);
 
   return {
-    sql: `DELETE FROM ${config.tableName} ${whereClause.sql} RETURNING id`,
+    sql: `DELETE FROM ${config.tableName} ${whereClause.sql} RETURNING "id"`,
     params: whereClause.params,
   };
 }

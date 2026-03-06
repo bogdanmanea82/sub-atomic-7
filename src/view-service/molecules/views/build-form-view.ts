@@ -31,7 +31,8 @@ function mapInputType(field: FieldConfig): string {
  */
 export function buildFormView(
   config: EntityConfig,
-  currentValues?: Record<string, unknown>
+  currentValues?: Record<string, unknown>,
+  errors?: Record<string, string>,
 ): FormView {
   const editableFields = config.fields.filter(
     (f) =>
@@ -40,13 +41,17 @@ export function buildFormView(
       f.type !== "timestamp"
   );
 
-  const fields: FormField[] = editableFields.map((field) => ({
-    name: field.name,
-    label: field.label,
-    inputType: mapInputType(field),
-    value: currentValues ? (currentValues[field.name] ?? null) : null,
-    required: field.required,
-  }));
+  const fields: FormField[] = editableFields.map((field) => {
+    const base: FormField = {
+      name: field.name,
+      label: field.label,
+      inputType: mapInputType(field),
+      value: currentValues ? (currentValues[field.name] ?? null) : null,
+      required: field.required,
+    };
+    const error = errors?.[field.name];
+    return error ? { ...base, error } : base;
+  });
 
   const title = currentValues
     ? `Edit ${config.displayName}`

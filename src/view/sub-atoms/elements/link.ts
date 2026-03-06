@@ -5,7 +5,9 @@ import { escapeHtml } from "./escape";
 export function link(
   label: string,
   href: string,
-  variant: "default" | "secondary" | "danger" = "default"
+  variant: "default" | "secondary" | "danger" = "default",
+  icon?: string
 ): string {
-  return `<a href="${escapeHtml(href)}" class="link link--${variant}">${escapeHtml(label)}</a>`;
+  const iconHtml = icon ? `<span class="link__icon">${icon}</span> ` : "";
+  return `<a href="${escapeHtml(href)}" class="link link--${variant}">${iconHtml}${escapeHtml(label)}</a>`;
 }

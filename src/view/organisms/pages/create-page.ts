@@ -4,10 +4,10 @@ import type { FormView } from "@view-service/types";
 import { mainLayout } from "../layouts";
 import { pageHeader, formSection } from "../../molecules";
 
-export function createPage(view: FormView, basePath: string): string {
+export function createPage(view: FormView, basePath: string, fieldConfigJson?: string): string {
   const content = `
     ${pageHeader({ title: view.title, backUrl: basePath })}
-    ${formSection(view, basePath, basePath)}`;
+    ${formSection(view, basePath, basePath, fieldConfigJson)}`;
 
   return mainLayout(content, view.title, basePath);
 }

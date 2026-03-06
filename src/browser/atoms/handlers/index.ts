@@ -1,0 +1,10 @@
+// src/browser/atoms/handlers/index.ts
+export { attachFormSubmitHandler } from "./form-submit-handler";
+export type { FormSubmitCallbacks } from "./form-submit-handler";
+export { attachInputChangeHandler } from "./input-change-handler";
+export type { FieldValidator, FieldErrorDisplay } from "./input-change-handler";
+export { attachDeleteHandler } from "./delete-handler";
+export type { DeleteHandlerCallbacks } from "./delete-handler";
+export { attachSearchHandler } from "./search-handler";
+export { showDuplicateNotice } from "./duplicate-handler";
+export { attachNameAvailabilityHandler } from "./name-availability-handler";

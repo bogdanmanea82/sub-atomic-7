@@ -7,11 +7,22 @@ import { navItem } from "../../atoms";
 function navigation(currentPath: string): string {
   return `
     <nav class="main-nav">
-      <div class="main-nav__brand">RPG CMS</div>
+      <a href="/" class="main-nav__brand">RPG CMS</a>
       <ul class="main-nav__links">
+        ${navItem("Home", "/", currentPath === "/")}
         ${navItem("Game Domains", "/game-domains", currentPath.startsWith("/game-domains"))}
       </ul>
     </nav>`;
+}
+
+function footer(): string {
+  return `
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p class="site-footer__brand">RPG CMS <span class="site-footer__version">v0.1.0</span></p>
+        <p class="site-footer__arch">Seven-layer atomic design &middot; sub-atomic-7</p>
+      </div>
+    </footer>`;
 }
 
 /**
@@ -53,6 +64,8 @@ export function mainLayout(content: string, title: string, currentPath: string =
     .form-field label { display: block; font-weight: 600; margin-bottom: 0.35rem; font-size: 0.9rem; }
     .form-field input, .form-field textarea { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
     .form-field textarea { min-height: 100px; resize: vertical; }
+    .form-field--invalid input, .form-field--invalid textarea { border-color: #dc3545; }
+    .field-error { display: block; color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem; }
     .form-actions { display: flex; gap: 1rem; margin-top: 1.5rem; align-items: center; }
     .detail-list { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
     .detail-list__row { display: grid; grid-template-columns: 200px 1fr; padding: 0.75rem 1rem; border-top: 1px solid #eee; }
@@ -61,6 +74,53 @@ export function mainLayout(content: string, title: string, currentPath: string =
     .badge { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
     .badge--active { background: #d4edda; color: #155724; }
     .badge--inactive { background: #f8d7da; color: #721c24; }
+
+    /* Navigation brand link */
+    .main-nav__brand { text-decoration: none; color: #e0b84a; }
+
+    /* Footer */
+    .site-footer { background: #1a1a2e; color: #999; padding: 2rem; margin-top: 3rem; }
+    .site-footer__inner { max-width: 1200px; margin: 0 auto; text-align: center; }
+    .site-footer__brand { font-weight: 700; color: #e0b84a; margin-bottom: 0.25rem; }
+    .site-footer__version { font-weight: 400; color: #666; font-size: 0.85rem; }
+    .site-footer__arch { font-size: 0.85rem; }
+
+    /* Home page */
+    .hero { text-align: center; padding: 3rem 1rem; margin-bottom: 2rem; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .hero__title { font-size: 2.2rem; color: #1a1a2e; margin-bottom: 0.5rem; }
+    .hero__subtitle { font-size: 1.1rem; color: #555; max-width: 600px; margin: 0 auto 0.75rem; line-height: 1.5; }
+    .hero__tech { font-size: 0.9rem; color: #888; }
+    .hero__tech strong { color: #1a1a2e; }
+
+    .home-section { margin-bottom: 2.5rem; }
+    .home-section__title { font-size: 1.25rem; margin-bottom: 1rem; color: #1a1a2e; }
+
+    .entity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .entity-card { display: flex; gap: 1rem; padding: 1.25rem; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-decoration: none; color: inherit; transition: box-shadow 0.2s, transform 0.2s; }
+    .entity-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); transform: translateY(-2px); }
+    .entity-card__icon { font-size: 2rem; line-height: 1; }
+    .entity-card__name { font-weight: 700; font-size: 1rem; color: #1a1a2e; margin-bottom: 0.25rem; }
+    .entity-card__desc { font-size: 0.85rem; color: #666; line-height: 1.4; margin-bottom: 0.5rem; }
+    .entity-card__count { font-size: 0.8rem; color: #999; }
+
+    .architecture-table-wrapper { max-width: 700px; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-size: 0.8rem; font-weight: 700; color: white; }
+    .layer-badge--0 { background: #6c5ce7; }
+    .layer-badge--1 { background: #0984e3; }
+    .layer-badge--2 { background: #00b894; }
+    .layer-badge--3 { background: #fdcb6e; color: #1a1a2e; }
+    .layer-badge--4 { background: #e17055; }
+    .layer-badge--5 { background: #d63031; }
+    .layer-badge--6 { background: #1a1a2e; }
+
+    .api-endpoints { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+    .api-group { background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .api-group__title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.75rem; color: #1a1a2e; }
+    .api-group code { display: block; font-size: 0.82rem; padding: 0.3rem 0; color: #555; border-bottom: 1px solid #f0f0f0; }
+    .api-group code:last-child { border-bottom: none; }
+
+    /* Duplicate notice */
+    .duplicate-notice { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; max-width: 640px; font-size: 0.9rem; }
   </style>
 </head>
 <body>
@@ -68,6 +128,8 @@ export function mainLayout(content: string, title: string, currentPath: string =
   <main>
     ${content}
   </main>
+  ${footer()}
+  <script src="/public/main.js" defer></script>
 </body>
 </html>`;
 }

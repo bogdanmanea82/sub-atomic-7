@@ -1,6 +1,5 @@
 // src/model-service/molecules/workflows/create-entity-workflow.ts                                                                                                                                                                           // Universal entity creation workflow — works with any entity model and config
 import type { SQL } from "bun";
-import type { EntityConfig } from "@config/types";
 import type { PreparedQuery } from "@model/universal/sub-atoms/types/prepared-query";
 import { insertRecord, selectById } from "../../atoms/crud";
 
@@ -10,6 +9,7 @@ import { insertRecord, selectById } from "../../atoms/crud";
  */
 interface EntityModel<TEntity> {
   prepareCreate(input: Record<string, unknown>): PreparedQuery;
+  prepareSelect(conditions?: Record<string, unknown>): PreparedQuery;
   deserialize(row: Record<string, unknown>): TEntity;
 }
 
@@ -38,7 +38,6 @@ export type CreateWorkflowResult<TEntity> =
  */
 export async function createEntityWorkflow<TEntity>(
   db: SQL,
-  config: EntityConfig,
   model: EntityModel<TEntity>,
   input: Record<string, unknown>,
 ): Promise<CreateWorkflowResult<TEntity>> {
@@ -67,8 +66,9 @@ export async function createEntityWorkflow<TEntity>(
     return { success: false, stage: "database", error: message };
   }
 
-  // Step 4: Fetch the created record — we know the ID so we can select it back
-  const row = await selectById(db, config.tableName, id);
+  // Step 4: Fetch the created record — Layer 1 builds the SELECT query
+  const selectQuery = model.prepareSelect({ id });
+  const row = await selectById(db, selectQuery);
   if (!row) {
     return {
       success: false,

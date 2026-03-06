@@ -12,8 +12,9 @@ export function tableRow(row: ListViewRow, basePath: string): string {
     <tr data-id="${row.id}">
       ${row.fields.map((f) => `<td>${f.value}</td>`).join("")}
       <td class="actions">
-        ${link("View", `${basePath}/${row.id}`)}
-        ${link("Edit", `${basePath}/${row.id}/edit`, "secondary")}
+        ${link("View", `${basePath}/${row.id}`, "default", "👁")}
+        ${link("Edit", `${basePath}/${row.id}/edit`, "secondary", "✏️")}
+        ${link("Duplicate", `${basePath}/${row.id}/duplicate`, "secondary", "📋")}
         <form method="POST" action="${basePath}/${row.id}/delete" style="display:inline">
           <button type="submit" class="btn btn--danger btn--small">Delete</button>
         </form>

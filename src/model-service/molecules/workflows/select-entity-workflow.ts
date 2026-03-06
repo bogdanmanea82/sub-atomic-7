@@ -1,6 +1,8 @@
-// src/model-service/molecules/workflows/select-entity-workflow.ts                                                                                                                                                                           // Universal entity select-by-ID workflow — fetch one record and deserialize it
+// src/model-service/molecules/workflows/select-entity-workflow.ts
+// Universal entity select-by-ID workflow — fetch one record and deserialize it
 import type { SQL } from "bun";
 import type { EntityConfig } from "@config/types";
+import type { PreparedQuery } from "@model/universal/sub-atoms/types/prepared-query";
 import { selectById } from "../../atoms/crud";
 
 /**
@@ -8,6 +10,7 @@ import { selectById } from "../../atoms/crud";
  * to be used with this workflow.
  */
 interface EntityModel<TEntity> {
+  prepareSelect(conditions?: Record<string, unknown>): PreparedQuery;
   deserialize(row: Record<string, unknown>): TEntity;
 }
 
@@ -30,7 +33,8 @@ export async function selectEntityWorkflow<TEntity>(
   model: EntityModel<TEntity>,
   id: string,
 ): Promise<SelectWorkflowResult<TEntity>> {
-  const row = await selectById(db, config.tableName, id);
+  const query = model.prepareSelect({ id });
+  const row = await selectById(db, query);
 
   if (!row) {
     return {

@@ -9,10 +9,12 @@ import {
   detailPage,
   createPage,
   editPage,
+  duplicatePage,
 } from "@view/entities/game-domain";
 import { errorHandlerPlugin } from "../../atoms/middleware";
 
 const BASE_PATH = "/game-domains";
+const FIELD_CONFIG_JSON = GameDomainViewService.prepareBrowserFieldConfig();
 
 /** Sets the response content-type to HTML. */
 function setHtml(headers: Record<string, string | number>): void {
@@ -42,7 +44,7 @@ export const GameDomainPages = new Elysia()
   .get(`${BASE_PATH}/new`, ({ set }) => {
     setHtml(set.headers);
     const view = GameDomainViewService.prepareCreateForm();
-    return createPage(view, BASE_PATH);
+    return createPage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
 
   // ── Detail ───────────────────────────────────────────────────────────────
@@ -70,38 +72,54 @@ export const GameDomainPages = new Elysia()
     const view = GameDomainViewService.prepareEditForm(
       result.data as unknown as Record<string, unknown>,
     );
-    return editPage(view, params["id"], BASE_PATH);
+    return editPage(view, params["id"], BASE_PATH, FIELD_CONFIG_JSON);
+  })
+
+  // ── Duplicate form ──────────────────────────────────────────────────────────
+  .get(`${BASE_PATH}/:id/duplicate`, async ({ params, set }) => {
+    setHtml(set.headers);
+    const result = await GameDomainService.findById(params["id"]);
+    if (!result.success) {
+      set.status = 404;
+      return `<p>Record not found.</p>`;
+    }
+    const view = GameDomainViewService.prepareDuplicateForm(
+      result.data as unknown as Record<string, unknown>,
+    );
+    return duplicatePage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
 
   // ── Create action ─────────────────────────────────────────────────────────
   .post(BASE_PATH, async ({ body, set }) => {
-    const result = await GameDomainService.create(
-      body as Record<string, unknown>,
-    );
+    const input = body as Record<string, unknown>;
+    const result = await GameDomainService.create(input);
     if (result.success) {
       set.redirect = `${BASE_PATH}/${(result.data as { id: string }).id}`;
       return;
     }
-    // Validation failed — re-render form
+    // Validation failed — re-render form with submitted values and errors
     setHtml(set.headers);
     set.status = 422;
-    const view = GameDomainViewService.prepareCreateForm();
-    return createPage(view, BASE_PATH);
+    const errors = result.stage === "validation" ? result.errors : undefined;
+    const view = GameDomainViewService.prepareCreateForm(input, errors);
+    return createPage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
 
   // ── Update action ─────────────────────────────────────────────────────────
   .post(`${BASE_PATH}/:id`, async ({ params, body, set }) => {
     const id = params["id"];
-    const result = await GameDomainService.update(
-      id,
-      body as Record<string, unknown>,
-    );
+    const input = body as Record<string, unknown>;
+    const result = await GameDomainService.update(id, input);
     if (result.success) {
       set.redirect = `${BASE_PATH}/${id}`;
       return;
     }
-    set.redirect = `${BASE_PATH}/${id}/edit`;
-    return;
+    // Validation failed — re-render edit form with submitted values and errors
+    setHtml(set.headers);
+    set.status = 422;
+    const errors = result.stage === "validation" ? result.errors : undefined;
+    const view = GameDomainViewService.prepareEditForm(input, errors);
+    return editPage(view, id, BASE_PATH, FIELD_CONFIG_JSON);
   })
 
   // ── Delete action ─────────────────────────────────────────────────────────

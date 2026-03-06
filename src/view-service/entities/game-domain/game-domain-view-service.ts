@@ -3,7 +3,7 @@
 
 import { GAME_DOMAIN_CONFIG } from "@config/entities/game-domain";
 import type { ListView, DetailView, FormView } from "../../types";
-import { buildListView, buildDetailView, buildFormView } from "../../molecules/views";
+import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig } from "../../molecules/views";
 
 /**
  * Pre-binds GAME_DOMAIN_CONFIG so callers never import config directly.
@@ -18,11 +18,26 @@ export const GameDomainViewService = {
     return buildDetailView(entity, GAME_DOMAIN_CONFIG);
   },
 
-  prepareCreateForm(): FormView {
-    return buildFormView(GAME_DOMAIN_CONFIG);
+  prepareCreateForm(
+    values?: Record<string, unknown>,
+    errors?: Record<string, string>,
+  ): FormView {
+    return buildFormView(GAME_DOMAIN_CONFIG, values, errors);
   },
 
-  prepareEditForm(currentValues: Record<string, unknown>): FormView {
-    return buildFormView(GAME_DOMAIN_CONFIG, currentValues);
+  prepareEditForm(
+    currentValues: Record<string, unknown>,
+    errors?: Record<string, string>,
+  ): FormView {
+    return buildFormView(GAME_DOMAIN_CONFIG, currentValues, errors);
+  },
+
+  prepareDuplicateForm(sourceValues: Record<string, unknown>): FormView {
+    const view = buildFormView(GAME_DOMAIN_CONFIG, sourceValues);
+    return { ...view, title: `Duplicate ${GAME_DOMAIN_CONFIG.displayName}` };
+  },
+
+  prepareBrowserFieldConfig(): string {
+    return JSON.stringify(buildBrowserFieldConfig(GAME_DOMAIN_CONFIG));
   },
 };

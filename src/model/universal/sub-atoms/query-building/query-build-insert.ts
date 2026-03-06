@@ -11,10 +11,10 @@ export function queryBuildInsert(
   const placeholders = fields.map(() => "?").join(", ");
   const values = fields.map((field) => data[field]);
 
+  const quotedFields = fields.map((f) => `"${f}"`).join(", ");
+
   return {
-    sql: `INSERT INTO ${tableName} (${fields.join(
-      ", "
-    )}) VALUES (${placeholders})`,
+    sql: `INSERT INTO ${tableName} (${quotedFields}) VALUES (${placeholders})`,
     params: values,
   };
 }

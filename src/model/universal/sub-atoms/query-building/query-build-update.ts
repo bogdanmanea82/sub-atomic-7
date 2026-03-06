@@ -8,7 +8,7 @@ export function queryBuildUpdate(
   data: Record<string, unknown>
 ): PreparedQuery {
   const fields = Object.keys(data);
-  const setClause = fields.map((field) => `${field} = ?`).join(", ");
+  const setClause = fields.map((field) => `"${field}" = ?`).join(", ");
   const values = fields.map((field) => data[field]);
 
   return {

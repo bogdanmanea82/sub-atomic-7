@@ -2,6 +2,6 @@
 // Builds SELECT clause with field list
 
 export function queryBuildSelect(tableName: string, fields: string[]): string {
-  const fieldList = fields.length > 0 ? fields.join(", ") : "*";
+  const fieldList = fields.length > 0 ? fields.map((f) => `"${f}"`).join(", ") : "*";
   return `SELECT ${fieldList} FROM ${tableName}`;
 }

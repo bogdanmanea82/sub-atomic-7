@@ -19,12 +19,13 @@
     input: Record<string, unknown>
   ): PreparedQuery {
     // Step 1: Validate — throws ValidationErrors if any field is invalid
-    const validated = validateEntity(config, input);
+    validateEntity(config, input);
 
     // Step 2: Serialize — converts TypeScript types to database-ready format
+    // Uses original input (not validated subset) so system fields like id are included
     const serialized = serializeEntity(
       config,
-      validated as Record<string, unknown>,
+      input,
       "create"
     );
 
