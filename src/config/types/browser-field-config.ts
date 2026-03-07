@@ -15,4 +15,7 @@ export interface BrowserFieldConfig {
   readonly min?: number;
   readonly max?: number;
   readonly pattern?: string;
+  readonly values?: readonly string[];
+  readonly precision?: number;
+  readonly scale?: number;
 }

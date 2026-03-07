@@ -10,3 +10,9 @@ export type {
   SelectOption,
   ReferenceLookup,
 } from "./view-models";
+
+export type {
+  TierFormRow,
+  TierDetailRow,
+  TierFieldMeta,
+} from "./tier-view-models";

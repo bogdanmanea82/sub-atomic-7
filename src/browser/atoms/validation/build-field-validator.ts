@@ -33,12 +33,29 @@ export function buildFieldValidator(fieldConfig: BrowserFieldConfig): FieldValid
       }
     }
 
+    if (fieldConfig.type === "enum" && fieldConfig.values) {
+      if (!fieldConfig.values.includes(value)) {
+        return `${fieldLabel} must be one of: ${fieldConfig.values.join(", ")}`;
+      }
+    }
+
     if (fieldConfig.type === "integer") {
       if (fieldConfig.min !== undefined && fieldConfig.max !== undefined) {
         const rangeError = validateIntegerRange(
           value, fieldConfig.min, fieldConfig.max, fieldLabel
         );
         if (rangeError !== null) return rangeError;
+      }
+    }
+
+    if (fieldConfig.type === "decimal") {
+      const num = parseFloat(value);
+      if (Number.isNaN(num)) return `${fieldLabel} must be a valid number`;
+      if (fieldConfig.min !== undefined && num < fieldConfig.min) {
+        return `${fieldLabel} must be at least ${fieldConfig.min}`;
+      }
+      if (fieldConfig.max !== undefined && num > fieldConfig.max) {
+        return `${fieldLabel} must be at most ${fieldConfig.max}`;
       }
     }
 

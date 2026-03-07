@@ -8,6 +8,8 @@ import { validateStringLength } from "../sub-atoms/validation/validate-string-le
 import { validateIntegerRange } from "../sub-atoms/validation/validate-integer-range";
 import { validateBoolean } from "../sub-atoms/validation/validate-boolean";
 import { validateDatetime } from "../sub-atoms/validation/validate-datetime";
+import { validateEnum } from "../sub-atoms/validation/validate-enum";
+import { validateDecimal } from "../sub-atoms/validation/validate-decimal";
 
 // Type for validation errors - collects all field errors before throwing
 export type ValidationErrors = {
@@ -97,6 +99,21 @@ function validateField(field: FieldConfig, value: unknown): unknown {
 
     case "timestamp":
       return validateDatetime(value as string, field.name);
+
+    case "enum":
+      return validateEnum(
+        value as string,
+        field.values,
+        field.name
+      );
+
+    case "decimal":
+      return validateDecimal(
+        value as number,
+        field.name,
+        field.min,
+        field.max
+      );
 
     case "uuid":
     case "reference":

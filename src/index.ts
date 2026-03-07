@@ -4,11 +4,13 @@ import {
   GameSubdomainController,
   GameCategoryController,
   GameSubcategoryController,
+  ModifierController,
 } from "@controller/entities";
 import { GameDomainService } from "@model-service/entities/game-domain";
 import { GameSubdomainService } from "@model-service/entities/game-subdomain";
 import { GameCategoryService } from "@model-service/entities/game-category";
 import { GameSubcategoryService } from "@model-service/entities/game-subcategory";
+import { ModifierService } from "@model-service/entities/modifier";
 import { homePage } from "@view/organisms/pages";
 import type { EntityCardData } from "@view/organisms/pages";
 
@@ -17,6 +19,7 @@ const app = new Elysia()
   .use(GameSubdomainController)
   .use(GameCategoryController)
   .use(GameSubcategoryController)
+  .use(ModifierController)
   // Serve the browser bundle as a static asset
   .get("/public/main.js", () => Bun.file("public/main.js"))
   // Home page — HTML with live entity counts
@@ -24,11 +27,12 @@ const app = new Elysia()
     set.headers["content-type"] = "text/html; charset=utf-8";
 
     // Fetch entity counts for the dashboard cards
-    const [gameDomainResult, gameSubdomainResult, gameCategoryResult, gameSubcategoryResult] = await Promise.all([
+    const [gameDomainResult, gameSubdomainResult, gameCategoryResult, gameSubcategoryResult, modifierResult] = await Promise.all([
       GameDomainService.findMany(),
       GameSubdomainService.findMany(),
       GameCategoryService.findMany(),
       GameSubcategoryService.findMany(),
+      ModifierService.findMany(),
     ]);
     const gameDomainCount = gameDomainResult.success
       ? (gameDomainResult.data as unknown[]).length
@@ -41,6 +45,9 @@ const app = new Elysia()
       : 0;
     const gameSubcategoryCount = gameSubcategoryResult.success
       ? (gameSubcategoryResult.data as unknown[]).length
+      : 0;
+    const modifierCount = modifierResult.success
+      ? (modifierResult.data as unknown[]).length
       : 0;
 
     const entities: EntityCardData[] = [
@@ -71,6 +78,13 @@ const app = new Elysia()
         href: "/game-subcategories",
         count: gameSubcategoryCount,
         icon: "📑",
+      },
+      {
+        name: "Modifiers",
+        description: "Atomic gameplay statistics — prefix and suffix modifiers tied to the full hierarchy.",
+        href: "/modifiers",
+        count: modifierCount,
+        icon: "⚔️",
       },
     ];
 

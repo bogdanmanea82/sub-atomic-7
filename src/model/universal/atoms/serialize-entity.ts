@@ -7,6 +7,7 @@ import { serializeString } from "../sub-atoms/serialization/serialize-string";
 import { serializeInteger } from "../sub-atoms/serialization/serialize-integer";
 import { serializeBoolean } from "../sub-atoms/serialization/serialize-boolean";
 import { serializeDatetime } from "../sub-atoms/serialization/serialize-datetime";
+import { serializeDecimal } from "../sub-atoms/serialization/serialize-decimal";
 
 // Type for serialized output - values are database-ready
 export type SerializedData = {
@@ -73,6 +74,12 @@ function serializeField(field: FieldConfig, value: unknown): unknown {
 
     case "timestamp":
       return serializeDatetime(value as Date);
+
+    case "enum":
+      return serializeString(value as string);
+
+    case "decimal":
+      return serializeDecimal(value as number);
 
     case "uuid":
     case "reference":

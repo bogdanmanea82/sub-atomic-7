@@ -5,3 +5,4 @@ export { deserializeBoolean } from "./deserialize-boolean";
 export { deserializeString } from "./deserialize-string";
 export { deserializeInteger } from "./deserialize-integer";
 export { deserializeDatetime } from "./deserialize-datetime.ts";
+export { deserializeDecimal } from "./deserialize-decimal";

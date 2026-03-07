@@ -28,6 +28,14 @@ export function buildBrowserFieldConfig(config: EntityConfig): BrowserFieldConfi
         return { ...base, min: field.min, max: field.max };
       }
 
+      if (field.type === "enum") {
+        return { ...base, values: field.values };
+      }
+
+      if (field.type === "decimal") {
+        return { ...base, min: field.min, max: field.max, precision: field.precision, scale: field.scale };
+      }
+
       return base;
     });
 }

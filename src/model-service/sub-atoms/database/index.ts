@@ -4,3 +4,4 @@ export { getConnection } from "./get-connection";
 export { convertPlaceholders } from "./convert-placeholders";
 export { executeSelect } from "./execute-select";
 export { executeWrite } from "./execute-write";
+export { withTransaction } from "./with-transaction";

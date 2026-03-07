@@ -5,3 +5,4 @@ export { serializeBoolean } from "./serialize-boolean";
 export { serializeString } from "./serialize-string";
 export { serializeInteger } from "./serialize-integer";
 export { serializeDatetime } from "./serialize-datetime";
+export { serializeDecimal } from "./serialize-decimal";

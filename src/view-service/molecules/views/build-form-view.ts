@@ -32,7 +32,11 @@ export function buildFormView(
       value: currentValues ? (currentValues[field.name] ?? null) : null,
       required: field.required,
     };
-    const options = selectOptions?.[field.name];
+    // Enum fields auto-generate options from config values
+    const enumOptions = field.type === "enum"
+      ? field.values.map((v) => ({ label: v, value: v }))
+      : undefined;
+    const options = selectOptions?.[field.name] ?? enumOptions;
     const withOptions = options ? { ...base, options } : base;
     const error = errors?.[field.name];
     return error ? { ...withOptions, error } : withOptions;

@@ -5,3 +5,4 @@ export { makeGetAllHandler } from "./get-all-handler";
 export { makeUpdateHandler } from "./update-handler";
 export { makeDeleteHandler } from "./delete-handler";
 export { makeCheckNameHandler } from "./check-name-handler";
+export { makeCheckFieldHandler } from "./check-field-handler";

@@ -5,7 +5,7 @@
  * Supported field data types in the system.
  * These map to database column types and TypeScript types.
  */
-export type FieldType = "string" | "integer" | "boolean" | "timestamp" | "uuid" | "reference";
+export type FieldType = "string" | "integer" | "boolean" | "timestamp" | "uuid" | "reference" | "enum" | "decimal";
 
 /**
  * Display format hints for the view layer.
@@ -89,6 +89,29 @@ export interface ReferenceFieldConfig extends BaseFieldConfig {
 }
 
 /**
+ * Enum field configuration for fields with a fixed set of allowed values.
+ * Stored as strings in the database, rendered as <select> dropdowns in forms.
+ */
+export interface EnumFieldConfig extends BaseFieldConfig {
+  readonly type: "enum";
+  readonly values: readonly string[];
+  readonly defaultValue?: string;
+}
+
+/**
+ * Decimal field configuration for NUMERIC columns.
+ * PostgreSQL returns NUMERIC as string — deserialization parses to number.
+ */
+export interface DecimalFieldConfig extends BaseFieldConfig {
+  readonly type: "decimal";
+  readonly precision: number;
+  readonly scale: number;
+  readonly min?: number;
+  readonly max?: number;
+  readonly defaultValue?: number;
+}
+
+/**
  * Union type representing any valid field configuration.
  * The discriminant is the `type` property.
  */
@@ -98,4 +121,6 @@ export type FieldConfig =
   | BooleanFieldConfig
   | TimestampFieldConfig
   | UuidFieldConfig
-  | ReferenceFieldConfig;
+  | ReferenceFieldConfig
+  | EnumFieldConfig
+  | DecimalFieldConfig;

@@ -12,6 +12,8 @@ export type {
   StringFieldConfig,
   TimestampFieldConfig,
   UuidFieldConfig,
+  EnumFieldConfig,
+  DecimalFieldConfig,
 } from "./field-config";
 
 export type {

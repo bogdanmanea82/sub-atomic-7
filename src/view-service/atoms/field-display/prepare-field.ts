@@ -53,6 +53,12 @@ function formatFieldValue(
     case "timestamp":
       return formatDatetime(value as Date);
 
+    case "enum":
+      return formatText(value as string);
+
+    case "decimal":
+      return formatNumber(value as number);
+
     case "uuid":
       return value as string;
 

@@ -18,3 +18,5 @@ export { GAME_DOMAIN_REF_FIELD_ATOM } from "./game-domain-ref-field-atom";
 export { GAME_SUBDOMAIN_REF_FIELD_ATOM } from "./game-subdomain-ref-field-atom";
 
 export { GAME_CATEGORY_REF_FIELD_ATOM } from "./game-category-ref-field-atom";
+
+export { GAME_SUBCATEGORY_REF_FIELD_ATOM } from "./game-subcategory-ref-field-atom";

@@ -7,6 +7,7 @@ import { deserializeInteger } from "../sub-atoms/deserialization";
 import { deserializeDatetime } from "../sub-atoms/deserialization";
 import { deserializeString } from "../sub-atoms/deserialization/deserialize-string";
 import { deserializeBoolean } from "../sub-atoms/deserialization/deserialize-boolean";
+import { deserializeDecimal } from "../sub-atoms/deserialization/deserialize-decimal";
 
 // Type for deserialized output - values are TypeScript-native types
 export type DeserializedData = {
@@ -53,6 +54,12 @@ function deserializeField(field: FieldConfig, value: unknown): unknown {
 
     case "timestamp":
       return deserializeDatetime(value as Date);
+
+    case "enum":
+      return deserializeString(value as string);
+
+    case "decimal":
+      return deserializeDecimal(value);
 
     case "uuid":
     case "reference":

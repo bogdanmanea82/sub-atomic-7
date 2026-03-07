@@ -15,6 +15,7 @@ export function formSection(
   action: string,
   cancelUrl: string,
   fieldConfigJson?: string,
+  extraContent?: string,
 ): string {
   const configTag = fieldConfigJson
     ? `<script id="field-config" type="application/json">${fieldConfigJson}</script>`
@@ -24,6 +25,7 @@ export function formSection(
     <form method="POST" action="${action}" class="entity-form">
       ${configTag}
       ${view.fields.map((f) => formField(f)).join("")}
+      ${extraContent ?? ""}
       <div class="form-actions">
         ${submitButton("Save")}
         ${link("Cancel", cancelUrl, "secondary")}

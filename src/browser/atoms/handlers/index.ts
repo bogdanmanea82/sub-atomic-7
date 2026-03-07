@@ -10,3 +10,4 @@ export { showDuplicateNotice } from "./duplicate-handler";
 export { attachNameAvailabilityHandler } from "./name-availability-handler";
 export { attachCascadeDropdownHandler } from "./cascade-dropdown-handler";
 export type { CascadeDropdownOptions } from "./cascade-dropdown-handler";
+export { attachTierHandlers } from "./tier-row-handler";
