@@ -28,13 +28,18 @@ export function initListController(options: ListControllerOptions): void {
   const table = document.querySelector<HTMLElement>(options.tableSelector);
   if (!table) return;
 
-  // Create and insert a search input above the table
+  // Insert search input into the toolbar (or fallback to above the table)
   const searchInput = createSearchInput();
-  const wrapper = table.closest(".table-wrapper");
-  if (wrapper) {
-    wrapper.insertBefore(searchInput, wrapper.firstChild);
+  const toolbar = document.querySelector<HTMLElement>(".list-toolbar");
+  if (toolbar) {
+    toolbar.insertBefore(searchInput, toolbar.firstChild);
   } else {
-    table.parentElement?.insertBefore(searchInput, table);
+    const wrapper = table.closest(".table-wrapper");
+    if (wrapper) {
+      wrapper.insertBefore(searchInput, wrapper.firstChild);
+    } else {
+      table.parentElement?.insertBefore(searchInput, table);
+    }
   }
 
   attachSearchHandler(searchInput, options.rowSelector);

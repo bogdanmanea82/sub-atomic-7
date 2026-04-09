@@ -24,7 +24,7 @@ export function input(
 
   if (inputType === "checkbox") {
     const checkedAttr = value === true ? " checked" : "";
-    return `<input type="checkbox" id="${name}" name="${name}" value="true"${checkedAttr}${requiredAttr}>`;
+    return `<input type="hidden" name="${name}" value="false"><input type="checkbox" id="${name}" name="${name}" value="true"${checkedAttr}>`;
   }
 
   if (inputType === "select" && options) {

@@ -15,6 +15,7 @@ import {
   editPage,
   duplicatePage,
 } from "@view/entities/game-subcategory";
+import type { SubcategoryFilterOptions } from "@view/entities/game-subcategory";
 import { errorHandlerPlugin } from "../../atoms/middleware";
 import { extractPagination } from "../../sub-atoms/request";
 import { setHtml } from "../../sub-atoms/response";
@@ -30,26 +31,38 @@ export const GameSubcategoryPages = new Elysia()
   // ── List ────────────────────────────────────────────────────────────────
   .get(BASE_PATH, async ({ query, set }) => {
     setHtml(set.headers);
-    const pagination = extractPagination(query as Record<string, string>);
+    const params = query as Record<string, string>;
+    const pagination = extractPagination(params);
+
+    const filterDomainId = params["game_domain_id"] || undefined;
+    const filterSubdomainId = params["game_subdomain_id"] || undefined;
+    const filterCategoryId = params["game_category_id"] || undefined;
+    const conditions: Record<string, unknown> = {};
+    if (filterDomainId) conditions["game_domain_id"] = filterDomainId;
+    if (filterSubdomainId) conditions["game_subdomain_id"] = filterSubdomainId;
+    if (filterCategoryId) conditions["game_category_id"] = filterCategoryId;
+    const hasConditions = Object.keys(conditions).length > 0;
+
     const [result, domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
-      GameSubcategoryService.findManyPaginated(pagination),
+      GameSubcategoryService.findManyPaginated(pagination, hasConditions ? conditions : undefined),
       fetchOptions(GameDomainService),
-      fetchOptions(GameSubdomainService),
-      fetchOptions(GameCategoryService),
+      filterDomainId ? fetchOptions(GameSubdomainService, { game_domain_id: filterDomainId }) : Promise.resolve([]),
+      filterSubdomainId ? fetchOptions(GameCategoryService, { game_subdomain_id: filterSubdomainId }) : Promise.resolve([]),
     ]);
     if (!result.success) return `<p>Error loading records.</p>`;
-    const lookup = buildReferenceLookup([
-      { fieldName: "game_domain_id", options: domainOptions },
-      { fieldName: "game_subdomain_id", options: subdomainOptions },
-      { fieldName: "game_category_id", options: categoryOptions },
-    ]);
+
     const paginationMeta = buildPaginationMeta(result.totalCount, pagination.page, pagination.pageSize);
-    const view = GameSubcategoryViewService.prepareListView(
+    const view = GameSubcategoryViewService.prepareFilteredListView(
       result.data as unknown as Record<string, unknown>[],
-      lookup,
       paginationMeta,
     );
-    return listPage(view, BASE_PATH);
+    const filterOptions: SubcategoryFilterOptions = { domainOptions, subdomainOptions, categoryOptions };
+    const filterValues = {
+      game_domain_id: filterDomainId,
+      game_subdomain_id: filterSubdomainId,
+      game_category_id: filterCategoryId,
+    };
+    return listPage(view, BASE_PATH, filterOptions, filterValues);
   })
 
   // ── Create form ────────────────────────────────────────────────────────

@@ -15,4 +15,5 @@ export const IS_ACTIVE_FIELD_ATOM = {
   ...DISPLAY_FORMATS.toggle,
   defaultValue: true,
   showInList: true,
+  listOrder: 100,
 } as const;

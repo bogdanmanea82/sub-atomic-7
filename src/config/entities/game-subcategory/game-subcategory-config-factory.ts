@@ -8,6 +8,7 @@ import {
   GAME_DOMAIN_REF_FIELD_ATOM,
   GAME_SUBDOMAIN_REF_FIELD_ATOM,
   GAME_CATEGORY_REF_FIELD_ATOM,
+  SORT_ORDER_FIELD_ATOM,
 } from "../../universal/atoms";
 
 export class GameSubcategoryConfigFactory extends BaseEntityConfigFactory {
@@ -37,7 +38,7 @@ export class GameSubcategoryConfigFactory extends BaseEntityConfigFactory {
    * Each cascading dropdown filters the next.
    */
   protected override getEntitySpecificFields(): readonly FieldConfig[] {
-    return [GAME_DOMAIN_REF_FIELD_ATOM, GAME_SUBDOMAIN_REF_FIELD_ATOM, GAME_CATEGORY_REF_FIELD_ATOM];
+    return [GAME_DOMAIN_REF_FIELD_ATOM, GAME_SUBDOMAIN_REF_FIELD_ATOM, GAME_CATEGORY_REF_FIELD_ATOM, SORT_ORDER_FIELD_ATOM];
   }
 
   protected override getRelationships(): readonly RelationshipConfig[] {

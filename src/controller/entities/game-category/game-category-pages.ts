@@ -14,6 +14,7 @@ import {
   editPage,
   duplicatePage,
 } from "@view/entities/game-category";
+import type { CategoryFilterOptions } from "@view/entities/game-category";
 import { errorHandlerPlugin } from "../../atoms/middleware";
 import { extractPagination } from "../../sub-atoms/request";
 import { setHtml } from "../../sub-atoms/response";
@@ -29,24 +30,34 @@ export const GameCategoryPages = new Elysia()
   // ── List ────────────────────────────────────────────────────────────────
   .get(BASE_PATH, async ({ query, set }) => {
     setHtml(set.headers);
-    const pagination = extractPagination(query as Record<string, string>);
+    const params = query as Record<string, string>;
+    const pagination = extractPagination(params);
+
+    const filterDomainId = params["game_domain_id"] || undefined;
+    const filterSubdomainId = params["game_subdomain_id"] || undefined;
+    const conditions: Record<string, unknown> = {};
+    if (filterDomainId) conditions["game_domain_id"] = filterDomainId;
+    if (filterSubdomainId) conditions["game_subdomain_id"] = filterSubdomainId;
+    const hasConditions = Object.keys(conditions).length > 0;
+
     const [result, domainOptions, subdomainOptions] = await Promise.all([
-      GameCategoryService.findManyPaginated(pagination),
+      GameCategoryService.findManyPaginated(pagination, hasConditions ? conditions : undefined),
       fetchOptions(GameDomainService),
-      fetchOptions(GameSubdomainService),
+      filterDomainId ? fetchOptions(GameSubdomainService, { game_domain_id: filterDomainId }) : Promise.resolve([]),
     ]);
     if (!result.success) return `<p>Error loading records.</p>`;
-    const lookup = buildReferenceLookup([
-      { fieldName: "game_domain_id", options: domainOptions },
-      { fieldName: "game_subdomain_id", options: subdomainOptions },
-    ]);
+
     const paginationMeta = buildPaginationMeta(result.totalCount, pagination.page, pagination.pageSize);
-    const view = GameCategoryViewService.prepareListView(
+    const view = GameCategoryViewService.prepareFilteredListView(
       result.data as unknown as Record<string, unknown>[],
-      lookup,
       paginationMeta,
     );
-    return listPage(view, BASE_PATH);
+    const filterOptions: CategoryFilterOptions = { domainOptions, subdomainOptions };
+    const filterValues = {
+      game_domain_id: filterDomainId,
+      game_subdomain_id: filterSubdomainId,
+    };
+    return listPage(view, BASE_PATH, filterOptions, filterValues);
   })
 
   // ── Create form (before /:id) ──────────────────────────────────────────

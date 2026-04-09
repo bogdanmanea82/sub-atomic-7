@@ -2,10 +2,12 @@
 // Formats boolean values into human-readable strings
 
 /**
- * Formats a boolean as "Active" / "Inactive" — used for status fields like isActive.
+ * Formats a boolean as a colored status dot with tooltip — used for status fields like isActive.
+ * Returns HTML (not plain text) — callers must not escape the output.
  */
 export function formatBoolean(value: boolean): string {
-  return value ? "Active" : "Inactive";
+  const cls = value ? "status-dot--active" : "status-dot--inactive";
+  return `<span class="status-dot ${cls}"></span>`;
 }
 
 /**

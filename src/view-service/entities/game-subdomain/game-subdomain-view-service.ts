@@ -10,6 +10,9 @@ import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig 
  * Form methods accept domainOptions — the list of GameDomains for the dropdown.
  * List/detail methods accept a referenceLookup to resolve domain UUIDs to names.
  */
+/** Fields excluded from filtered list view — shown as filter dropdown instead */
+const LIST_EXCLUDE_FIELDS = new Set(["game_domain_id"]);
+
 export const GameSubdomainViewService = {
   prepareListView(
     entities: Record<string, unknown>[],
@@ -17,6 +20,21 @@ export const GameSubdomainViewService = {
     pagination?: PaginationMeta,
   ): ListView {
     return buildListView(entities, GAME_SUBDOMAIN_CONFIG, referenceLookup, pagination);
+  },
+
+  prepareFilteredListView(
+    entities: Record<string, unknown>[],
+    pagination?: PaginationMeta,
+  ): ListView {
+    const view = buildListView(entities, GAME_SUBDOMAIN_CONFIG, undefined, pagination);
+    return {
+      ...view,
+      columns: view.columns.filter((c) => !LIST_EXCLUDE_FIELDS.has(c.name)),
+      rows: view.rows.map((r) => ({
+        ...r,
+        fields: r.fields.filter((f) => !LIST_EXCLUDE_FIELDS.has(f.name)),
+      })),
+    };
   },
 
   prepareDetailView(

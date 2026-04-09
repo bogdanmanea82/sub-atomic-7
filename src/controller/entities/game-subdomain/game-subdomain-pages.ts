@@ -13,6 +13,7 @@ import {
   editPage,
   duplicatePage,
 } from "@view/entities/game-subdomain";
+import type { SubdomainFilterOptions } from "@view/entities/game-subdomain";
 import { errorHandlerPlugin } from "../../atoms/middleware";
 import { extractPagination } from "../../sub-atoms/request";
 import { setHtml } from "../../sub-atoms/response";
@@ -28,20 +29,28 @@ export const GameSubdomainPages = new Elysia()
   // ── List ────────────────────────────────────────────────────────────────
   .get(BASE_PATH, async ({ query, set }) => {
     setHtml(set.headers);
-    const pagination = extractPagination(query as Record<string, string>);
+    const params = query as Record<string, string>;
+    const pagination = extractPagination(params);
+
+    const filterDomainId = params["game_domain_id"] || undefined;
+    const conditions: Record<string, unknown> = {};
+    if (filterDomainId) conditions["game_domain_id"] = filterDomainId;
+    const hasConditions = Object.keys(conditions).length > 0;
+
     const [result, domainOptions] = await Promise.all([
-      GameSubdomainService.findManyPaginated(pagination),
+      GameSubdomainService.findManyPaginated(pagination, hasConditions ? conditions : undefined),
       fetchOptions(GameDomainService),
     ]);
     if (!result.success) return `<p>Error loading records.</p>`;
-    const lookup = buildReferenceLookup([{ fieldName: "game_domain_id", options: domainOptions }]);
+
     const paginationMeta = buildPaginationMeta(result.totalCount, pagination.page, pagination.pageSize);
-    const view = GameSubdomainViewService.prepareListView(
+    const view = GameSubdomainViewService.prepareFilteredListView(
       result.data as unknown as Record<string, unknown>[],
-      lookup,
       paginationMeta,
     );
-    return listPage(view, BASE_PATH);
+    const filterOptions: SubdomainFilterOptions = { domainOptions };
+    const filterValues = { game_domain_id: filterDomainId };
+    return listPage(view, BASE_PATH, filterOptions, filterValues);
   })
 
   // ── Create form (before /:id) ────────────────────────────────────────────

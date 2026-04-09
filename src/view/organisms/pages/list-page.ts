@@ -7,7 +7,10 @@ import { dataTable } from "../../molecules";
 
 export function listPage(view: ListView, basePath: string): string {
   const content = `
-    ${pageHeader({ title: view.title, actionLabel: "New", actionUrl: `${basePath}/new` })}
+    ${pageHeader({ title: view.title })}
+    <div class="list-toolbar">
+      <a href="${basePath}/new" class="btn btn--primary" title="New">+</a>
+    </div>
     ${dataTable(view, basePath)}`;
 
   return mainLayout(content, view.title, basePath);

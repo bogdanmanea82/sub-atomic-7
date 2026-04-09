@@ -39,6 +39,7 @@ function layerRow(number: number, name: string, description: string): string {
  */
 export function homePage(entities: readonly EntityCardData[]): string {
   const content = `
+    <div class="main--home">
     <section class="hero">
       <h1 class="hero__title">RPG CMS</h1>
       <p class="hero__subtitle">Entity-driven content management with sub-atomic composition and seven-layer architecture.</p>
@@ -100,7 +101,8 @@ export function homePage(entities: readonly EntityCardData[]): string {
           <code>GET /health</code>
         </div>
       </div>
-    </section>`;
+    </section>
+    </div>`;
 
   return mainLayout(content, "Home", "/");
 }

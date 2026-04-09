@@ -53,6 +53,7 @@ export class ModifierConfigFactory extends BaseEntityConfigFactory {
         pattern: "^[a-z0-9_]+$",
         required: true,
         displayFormat: "text",
+        listOrder: 1,
       },
       {
         type: "enum",
@@ -61,6 +62,7 @@ export class ModifierConfigFactory extends BaseEntityConfigFactory {
         values: ["prefix", "suffix"],
         required: true,
         displayFormat: "select",
+        listOrder: 20,
       },
       {
         type: "enum",
@@ -69,6 +71,25 @@ export class ModifierConfigFactory extends BaseEntityConfigFactory {
         values: ["offensive", "defensive", "utility", "resource"],
         required: true,
         displayFormat: "select",
+        listOrder: 21,
+      },
+      {
+        type: "enum",
+        name: "value_type",
+        label: "Value Type",
+        values: ["flat", "increased", "more", "between"],
+        required: true,
+        displayFormat: "select",
+        listOrder: 22,
+      },
+      {
+        type: "enum",
+        name: "calc_method",
+        label: "Calculation Method",
+        values: ["additive", "multiplicative"],
+        required: true,
+        displayFormat: "select",
+        listOrder: 23,
       },
     ] as const;
   }
@@ -90,15 +111,19 @@ export class ModifierConfigFactory extends BaseEntityConfigFactory {
         autoSet: "none",
         required: false,
         displayFormat: "datetime",
+        showInList: false,
+        showInForm: false,
       },
       {
         type: "string",
         name: "archived_reason",
-        label: "Archived Reason",
+        label: "Archive Reason",
         minLength: 0,
         maxLength: 500,
         required: false,
         displayFormat: "textarea",
+        showInList: false,
+        showInForm: false,
       },
     ] as const;
 

@@ -31,6 +31,8 @@ export type Modifier = {
   readonly description: string | null;
   readonly affix_type: string;
   readonly semantic_cat: string;
+  readonly value_type: string;
+  readonly calc_method: string;
   readonly is_active: boolean;
   readonly archived_at: Date | null;
   readonly archived_reason: string | null;

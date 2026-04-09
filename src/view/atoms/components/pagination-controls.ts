@@ -8,7 +8,9 @@ import type { PaginationMeta } from "@view-service/types";
  * Page 1 uses the bare path (no ?page= param) for clean URLs.
  */
 function pageUrl(basePath: string, page: number): string {
-  return page === 1 ? basePath : `${basePath}?page=${page}`;
+  if (page === 1) return basePath;
+  const separator = basePath.includes("?") ? "&" : "?";
+  return `${basePath}${separator}page=${page}`;
 }
 
 /**

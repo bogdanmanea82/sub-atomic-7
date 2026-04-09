@@ -1,6 +1,5 @@
 // src/model-service/entities/modifier/modifier-service.ts
 // Layer 2 organism — public API for all Modifier database operations.
-// Phase 2: transactional tier handling (delete-all-then-reinsert pattern).
 
 import type { SQL } from "bun";
 import type { Modifier } from "@model/entities/modifier/modifier-model";
@@ -37,7 +36,7 @@ import { insertRecord, selectMany } from "../../atoms/crud";
 import { validateTierSet, type TierInput } from "../../atoms/validation/validate-tier-set";
 
 // Keys that are service-layer concerns, not modifier table columns
-const NON_COLUMN_KEYS = ["tiers_json", "tiers"] as const;
+const NON_COLUMN_KEYS = ["tiers_json", "tiers", "status_action", "status_reason"] as const;
 
 function stripNonColumnKeys(data: Record<string, unknown>): Record<string, unknown> {
   const cleaned = { ...data };
@@ -142,10 +141,43 @@ async function fetchTiers(db: SQL, modifierId: string): Promise<ModifierTier[]> 
     .sort((a, b) => a.tier_index - b.tier_index);
 }
 
+/** Derives the old state from the current DB row. */
+type StatusState = "active" | "disabled" | "archived";
+
+/**
+ * Translates status_action radio value into entity field values.
+ * Sets is_active, archived_reason, archived_at on the data object.
+ */
+function applyStatusAction(data: Record<string, unknown>): { action: StatusState; reason: string | undefined } {
+  const statusAction = data["status_action"] as string | undefined;
+  const statusReason = ((data["status_reason"] as string) ?? "").trim() || undefined;
+
+  if (statusAction === "disabled") {
+    data["is_active"] = "false";
+    data["archived_reason"] = null;
+    data["archived_at"] = null;
+    return { action: "disabled", reason: statusReason };
+  }
+  if (statusAction === "archived") {
+    data["is_active"] = "false";
+    data["archived_reason"] = statusReason ?? null;
+    data["archived_at"] = new Date().toISOString();
+    return { action: "archived", reason: statusReason };
+  }
+  // Default: active
+  data["is_active"] = "true";
+  data["archived_reason"] = null;
+  data["archived_at"] = null;
+  return { action: "active", reason: statusReason };
+}
+
 export const ModifierService = {
   async create(
     input: Record<string, unknown>,
   ): Promise<CreateModifierResult> {
+    // Translate status_action to is_active/archived fields
+    applyStatusAction(input);
+
     // Uniqueness check
     const uniquenessErrors = await checkUniqueness(input);
     if (uniquenessErrors) {
@@ -224,6 +256,9 @@ export const ModifierService = {
     id: string,
     data: Record<string, unknown>,
   ): Promise<UpdateModifierResult> {
+    // Translate status_action radio to is_active/archived fields
+    applyStatusAction(data);
+
     // Uniqueness check
     const uniquenessErrors = await checkUniqueness(data, id);
     if (uniquenessErrors) {
@@ -243,7 +278,6 @@ export const ModifierService = {
     const db = getConnection();
 
     // Validate and prepare modifier update query (Layer 1)
-    // Strip tiers_json/tiers — they're service-layer keys, not modifier columns
     const modifierData = stripNonColumnKeys(data);
     let updateQuery;
     try {
@@ -279,5 +313,32 @@ export const ModifierService = {
   async delete(id: string): Promise<DeleteWorkflowResult> {
     const db = getConnection();
     return deleteEntityWorkflow(db, ModifierModel, id);
+  },
+
+  /**
+   * Replaces all tiers for a modifier with a new set.
+   * Validates the full set and persists via delete-all-then-reinsert.
+   * Returns the validated tier set on success, or validation errors on failure.
+   */
+  async replaceTiers(
+    modifierId: string,
+    tiers: readonly TierInput[],
+  ): Promise<{ success: true; tiers: readonly TierInput[] } | { success: false; error: string }> {
+    // Allow empty set (all tiers deleted)
+    if (tiers.length > 0) {
+      const validation = validateTierSet(tiers);
+      if (!validation.valid) {
+        return { success: false, error: Object.values(validation.errors).join("; ") };
+      }
+    }
+
+    const db = getConnection();
+    await withTransaction(db, async (txDb) => {
+      const deleteQuery = ModifierTierModel.prepareDelete({ modifier_id: modifierId });
+      await executeWrite(txDb, deleteQuery);
+      await insertTiers(txDb, modifierId, tiers);
+    });
+
+    return { success: true, tiers };
   },
 };

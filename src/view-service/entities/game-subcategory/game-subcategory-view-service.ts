@@ -10,6 +10,9 @@ import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig 
  * Form methods accept three sets of options for the cascading dropdowns.
  * List/detail methods accept a referenceLookup to resolve all three parent UUIDs.
  */
+/** Fields excluded from filtered list view — shown as filter dropdowns instead */
+const LIST_EXCLUDE_FIELDS = new Set(["game_domain_id", "game_subdomain_id", "game_category_id"]);
+
 export const GameSubcategoryViewService = {
   prepareListView(
     entities: Record<string, unknown>[],
@@ -17,6 +20,21 @@ export const GameSubcategoryViewService = {
     pagination?: PaginationMeta,
   ): ListView {
     return buildListView(entities, GAME_SUBCATEGORY_CONFIG, referenceLookup, pagination);
+  },
+
+  prepareFilteredListView(
+    entities: Record<string, unknown>[],
+    pagination?: PaginationMeta,
+  ): ListView {
+    const view = buildListView(entities, GAME_SUBCATEGORY_CONFIG, undefined, pagination);
+    return {
+      ...view,
+      columns: view.columns.filter((c) => !LIST_EXCLUDE_FIELDS.has(c.name)),
+      rows: view.rows.map((r) => ({
+        ...r,
+        fields: r.fields.filter((f) => !LIST_EXCLUDE_FIELDS.has(f.name)),
+      })),
+    };
   },
 
   prepareDetailView(

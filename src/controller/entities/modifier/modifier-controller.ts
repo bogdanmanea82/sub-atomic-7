@@ -13,6 +13,8 @@ import {
 import { makeCheckFieldHandler } from "../../atoms/handlers";
 import { createCrudRoutes } from "../../molecules/crud-routes";
 import { ModifierPages } from "./modifier-pages";
+import { ModifierBindingApi } from "./modifier-binding-api";
+import { ModifierTierApi } from "./modifier-tier-api";
 
 const ModifierApi = new Elysia()
   .use(errorHandlerPlugin)
@@ -25,7 +27,9 @@ const ModifierApi = new Elysia()
   .get("/api/modifiers/check-code", makeCheckFieldHandler(
     ModifierService, "code", "gameSubcategoryId", "game_subcategory_id",
   ))
-  .use(createCrudRoutes("/api/modifiers", ModifierService));
+  .use(createCrudRoutes("/api/modifiers", ModifierService))
+  .use(ModifierBindingApi)
+  .use(ModifierTierApi);
 
 export const ModifierController = new Elysia()
   .use(ModifierApi)

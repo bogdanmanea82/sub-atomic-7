@@ -21,7 +21,8 @@ export function buildFormView(
     (f) =>
       f.displayFormat !== "hidden" &&
       f.type !== "uuid" &&
-      f.type !== "timestamp"
+      f.type !== "timestamp" &&
+      f.showInForm !== false
   );
 
   const fields: FormField[] = editableFields.map((field) => {

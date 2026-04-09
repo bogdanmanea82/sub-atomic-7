@@ -30,6 +30,9 @@ export interface BaseFieldConfig {
   readonly label: string;
   readonly required: boolean;
   readonly displayFormat: DisplayFormat;
+  readonly showInList?: boolean;
+  readonly showInForm?: boolean;
+  readonly listOrder?: number;
 }
 
 /**

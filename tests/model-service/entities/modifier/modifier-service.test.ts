@@ -59,8 +59,13 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  // Cascade delete from the top — removes subdomain, category, subcategory, modifier, tiers
+  // Delete in reverse hierarchy order — RESTRICT FKs prevent top-down cascade.
+  // modifier_tier→modifier still uses CASCADE, so deleting modifier removes its tiers.
   const db = getConnection();
+  await db.unsafe(`DELETE FROM modifier WHERE game_subcategory_id = $1`, [testSubcategoryId]);
+  await db.unsafe(`DELETE FROM game_subcategory WHERE id = $1`, [testSubcategoryId]);
+  await db.unsafe(`DELETE FROM game_category WHERE id = $1`, [testCategoryId]);
+  await db.unsafe(`DELETE FROM game_subdomain WHERE id = $1`, [testSubdomainId]);
   await db.unsafe(`DELETE FROM game_domain WHERE id = $1`, [testDomainId]);
 });
 
@@ -75,6 +80,8 @@ function makeModifierInput(overrides?: Record<string, unknown>): Record<string, 
     description: "A test modifier",
     affix_type: "prefix",
     semantic_cat: "offensive",
+    value_type: "flat",
+    calc_method: "additive",
     is_active: true,
     tiers_json: TIERS_JSON_3,
     ...overrides,

@@ -7,6 +7,7 @@ import type { FieldConfig, PermissionConfig, RelationshipConfig } from "../../ty
 import {
   GAME_DOMAIN_REF_FIELD_ATOM,
   GAME_SUBDOMAIN_REF_FIELD_ATOM,
+  SORT_ORDER_FIELD_ATOM,
 } from "../../universal/atoms";
 
 export class GameCategoryConfigFactory extends BaseEntityConfigFactory {
@@ -36,7 +37,7 @@ export class GameCategoryConfigFactory extends BaseEntityConfigFactory {
    * Order matters: domain first, then subdomain — matching the cascade UX.
    */
   protected override getEntitySpecificFields(): readonly FieldConfig[] {
-    return [GAME_DOMAIN_REF_FIELD_ATOM, GAME_SUBDOMAIN_REF_FIELD_ATOM];
+    return [GAME_DOMAIN_REF_FIELD_ATOM, GAME_SUBDOMAIN_REF_FIELD_ATOM, SORT_ORDER_FIELD_ATOM];
   }
 
   protected override getRelationships(): readonly RelationshipConfig[] {

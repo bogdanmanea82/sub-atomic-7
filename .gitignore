@@ -49,3 +49,13 @@ temp/
 # Claude Code (AI assistant configuration)
 CLAUDE.md
 .claude/
+
+# Third-party editor configs
+.continue/
+.roo/
+opencode.json
+
+# Binary workflow docs
+modifier_workflow.docx
+*.docx:Zone.Identifier
+modifier_workflow.md

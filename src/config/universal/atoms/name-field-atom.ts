@@ -18,4 +18,5 @@ export const NAME_FIELD_ATOM = {
   ...STRING_CONSTRAINTS.standard,
   ...FIELD_MARKERS.primary,
   ...DISPLAY_FORMATS.text,
+  listOrder: 0,
 } as const;

@@ -14,11 +14,24 @@ export interface DisplayField {
 }
 
 /**
+ * Tooltip metadata for list rows — carried alongside fields
+ * so the view layer can render title attributes without re-querying.
+ */
+export interface ListRowMetadata {
+  readonly description?: string;
+  readonly createdAt?: string;
+  readonly updatedAt?: string;
+  readonly archivedAt?: string;
+  readonly archivedReason?: string;
+}
+
+/**
  * A single row in a list view.
  */
 export interface ListViewRow {
   readonly id: string;
   readonly fields: readonly DisplayField[];
+  readonly metadata?: ListRowMetadata;
 }
 
 /**
@@ -87,3 +100,4 @@ export interface FormView {
  * Used by list and detail views to display parent entity names instead of raw UUIDs.
  */
 export type ReferenceLookup = Record<string, Record<string, string>>;
+

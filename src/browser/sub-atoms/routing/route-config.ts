@@ -17,4 +17,8 @@ export interface EntityRouteConfig {
   readonly cascades?: readonly CascadeDropdownOptions[];
   /** Extra form initialization hook (e.g. subcategory domain→category reset) */
   readonly onFormInit?: (form: HTMLFormElement) => void;
+  /** Extra detail page initialization hook (e.g. tab switching) */
+  readonly onDetailInit?: () => void;
+  /** Extra list page initialization hook (e.g. filter dropdowns) */
+  readonly onListInit?: () => void;
 }

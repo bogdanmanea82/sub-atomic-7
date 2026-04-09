@@ -8,18 +8,20 @@ import { tableRow, paginationControls } from "../../atoms";
  * Renders a complete data table with thead, tbody, record count, and pagination.
  * basePath is passed through to tableRow for action links and pagination URLs.
  */
-export function dataTable(view: ListView, basePath: string): string {
+export function dataTable(view: ListView, basePath: string, paginationBasePath?: string): string {
   if (view.rows.length === 0) {
     return `<p class="empty-state">No ${escapeHtml(view.title)} found.</p>`;
   }
 
   const pagination = view.pagination
-    ? paginationControls(view.pagination, basePath)
+    ? paginationControls(view.pagination, paginationBasePath ?? basePath)
     : "";
+
+  const tableClass = view.columns.length <= 5 ? "data-table data-table--compact" : "data-table";
 
   return `
     <div class="table-wrapper">
-      <table class="data-table">
+      <table class="${tableClass}">
         <thead>
           <tr>
             ${view.columns.map((col) => `<th>${escapeHtml(col.label)}</th>`).join("")}

@@ -123,6 +123,9 @@ export function initEntityRoutes(
       entityName: document.querySelector("h1")?.textContent ?? "this record",
       redirectUrl: basePath,
     });
+    if (config.onDetailInit) {
+      config.onDetailInit();
+    }
     return true;
   }
 
@@ -134,6 +137,9 @@ export function initEntityRoutes(
       apiBasePath: apiBasePath,
       redirectUrl: basePath,
     });
+    if (config.onListInit) {
+      config.onListInit();
+    }
     return true;
   }
 

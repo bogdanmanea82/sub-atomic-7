@@ -4,7 +4,7 @@
 
 import { BaseEntityConfigFactory } from "../../factories/base-entity-config-factory";
 import type { FieldConfig, PermissionConfig, RelationshipConfig } from "../../types";
-import { GAME_DOMAIN_REF_FIELD_ATOM } from "../../universal/atoms";
+import { GAME_DOMAIN_REF_FIELD_ATOM, SORT_ORDER_FIELD_ATOM } from "../../universal/atoms";
 
 export class GameSubdomainConfigFactory extends BaseEntityConfigFactory {
   protected getEntityName(): string {
@@ -33,7 +33,7 @@ export class GameSubdomainConfigFactory extends BaseEntityConfigFactory {
    * so the dropdown appears first in forms — user picks a domain, then names the subdomain.
    */
   protected override getEntitySpecificFields(): readonly FieldConfig[] {
-    return [GAME_DOMAIN_REF_FIELD_ATOM];
+    return [GAME_DOMAIN_REF_FIELD_ATOM, SORT_ORDER_FIELD_ATOM];
   }
 
   protected override getRelationships(): readonly RelationshipConfig[] {

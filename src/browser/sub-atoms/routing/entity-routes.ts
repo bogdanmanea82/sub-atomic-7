@@ -3,7 +3,7 @@
 // Adding a new entity to the browser = adding one entry here.
 
 import type { CascadeDropdownOptions } from "../../atoms/handlers";
-import { attachTierHandlers } from "../../atoms/handlers";
+import { attachCascadeDropdownHandler, attachTierHandlers, attachTabSwitchHandler, attachBindingHandler, attachTierDetailHandler } from "../../atoms/handlers";
 import type { EntityRouteConfig } from "./route-config";
 
 // ── Cascade configs ──────────────────────────────────────────────────────
@@ -38,6 +38,38 @@ const categoryToSubcategory: CascadeDropdownOptions = {
   placeholder: "-- Select Subcategory --",
 };
 
+// ── Filter cascade configs (modifier list page) ─────────────────────────
+
+const filterDomainToSubdomain: CascadeDropdownOptions = {
+  parentSelector: "#filter_game_domain_id",
+  childSelector: "#filter_game_subdomain_id",
+  apiUrl: "/api/game-subdomains",
+  filterParam: "game_domain_id",
+  labelField: "name",
+  valueField: "id",
+  placeholder: "All Subdomains",
+};
+
+const filterSubdomainToCategory: CascadeDropdownOptions = {
+  parentSelector: "#filter_game_subdomain_id",
+  childSelector: "#filter_game_category_id",
+  apiUrl: "/api/game-categories",
+  filterParam: "game_subdomain_id",
+  labelField: "name",
+  valueField: "id",
+  placeholder: "All Categories",
+};
+
+const filterCategoryToSubcategory: CascadeDropdownOptions = {
+  parentSelector: "#filter_game_category_id",
+  childSelector: "#filter_game_subcategory_id",
+  apiUrl: "/api/game-subcategories",
+  filterParam: "game_category_id",
+  labelField: "name",
+  valueField: "id",
+  placeholder: "All Subcategories",
+};
+
 // ── Entity route configs ─────────────────────────────────────────────────
 
 export const ENTITY_ROUTES: readonly EntityRouteConfig[] = [
@@ -57,12 +89,32 @@ export const ENTITY_ROUTES: readonly EntityRouteConfig[] = [
     apiBasePath: "/api/game-categories",
     displayName: "Game Category",
     cascades: [domainToSubdomain],
+    onListInit(): void {
+      const filterForm = document.querySelector<HTMLFormElement>(".filter-bar");
+      if (!filterForm) return;
+      attachCascadeDropdownHandler(filterForm, filterDomainToSubdomain);
+    },
   },
   {
     basePath: "/game-subcategories",
     apiBasePath: "/api/game-subcategories",
     displayName: "Game Subcategory",
     cascades: [domainToSubdomain, subdomainToCategory],
+    onListInit(): void {
+      const filterForm = document.querySelector<HTMLFormElement>(".filter-bar");
+      if (!filterForm) return;
+      attachCascadeDropdownHandler(filterForm, filterDomainToSubdomain);
+      attachCascadeDropdownHandler(filterForm, filterSubdomainToCategory);
+
+      // When domain changes, also reset category filter
+      const domainSelect = filterForm.querySelector<HTMLSelectElement>("#filter_game_domain_id");
+      const categorySelect = filterForm.querySelector<HTMLSelectElement>("#filter_game_category_id");
+      if (domainSelect && categorySelect) {
+        domainSelect.addEventListener("change", () => {
+          categorySelect.innerHTML = '<option value="">All Categories</option>';
+        });
+      }
+    },
     onFormInit(form: HTMLFormElement): void {
       // When domain changes, also reset the category dropdown (depends on subdomain)
       const domainSelect = form.querySelector<HTMLSelectElement>('[name="game_domain_id"]');
@@ -80,6 +132,39 @@ export const ENTITY_ROUTES: readonly EntityRouteConfig[] = [
     apiBasePath: "/api/modifiers",
     displayName: "Modifier",
     cascades: [domainToSubdomain, subdomainToCategory, categoryToSubcategory],
+    onListInit(): void {
+      const filterForm = document.querySelector<HTMLFormElement>(".filter-bar");
+      if (!filterForm) return;
+      attachCascadeDropdownHandler(filterForm, filterDomainToSubdomain);
+      attachCascadeDropdownHandler(filterForm, filterSubdomainToCategory);
+      attachCascadeDropdownHandler(filterForm, filterCategoryToSubcategory);
+
+      // When domain changes, also reset category and subcategory filters
+      const domainSelect = filterForm.querySelector<HTMLSelectElement>("#filter_game_domain_id");
+      const categorySelect = filterForm.querySelector<HTMLSelectElement>("#filter_game_category_id");
+      const subcategorySelect = filterForm.querySelector<HTMLSelectElement>("#filter_game_subcategory_id");
+      if (domainSelect && categorySelect) {
+        domainSelect.addEventListener("change", () => {
+          categorySelect.innerHTML = '<option value="">All Categories</option>';
+          if (subcategorySelect) {
+            subcategorySelect.innerHTML = '<option value="">All Subcategories</option>';
+          }
+        });
+      }
+
+      // When subdomain changes, also reset subcategory filter
+      const subdomainSelect = filterForm.querySelector<HTMLSelectElement>("#filter_game_subdomain_id");
+      if (subdomainSelect && subcategorySelect) {
+        subdomainSelect.addEventListener("change", () => {
+          subcategorySelect.innerHTML = '<option value="">All Subcategories</option>';
+        });
+      }
+    },
+    onDetailInit(): void {
+      attachTabSwitchHandler();
+      attachBindingHandler();
+      attachTierDetailHandler();
+    },
     onFormInit(form: HTMLFormElement): void {
       const domainSelect = form.querySelector<HTMLSelectElement>('[name="game_domain_id"]');
       const subdomainSelect = form.querySelector<HTMLSelectElement>('[name="game_subdomain_id"]');
@@ -108,6 +193,10 @@ export const ENTITY_ROUTES: readonly EntityRouteConfig[] = [
 
       // Attach tier row management handlers
       attachTierHandlers(form);
+
+      // Attach tab switching and binding handler (edit page has tabs too)
+      attachTabSwitchHandler();
+      attachBindingHandler();
     },
   },
 ];

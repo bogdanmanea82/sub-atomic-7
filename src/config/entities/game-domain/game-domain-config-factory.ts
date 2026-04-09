@@ -2,7 +2,8 @@
 // Factory for GameDomain entity configuration
 
 import { BaseEntityConfigFactory } from "../../factories/base-entity-config-factory";
-import type { PermissionConfig } from "../../types";
+import type { FieldConfig, PermissionConfig } from "../../types";
+import { SORT_ORDER_FIELD_ATOM } from "../../universal/atoms";
 
 /**
  * Factory for creating GameDomain entity configuration.
@@ -28,6 +29,10 @@ export class GameDomainConfigFactory extends BaseEntityConfigFactory {
       update: "admin",
       delete: "admin",
     };
+  }
+
+  protected override getEntitySpecificFields(): readonly FieldConfig[] {
+    return [SORT_ORDER_FIELD_ATOM];
   }
 }
 

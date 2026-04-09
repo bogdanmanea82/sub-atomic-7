@@ -14,5 +14,5 @@ export const CREATED_AT_FIELD_ATOM = {
   ...FIELD_MARKERS.system,
   ...DISPLAY_FORMATS.datetime,
   autoSet: "create",
-  showInList: true,
+  showInList: false,
 } as const;

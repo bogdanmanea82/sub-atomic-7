@@ -12,6 +12,7 @@ describe("createEntity (full pipeline)", () => {
       id: "test-uuid",
       name: "Fantasy World",
       description: "A rich fantasy setting",
+      sort_order: 1000,
       is_active: true,
     };
     const query = createEntity(GAME_DOMAIN_CONFIG, input);
@@ -25,6 +26,7 @@ describe("createEntity (full pipeline)", () => {
     const input = {
       id: "my-custom-uuid",
       name: "Test Domain",
+      sort_order: 1000,
       is_active: true,
     };
     const query = createEntity(GAME_DOMAIN_CONFIG, input);
@@ -35,6 +37,7 @@ describe("createEntity (full pipeline)", () => {
     const input = {
       id: "uuid",
       name: "  Trimmed Name  ",
+      sort_order: 1000,
       is_active: true,
     };
     const query = createEntity(GAME_DOMAIN_CONFIG, input);
@@ -46,6 +49,7 @@ describe("createEntity (full pipeline)", () => {
     const input = {
       id: "uuid",
       name: "Test",
+      sort_order: 1000,
       is_active: true,
     };
     const query = createEntity(GAME_DOMAIN_CONFIG, input);
@@ -61,6 +65,7 @@ describe("createEntity (full pipeline)", () => {
     const input = {
       id: "uuid",
       name: "No Description",
+      sort_order: 1000,
       is_active: false,
     };
     const query = createEntity(GAME_DOMAIN_CONFIG, input);
@@ -70,7 +75,7 @@ describe("createEntity (full pipeline)", () => {
   // ── Validation failures (pipeline short-circuits) ──────────────────────
 
   it("throws validation error for missing required name", () => {
-    const input = { id: "uuid", is_active: true };
+    const input = { id: "uuid", sort_order: 1000, is_active: true };
     try {
       createEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -82,7 +87,7 @@ describe("createEntity (full pipeline)", () => {
   });
 
   it("throws validation error for name too short", () => {
-    const input = { id: "uuid", name: "ab", is_active: true };
+    const input = { id: "uuid", name: "ab", sort_order: 1000, is_active: true };
     try {
       createEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -93,7 +98,7 @@ describe("createEntity (full pipeline)", () => {
   });
 
   it("throws validation error for name too long", () => {
-    const input = { id: "uuid", name: "a".repeat(256), is_active: true };
+    const input = { id: "uuid", name: "a".repeat(256), sort_order: 1000, is_active: true };
     try {
       createEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -104,7 +109,7 @@ describe("createEntity (full pipeline)", () => {
   });
 
   it("throws validation error for missing required is_active", () => {
-    const input = { id: "uuid", name: "Valid Name" };
+    const input = { id: "uuid", name: "Valid Name", sort_order: 1000 };
     try {
       createEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -127,12 +132,12 @@ describe("createEntity (full pipeline)", () => {
   // ── Description edge cases ─────────────────────────────────────────────
 
   it("accepts valid input without description", () => {
-    const input = { id: "uuid", name: "Valid", is_active: true };
+    const input = { id: "uuid", name: "Valid", sort_order: 1000, is_active: true };
     expect(() => createEntity(GAME_DOMAIN_CONFIG, input)).not.toThrow();
   });
 
   it("throws for description too short (1-2 chars)", () => {
-    const input = { id: "uuid", name: "Valid", description: "ab", is_active: true };
+    const input = { id: "uuid", name: "Valid", description: "ab", sort_order: 1000, is_active: true };
     try {
       createEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -145,7 +150,7 @@ describe("createEntity (full pipeline)", () => {
   // ── SQL structure verification ─────────────────────────────────────────
 
   it("generates quoted column names in SQL", () => {
-    const input = { id: "uuid", name: "Test", is_active: true };
+    const input = { id: "uuid", name: "Test", sort_order: 1000, is_active: true };
     const query = createEntity(GAME_DOMAIN_CONFIG, input);
     expect(query.sql).toContain('"name"');
     expect(query.sql).toContain('"is_active"');
@@ -154,14 +159,14 @@ describe("createEntity (full pipeline)", () => {
   });
 
   it("uses ? placeholders (not $n — Layer 2 converts later)", () => {
-    const input = { id: "uuid", name: "Test", is_active: true };
+    const input = { id: "uuid", name: "Test", sort_order: 1000, is_active: true };
     const query = createEntity(GAME_DOMAIN_CONFIG, input);
     expect(query.sql).toContain("?");
     expect(query.sql).not.toContain("$1");
   });
 
   it("has matching placeholder count and params count", () => {
-    const input = { id: "uuid", name: "Test", description: "Desc", is_active: true };
+    const input = { id: "uuid", name: "Test", description: "Desc", sort_order: 1000, is_active: true };
     const query = createEntity(GAME_DOMAIN_CONFIG, input);
     const placeholderCount = (query.sql.match(/\?/g) ?? []).length;
     expect(placeholderCount).toBe(query.params.length);

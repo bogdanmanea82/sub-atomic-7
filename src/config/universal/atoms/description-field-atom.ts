@@ -18,4 +18,5 @@ export const DESCRIPTION_FIELD_ATOM = {
   ...STRING_CONSTRAINTS.long,
   ...FIELD_MARKERS.optional,
   ...DISPLAY_FORMATS.textarea,
+  showInList: false,
 } as const;

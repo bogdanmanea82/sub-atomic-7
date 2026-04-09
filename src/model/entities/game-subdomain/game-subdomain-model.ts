@@ -24,6 +24,7 @@ import { buildDeleteQuery } from "../../universal/atoms/build-delete-query";
 export type GameSubdomain = {
   readonly id: string;
   readonly game_domain_id: string;
+  readonly sort_order: number;
   readonly name: string;
   readonly description: string | null;
   readonly is_active: boolean;

@@ -7,7 +7,7 @@ describe("validateEntity (GameDomain)", () => {
   // ── Valid input ─────────────────────────────────────────────────────────
 
   it("validates a complete valid input", () => {
-    const input = { name: "Fantasy World", description: "A fantasy setting", is_active: true };
+    const input = { name: "Fantasy World", description: "A fantasy setting", sort_order: 1000, is_active: true };
     const result = validateEntity(GAME_DOMAIN_CONFIG, input);
     expect(result["name"]).toBe("Fantasy World");
     expect(result["description"]).toBe("A fantasy setting");
@@ -15,51 +15,51 @@ describe("validateEntity (GameDomain)", () => {
   });
 
   it("accepts input with optional description omitted (null)", () => {
-    const input = { name: "Minimal Domain", description: null, is_active: false };
+    const input = { name: "Minimal Domain", description: null, sort_order: 1000, is_active: false };
     const result = validateEntity(GAME_DOMAIN_CONFIG, input);
     expect(result["name"]).toBe("Minimal Domain");
     expect(result["description"]).toBeNull();
   });
 
   it("accepts input with description undefined", () => {
-    const input = { name: "No Description", is_active: true };
+    const input = { name: "No Description", sort_order: 1000, is_active: true };
     const result = validateEntity(GAME_DOMAIN_CONFIG, input);
     expect(result["name"]).toBe("No Description");
     expect(result["description"]).toBeUndefined();
   });
 
   it("normalizes boolean strings from form submissions", () => {
-    const input = { name: "Form Submit", description: null, is_active: "true" };
+    const input = { name: "Form Submit", description: null, sort_order: 1000, is_active: "true" };
     const result = validateEntity(GAME_DOMAIN_CONFIG, input);
     expect(result["is_active"]).toBe(true);
   });
 
   it("accepts name at minimum length (3 characters)", () => {
-    const input = { name: "abc", is_active: true };
+    const input = { name: "abc", sort_order: 1000, is_active: true };
     expect(() => validateEntity(GAME_DOMAIN_CONFIG, input)).not.toThrow();
   });
 
   it("accepts name at maximum length (255 characters)", () => {
-    const input = { name: "a".repeat(255), is_active: true };
+    const input = { name: "a".repeat(255), sort_order: 1000, is_active: true };
     expect(() => validateEntity(GAME_DOMAIN_CONFIG, input)).not.toThrow();
   });
 
   // ── Skips auto-managed fields ──────────────────────────────────────────
 
   it("does not require id (auto-generated UUID)", () => {
-    const input = { name: "No ID Needed", is_active: true };
+    const input = { name: "No ID Needed", sort_order: 1000, is_active: true };
     expect(() => validateEntity(GAME_DOMAIN_CONFIG, input)).not.toThrow();
   });
 
   it("does not require created_at or updated_at (auto-set timestamps)", () => {
-    const input = { name: "No Timestamps", is_active: true };
+    const input = { name: "No Timestamps", sort_order: 1000, is_active: true };
     expect(() => validateEntity(GAME_DOMAIN_CONFIG, input)).not.toThrow();
   });
 
   // ── Missing required fields ─────────────────────────────────────────────
 
   it("throws when name is missing (null)", () => {
-    const input = { name: null, is_active: true };
+    const input = { name: null, sort_order: 1000, is_active: true };
     try {
       validateEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false); // should not reach here
@@ -70,7 +70,7 @@ describe("validateEntity (GameDomain)", () => {
   });
 
   it("throws when name is undefined", () => {
-    const input = { is_active: true };
+    const input = { sort_order: 1000, is_active: true };
     try {
       validateEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -81,7 +81,7 @@ describe("validateEntity (GameDomain)", () => {
   });
 
   it("throws when is_active is missing", () => {
-    const input = { name: "Valid Name" };
+    const input = { name: "Valid Name", sort_order: 1000 };
     try {
       validateEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -107,7 +107,7 @@ describe("validateEntity (GameDomain)", () => {
   });
 
   it("reports errors for both missing and invalid fields", () => {
-    const input = { name: "ab", is_active: null }; // name too short, is_active missing
+    const input = { name: "ab", sort_order: 1000, is_active: null }; // name too short, is_active missing
     try {
       validateEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -121,7 +121,7 @@ describe("validateEntity (GameDomain)", () => {
   // ── String length violations ───────────────────────────────────────────
 
   it("throws when name is too short", () => {
-    const input = { name: "ab", is_active: true };
+    const input = { name: "ab", sort_order: 1000, is_active: true };
     try {
       validateEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -132,7 +132,7 @@ describe("validateEntity (GameDomain)", () => {
   });
 
   it("throws when name is too long", () => {
-    const input = { name: "a".repeat(256), is_active: true };
+    const input = { name: "a".repeat(256), sort_order: 1000, is_active: true };
     try {
       validateEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -143,7 +143,7 @@ describe("validateEntity (GameDomain)", () => {
   });
 
   it("throws when description is too short (under 3)", () => {
-    const input = { name: "Valid", description: "ab", is_active: true };
+    const input = { name: "Valid", description: "ab", sort_order: 1000, is_active: true };
     try {
       validateEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -154,7 +154,7 @@ describe("validateEntity (GameDomain)", () => {
   });
 
   it("throws when description is too long (over 5000)", () => {
-    const input = { name: "Valid", description: "a".repeat(5001), is_active: true };
+    const input = { name: "Valid", description: "a".repeat(5001), sort_order: 1000, is_active: true };
     try {
       validateEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -167,7 +167,7 @@ describe("validateEntity (GameDomain)", () => {
   // ── Boolean validation edge cases ──────────────────────────────────────
 
   it("throws when is_active is an invalid boolean string", () => {
-    const input = { name: "Valid Name", is_active: "yes" };
+    const input = { name: "Valid Name", sort_order: 1000, is_active: "yes" };
     try {
       validateEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -182,7 +182,7 @@ describe("validateEntity (GameDomain)", () => {
 
   it("catches empty string name (browser bypass)", () => {
     // Browser validates minLength=3, but attacker could send empty string
-    const input = { name: "", is_active: true };
+    const input = { name: "", sort_order: 1000, is_active: true };
     try {
       validateEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);
@@ -193,7 +193,7 @@ describe("validateEntity (GameDomain)", () => {
   });
 
   it("catches single character name (browser bypass)", () => {
-    const input = { name: "x", is_active: true };
+    const input = { name: "x", sort_order: 1000, is_active: true };
     try {
       validateEntity(GAME_DOMAIN_CONFIG, input);
       expect(true).toBe(false);

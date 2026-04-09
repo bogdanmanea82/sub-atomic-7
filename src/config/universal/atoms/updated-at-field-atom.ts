@@ -13,5 +13,5 @@ export const UPDATED_AT_FIELD_ATOM = {
   ...FIELD_MARKERS.system,
   ...DISPLAY_FORMATS.datetime,
   autoSet: "update",
-  showInList: true,
+  showInList: false,
 } as const;
