@@ -47,21 +47,7 @@ temp/
 *.sql.backup
 
 # Claude Code (AI assistant configuration)
-CLAUDE.md
-AGENTS.md
 .claude/
-
-# Internal planning and design docs
-SUB-ATOMIC-7.md
-LayersRefactoringPlan.md
-UI-improvements-V1.md
-tracker.md
-README-bck.md
-
-# Third-party editor configs
-.continue/
-.roo/
-opencode.json
 
 # Binary workflow docs
 modifier_workflow.docx
