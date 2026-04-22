@@ -1,5 +1,5 @@
 -- seeds/01-helpers.sql
--- Temporary helper function for inserting a modifier + its single tier in one call.
+-- Temporary helper function for inserting a item_modifier + its single tier in one call.
 -- Dropped by 99-cleanup.sql after seeding completes.
 
 CREATE OR REPLACE FUNCTION seed_insert_mod(
@@ -18,7 +18,7 @@ DECLARE
   v_mod_id UUID;
   v_min_val NUMERIC(12,4);
 BEGIN
-  INSERT INTO modifier (
+  INSERT INTO item_modifier (
     id, game_domain_id, game_subdomain_id, game_category_id, game_subcategory_id,
     code, affix_type, semantic_cat, value_type, calc_method,
     name, is_active, created_at, updated_at
@@ -30,7 +30,7 @@ BEGIN
 
   v_min_val := round((1 + random() * 9)::numeric, 4);
 
-  INSERT INTO modifier_tier (
+  INSERT INTO item_modifier_tier (
     id, modifier_id, tier_index, min_value, max_value,
     level_req, spawn_weight, created_at, updated_at
   ) VALUES (

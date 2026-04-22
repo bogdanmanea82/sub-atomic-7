@@ -2,3 +2,5 @@
 // Barrel file — re-exports all Layer 2 sub-atoms
 
 export { getConnection, executeSelect, executeWrite } from "./database";
+export { parseTiersFromInput, tierInputsFromTiers, insertTiers, fetchTiers, createTierOrchestration } from "./tiers";
+export type { HasTierFields, TierCreateModel, TierSelectModel, TierOrchestrationModel, HasTiers, ReplaceTiersResult, TierMutationResult } from "./tiers";

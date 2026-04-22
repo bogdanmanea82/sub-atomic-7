@@ -2,6 +2,7 @@
 // Layer 4 organism — complete view preparation interface for GameCategory
 
 import { GAME_CATEGORY_CONFIG } from "@config/entities/game-category";
+import { GAME_DOMAIN_REF_FIELD_ATOM, GAME_SUBDOMAIN_REF_FIELD_ATOM } from "@config/universal/atoms";
 import type { ListView, DetailView, FormView, SelectOption, PaginationMeta, ReferenceLookup } from "../../types";
 import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig } from "../../molecules/views";
 
@@ -11,7 +12,7 @@ import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig 
  * List/detail methods accept a referenceLookup to resolve both parent UUIDs to names.
  */
 /** Fields excluded from filtered list view — shown as filter dropdowns instead */
-const LIST_EXCLUDE_FIELDS = new Set(["game_domain_id", "game_subdomain_id"]);
+const LIST_EXCLUDE_FIELDS = new Set<string>([GAME_DOMAIN_REF_FIELD_ATOM, GAME_SUBDOMAIN_REF_FIELD_ATOM].map((f) => f.name));
 
 export const GameCategoryViewService = {
   prepareListView(

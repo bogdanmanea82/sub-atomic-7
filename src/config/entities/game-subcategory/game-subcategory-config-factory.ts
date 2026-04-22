@@ -1,15 +1,16 @@
 // src/config/entities/game-subcategory/game-subcategory-config-factory.ts
 // Factory for GameSubcategory entity configuration.
-// GameSubcategory belongs to GameDomain, GameSubdomain, and GameCategory — three foreign keys.
+// GameSubcategory belongs to GameDomain, GameSubdomain, and GameCategory — three FK parents.
 
 import { BaseEntityConfigFactory } from "../../factories/base-entity-config-factory";
 import type { FieldConfig, PermissionConfig, RelationshipConfig } from "../../types";
 import {
+  ID_FIELD_ATOM,
   GAME_DOMAIN_REF_FIELD_ATOM,
   GAME_SUBDOMAIN_REF_FIELD_ATOM,
   GAME_CATEGORY_REF_FIELD_ATOM,
-  SORT_ORDER_FIELD_ATOM,
 } from "../../universal/atoms";
+import { STANDARD_PERMISSIONS, BASE_ENTITY_FIELDS, AUDIT_FIELDS } from "../../universal/molecules";
 
 export class GameSubcategoryConfigFactory extends BaseEntityConfigFactory {
   protected getEntityName(): string {
@@ -25,20 +26,18 @@ export class GameSubcategoryConfigFactory extends BaseEntityConfigFactory {
   }
 
   protected getPermissions(): PermissionConfig {
-    return {
-      create: "admin",
-      read: "public",
-      update: "admin",
-      delete: "admin",
-    };
+    return STANDARD_PERMISSIONS;
   }
 
-  /**
-   * Three foreign key fields in hierarchy order: domain → subdomain → category.
-   * Each cascading dropdown filters the next.
-   */
-  protected override getEntitySpecificFields(): readonly FieldConfig[] {
-    return [GAME_DOMAIN_REF_FIELD_ATOM, GAME_SUBDOMAIN_REF_FIELD_ATOM, GAME_CATEGORY_REF_FIELD_ATOM, SORT_ORDER_FIELD_ATOM];
+  protected override buildFields(): readonly FieldConfig[] {
+    return [
+      ID_FIELD_ATOM,
+      GAME_DOMAIN_REF_FIELD_ATOM,
+      GAME_SUBDOMAIN_REF_FIELD_ATOM,
+      GAME_CATEGORY_REF_FIELD_ATOM,
+      ...BASE_ENTITY_FIELDS,
+      ...AUDIT_FIELDS,
+    ] as const;
   }
 
   protected override getRelationships(): readonly RelationshipConfig[] {

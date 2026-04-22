@@ -1,14 +1,12 @@
 // src/config/entities/game-domain/game-domain-config-factory.ts
-// Factory for GameDomain entity configuration
+// Factory for GameDomain entity configuration.
+// GameDomain is the top-level organizational unit — no FK parents.
 
 import { BaseEntityConfigFactory } from "../../factories/base-entity-config-factory";
 import type { FieldConfig, PermissionConfig } from "../../types";
-import { SORT_ORDER_FIELD_ATOM } from "../../universal/atoms";
+import { ID_FIELD_ATOM } from "../../universal/atoms";
+import { STANDARD_PERMISSIONS, BASE_ENTITY_FIELDS, AUDIT_FIELDS } from "../../universal/molecules";
 
-/**
- * Factory for creating GameDomain entity configuration.
- * GameDomain is the top-level organizational unit in the RPG CMS.
- */
 export class GameDomainConfigFactory extends BaseEntityConfigFactory {
   protected getEntityName(): string {
     return "GameDomain";
@@ -23,18 +21,16 @@ export class GameDomainConfigFactory extends BaseEntityConfigFactory {
   }
 
   protected getPermissions(): PermissionConfig {
-    return {
-      create: "admin",
-      read: "public",
-      update: "admin",
-      delete: "admin",
-    };
+    return STANDARD_PERMISSIONS;
   }
 
-  protected override getEntitySpecificFields(): readonly FieldConfig[] {
-    return [SORT_ORDER_FIELD_ATOM];
+  protected override buildFields(): readonly FieldConfig[] {
+    return [
+      ID_FIELD_ATOM,
+      ...BASE_ENTITY_FIELDS,
+      ...AUDIT_FIELDS,
+    ] as const;
   }
 }
 
-// Create and export the configuration instance
 export const GAME_DOMAIN_CONFIG = new GameDomainConfigFactory().create();

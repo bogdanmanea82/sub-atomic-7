@@ -21,29 +21,15 @@ describe("GAME_DOMAIN_CONFIG", () => {
 
   // ── Field count ────────────────────────────────────────────────────────
 
-  it("has exactly 7 fields (entity-specific + standard + audit)", () => {
-    expect(GAME_DOMAIN_CONFIG.fields).toHaveLength(7);
+  it("has exactly 6 fields (id + standard entity fields + audit)", () => {
+    expect(GAME_DOMAIN_CONFIG.fields).toHaveLength(6);
   });
 
   // ── Field order and names ──────────────────────────────────────────────
 
-  it("has fields in correct order: id, sort_order, name, description, is_active, created_at, updated_at", () => {
+  it("has fields in correct order: id, name, description, is_active, created_at, updated_at", () => {
     const names = GAME_DOMAIN_CONFIG.fields.map((f) => f.name);
-    expect(names).toEqual(["id", "sort_order", "name", "description", "is_active", "created_at", "updated_at"]);
-  });
-
-  // ── Sort Order field ──────────────────────────────────────────────────
-
-  it("sort_order is a required integer with default 1000", () => {
-    const sortOrder = GAME_DOMAIN_CONFIG.fields.find((f) => f.name === "sort_order");
-    expect(sortOrder).toBeDefined();
-    expect(sortOrder!.type).toBe("integer");
-    expect(sortOrder!.required).toBe(true);
-    if (sortOrder!.type === "integer") {
-      expect(sortOrder!.defaultValue).toBe(1000);
-      expect(sortOrder!.min).toBe(0);
-      expect(sortOrder!.max).toBe(99999);
-    }
+    expect(names).toEqual(["id", "name", "description", "is_active", "created_at", "updated_at"]);
   });
 
   // ── ID field ───────────────────────────────────────────────────────────

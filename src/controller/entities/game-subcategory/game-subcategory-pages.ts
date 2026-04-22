@@ -19,7 +19,7 @@ import type { SubcategoryFilterOptions } from "@view/entities/game-subcategory";
 import { errorHandlerPlugin } from "../../atoms/middleware";
 import { extractPagination } from "../../sub-atoms/request";
 import { setHtml } from "../../sub-atoms/response";
-import { fetchOptions, buildReferenceLookup } from "../../sub-atoms/options";
+import { fetchOptions, buildReferenceLookup, buildCascadingOptions } from "../../sub-atoms/options";
 import { buildPaginationMeta } from "@view-service/sub-atoms/pagination";
 
 const BASE_PATH = "/game-subcategories";
@@ -43,11 +43,9 @@ export const GameSubcategoryPages = new Elysia()
     if (filterCategoryId) conditions["game_category_id"] = filterCategoryId;
     const hasConditions = Object.keys(conditions).length > 0;
 
-    const [result, domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
+    const [result, { domainOptions, subdomainOptions, categoryOptions }] = await Promise.all([
       GameSubcategoryService.findManyPaginated(pagination, hasConditions ? conditions : undefined),
-      fetchOptions(GameDomainService),
-      filterDomainId ? fetchOptions(GameSubdomainService, { game_domain_id: filterDomainId }) : Promise.resolve([]),
-      filterSubdomainId ? fetchOptions(GameCategoryService, { game_subdomain_id: filterSubdomainId }) : Promise.resolve([]),
+      buildCascadingOptions({ domainId: filterDomainId, subdomainId: filterSubdomainId }),
     ]);
     if (!result.success) return `<p>Error loading records.</p>`;
 
@@ -68,9 +66,9 @@ export const GameSubcategoryPages = new Elysia()
   // ── Create form ────────────────────────────────────────────────────────
   .get(`${BASE_PATH}/new`, async ({ set }) => {
     setHtml(set.headers);
-    const domainOptions = await fetchOptions(GameDomainService);
+    const { domainOptions, subdomainOptions, categoryOptions } = await buildCascadingOptions({});
     const view = GameSubcategoryViewService.prepareCreateForm(
-      { game_domain_id: domainOptions, game_subdomain_id: [], game_category_id: [] },
+      { game_domain_id: domainOptions, game_subdomain_id: subdomainOptions, game_category_id: categoryOptions },
     );
     return createPage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
@@ -111,11 +109,7 @@ export const GameSubcategoryPages = new Elysia()
     const entity = result.data as unknown as Record<string, unknown>;
     const domainId = entity["game_domain_id"] as string;
     const subdomainId = entity["game_subdomain_id"] as string;
-    const [domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
-      fetchOptions(GameDomainService),
-      fetchOptions(GameSubdomainService, { game_domain_id: domainId }),
-      fetchOptions(GameCategoryService, { game_subdomain_id: subdomainId }),
-    ]);
+    const { domainOptions, subdomainOptions, categoryOptions } = await buildCascadingOptions({ domainId, subdomainId });
     const view = GameSubcategoryViewService.prepareEditForm(
       { game_domain_id: domainOptions, game_subdomain_id: subdomainOptions, game_category_id: categoryOptions },
       entity,
@@ -134,11 +128,7 @@ export const GameSubcategoryPages = new Elysia()
     const entity = result.data as unknown as Record<string, unknown>;
     const domainId = entity["game_domain_id"] as string;
     const subdomainId = entity["game_subdomain_id"] as string;
-    const [domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
-      fetchOptions(GameDomainService),
-      fetchOptions(GameSubdomainService, { game_domain_id: domainId }),
-      fetchOptions(GameCategoryService, { game_subdomain_id: subdomainId }),
-    ]);
+    const { domainOptions, subdomainOptions, categoryOptions } = await buildCascadingOptions({ domainId, subdomainId });
     const view = GameSubcategoryViewService.prepareDuplicateForm(
       { game_domain_id: domainOptions, game_subdomain_id: subdomainOptions, game_category_id: categoryOptions },
       entity,
@@ -159,11 +149,7 @@ export const GameSubcategoryPages = new Elysia()
     const errors = result.stage === "validation" ? result.errors : undefined;
     const domainId = input["game_domain_id"] as string | undefined;
     const subdomainId = input["game_subdomain_id"] as string | undefined;
-    const [domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
-      fetchOptions(GameDomainService),
-      domainId ? fetchOptions(GameSubdomainService, { game_domain_id: domainId }) : Promise.resolve([]),
-      subdomainId ? fetchOptions(GameCategoryService, { game_subdomain_id: subdomainId }) : Promise.resolve([]),
-    ]);
+    const { domainOptions, subdomainOptions, categoryOptions } = await buildCascadingOptions({ domainId, subdomainId });
     const view = GameSubcategoryViewService.prepareCreateForm(
       { game_domain_id: domainOptions, game_subdomain_id: subdomainOptions, game_category_id: categoryOptions },
       input, errors,
@@ -185,11 +171,7 @@ export const GameSubcategoryPages = new Elysia()
     const errors = result.stage === "validation" ? result.errors : undefined;
     const domainId = input["game_domain_id"] as string | undefined;
     const subdomainId = input["game_subdomain_id"] as string | undefined;
-    const [domainOptions, subdomainOptions, categoryOptions] = await Promise.all([
-      fetchOptions(GameDomainService),
-      domainId ? fetchOptions(GameSubdomainService, { game_domain_id: domainId }) : Promise.resolve([]),
-      subdomainId ? fetchOptions(GameCategoryService, { game_subdomain_id: subdomainId }) : Promise.resolve([]),
-    ]);
+    const { domainOptions, subdomainOptions, categoryOptions } = await buildCascadingOptions({ domainId, subdomainId });
     const view = GameSubcategoryViewService.prepareEditForm(
       { game_domain_id: domainOptions, game_subdomain_id: subdomainOptions, game_category_id: categoryOptions },
       input, errors,

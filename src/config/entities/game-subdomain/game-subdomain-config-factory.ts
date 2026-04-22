@@ -1,10 +1,14 @@
 // src/config/entities/game-subdomain/game-subdomain-config-factory.ts
 // Factory for GameSubdomain entity configuration.
-// GameSubdomain belongs to a GameDomain — the foreign key field is entity-specific.
+// GameSubdomain belongs to a GameDomain — one FK parent.
 
 import { BaseEntityConfigFactory } from "../../factories/base-entity-config-factory";
 import type { FieldConfig, PermissionConfig, RelationshipConfig } from "../../types";
-import { GAME_DOMAIN_REF_FIELD_ATOM, SORT_ORDER_FIELD_ATOM } from "../../universal/atoms";
+import {
+  ID_FIELD_ATOM,
+  GAME_DOMAIN_REF_FIELD_ATOM,
+} from "../../universal/atoms";
+import { STANDARD_PERMISSIONS, BASE_ENTITY_FIELDS, AUDIT_FIELDS } from "../../universal/molecules";
 
 export class GameSubdomainConfigFactory extends BaseEntityConfigFactory {
   protected getEntityName(): string {
@@ -20,20 +24,16 @@ export class GameSubdomainConfigFactory extends BaseEntityConfigFactory {
   }
 
   protected getPermissions(): PermissionConfig {
-    return {
-      create: "admin",
-      read: "public",
-      update: "admin",
-      delete: "admin",
-    };
+    return STANDARD_PERMISSIONS;
   }
 
-  /**
-   * The foreign key field is inserted before the standard fields (name, description, etc.)
-   * so the dropdown appears first in forms — user picks a domain, then names the subdomain.
-   */
-  protected override getEntitySpecificFields(): readonly FieldConfig[] {
-    return [GAME_DOMAIN_REF_FIELD_ATOM, SORT_ORDER_FIELD_ATOM];
+  protected override buildFields(): readonly FieldConfig[] {
+    return [
+      ID_FIELD_ATOM,
+      GAME_DOMAIN_REF_FIELD_ATOM,
+      ...BASE_ENTITY_FIELDS,
+      ...AUDIT_FIELDS,
+    ] as const;
   }
 
   protected override getRelationships(): readonly RelationshipConfig[] {

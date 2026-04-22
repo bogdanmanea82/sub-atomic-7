@@ -1,6 +1,6 @@
 // src/config/universal/molecules/index.ts
-// Barrel file - re-exports all molecules
+// Barrel file - re-exports all universal molecules
 
-export { STANDARD_ENTITY_FIELDS } from "./standard-entity-fields";
-
+export { STANDARD_PERMISSIONS } from "./standard-permissions";
+export { BASE_ENTITY_FIELDS } from "./base-entity-fields";
 export { AUDIT_FIELDS } from "./audit-fields";

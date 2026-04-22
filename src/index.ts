@@ -4,13 +4,13 @@ import {
   GameSubdomainController,
   GameCategoryController,
   GameSubcategoryController,
-  ModifierController,
+  ItemModifierController,
 } from "@controller/entities";
 import { GameDomainService } from "@model-service/entities/game-domain";
 import { GameSubdomainService } from "@model-service/entities/game-subdomain";
 import { GameCategoryService } from "@model-service/entities/game-category";
 import { GameSubcategoryService } from "@model-service/entities/game-subcategory";
-import { ModifierService } from "@model-service/entities/modifier";
+import { ItemModifierService } from "@model-service/entities/item-modifier";
 import { homePage } from "@view/organisms/pages";
 import type { EntityCardData } from "@view/organisms/pages";
 
@@ -19,7 +19,7 @@ const app = new Elysia()
   .use(GameSubdomainController)
   .use(GameCategoryController)
   .use(GameSubcategoryController)
-  .use(ModifierController)
+  .use(ItemModifierController)
   // Serve the browser bundle as a static asset
   .get("/public/main.js", () => Bun.file("public/main.js"))
   // Home page — HTML with live entity counts
@@ -32,7 +32,7 @@ const app = new Elysia()
       GameSubdomainService.findMany(),
       GameCategoryService.findMany(),
       GameSubcategoryService.findMany(),
-      ModifierService.findMany(),
+      ItemModifierService.findMany(),
     ]);
     const gameDomainCount = gameDomainResult.success
       ? (gameDomainResult.data as unknown[]).length

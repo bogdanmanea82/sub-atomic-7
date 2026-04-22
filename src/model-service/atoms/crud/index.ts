@@ -6,3 +6,4 @@ export { selectById } from "./select-by-id";
 export { selectMany } from "./select-many";
 export { updateRecord } from "./update-record";
 export { deleteRecord } from "./delete-record";
+export { verifyEntityExists } from "./verify-entity-exists";

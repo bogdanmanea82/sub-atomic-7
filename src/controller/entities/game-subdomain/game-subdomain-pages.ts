@@ -17,7 +17,7 @@ import type { SubdomainFilterOptions } from "@view/entities/game-subdomain";
 import { errorHandlerPlugin } from "../../atoms/middleware";
 import { extractPagination } from "../../sub-atoms/request";
 import { setHtml } from "../../sub-atoms/response";
-import { fetchOptions, buildReferenceLookup } from "../../sub-atoms/options";
+import { fetchOptions, buildReferenceLookup, buildCascadingOptions } from "../../sub-atoms/options";
 import { buildPaginationMeta } from "@view-service/sub-atoms/pagination";
 
 const BASE_PATH = "/game-subdomains";
@@ -37,9 +37,9 @@ export const GameSubdomainPages = new Elysia()
     if (filterDomainId) conditions["game_domain_id"] = filterDomainId;
     const hasConditions = Object.keys(conditions).length > 0;
 
-    const [result, domainOptions] = await Promise.all([
+    const [result, { domainOptions }] = await Promise.all([
       GameSubdomainService.findManyPaginated(pagination, hasConditions ? conditions : undefined),
-      fetchOptions(GameDomainService),
+      buildCascadingOptions({}),
     ]);
     if (!result.success) return `<p>Error loading records.</p>`;
 
@@ -56,7 +56,7 @@ export const GameSubdomainPages = new Elysia()
   // ── Create form (before /:id) ────────────────────────────────────────────
   .get(`${BASE_PATH}/new`, async ({ set }) => {
     setHtml(set.headers);
-    const domainOptions = await fetchOptions(GameDomainService);
+    const { domainOptions } = await buildCascadingOptions({});
     const view = GameSubdomainViewService.prepareCreateForm({ game_domain_id: domainOptions });
     return createPage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
@@ -88,7 +88,7 @@ export const GameSubdomainPages = new Elysia()
       set.status = 404;
       return `<p>Record not found.</p>`;
     }
-    const domainOptions = await fetchOptions(GameDomainService);
+    const { domainOptions } = await buildCascadingOptions({});
     const view = GameSubdomainViewService.prepareEditForm(
       { game_domain_id: domainOptions },
       result.data as unknown as Record<string, unknown>,
@@ -104,7 +104,7 @@ export const GameSubdomainPages = new Elysia()
       set.status = 404;
       return `<p>Record not found.</p>`;
     }
-    const domainOptions = await fetchOptions(GameDomainService);
+    const { domainOptions } = await buildCascadingOptions({});
     const view = GameSubdomainViewService.prepareDuplicateForm(
       { game_domain_id: domainOptions },
       result.data as unknown as Record<string, unknown>,
@@ -123,7 +123,7 @@ export const GameSubdomainPages = new Elysia()
     setHtml(set.headers);
     set.status = 422;
     const errors = result.stage === "validation" ? result.errors : undefined;
-    const domainOptions = await fetchOptions(GameDomainService);
+    const { domainOptions } = await buildCascadingOptions({});
     const view = GameSubdomainViewService.prepareCreateForm({ game_domain_id: domainOptions }, input, errors);
     return createPage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
@@ -140,7 +140,7 @@ export const GameSubdomainPages = new Elysia()
     setHtml(set.headers);
     set.status = 422;
     const errors = result.stage === "validation" ? result.errors : undefined;
-    const domainOptions = await fetchOptions(GameDomainService);
+    const { domainOptions } = await buildCascadingOptions({});
     const view = GameSubdomainViewService.prepareEditForm({ game_domain_id: domainOptions }, input, errors);
     return editPage(view, id, BASE_PATH, FIELD_CONFIG_JSON);
   })

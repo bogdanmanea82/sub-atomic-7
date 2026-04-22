@@ -35,4 +35,11 @@ export interface EntityConfig {
   readonly fields: readonly FieldConfig[];
   readonly permissions: PermissionConfig;
   readonly relationships?: readonly RelationshipConfig[];
+  /**
+   * Form field names that are service-layer concerns and must be stripped
+   * before a DB write. Examples: "tiers_json", "status_action", "status_reason".
+   * Consumed by updateEntityWorkflow (automatic strip) and any service that
+   * builds its own update query (reads and strips manually).
+   */
+  readonly nonColumnKeys?: readonly string[];
 }

@@ -23,7 +23,6 @@
    */
   export type GameDomain = {
     readonly id: string;
-    readonly sort_order: number;
     readonly name: string;
     readonly description: string | null;
     readonly is_active: boolean;

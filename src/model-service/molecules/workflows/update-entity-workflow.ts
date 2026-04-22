@@ -42,17 +42,28 @@ export type UpdateWorkflowResult<TEntity> =
 
 /**
  * Updates an entity by ID, then fetches and returns the updated record.
+ *
+ * @param nonColumnKeys  Optional list of form-only keys to strip before the
+ *                       update query (e.g. status_action, tiers_json).
+ *                       Populated from EntityConfig.nonColumnKeys by callers.
  */
 export async function updateEntityWorkflow<TEntity>(
   db: SQL,
   model: UpdateEntityModel<TEntity>,
   id: string,
   data: Record<string, unknown>,
+  nonColumnKeys?: readonly string[],
 ): Promise<UpdateWorkflowResult<TEntity>> {
+  // Strip virtual form fields that are not DB columns
+  const cleanData: Record<string, unknown> =
+    nonColumnKeys?.length
+      ? Object.fromEntries(Object.entries(data).filter(([k]) => !nonColumnKeys.includes(k)))
+      : data;
+
   // Build and execute the UPDATE query
   let query: PreparedQuery;
   try {
-    query = model.prepareUpdate(data, { id });
+    query = model.prepareUpdate(cleanData, { id });
   } catch (error) {
     const err = error as Error & { errors?: Record<string, string> };
     return {

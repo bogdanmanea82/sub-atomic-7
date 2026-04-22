@@ -25,7 +25,6 @@ export type GameSubcategory = {
   readonly game_domain_id: string;
   readonly game_subdomain_id: string;
   readonly game_category_id: string;
-  readonly sort_order: number;
   readonly name: string;
   readonly description: string | null;
   readonly is_active: boolean;
