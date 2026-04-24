@@ -8,13 +8,7 @@
 //
 // Returning all five lets each caller destructure only what it needs.
 
-export type BindingOverrideDisplay = {
-  readonly weightOverride: string;
-  readonly minTier: string;
-  readonly maxTier: string;
-  readonly tierRange: string;
-  readonly levelReqOverride: string;
-};
+import type { BindingOverrideDisplay } from "../../types/binding-view-models";
 
 export function formatBindingOverrides(b: Record<string, unknown>): BindingOverrideDisplay {
   const minTierRaw = b["min_tier_index"];

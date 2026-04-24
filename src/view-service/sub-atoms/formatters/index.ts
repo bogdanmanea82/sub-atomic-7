@@ -5,4 +5,5 @@ export { formatBoolean, formatBooleanYesNo } from "./format-boolean";
 export { formatText, formatTextTruncated } from "./format-text";
 export { formatStatusClass } from "./format-status";
 export { formatInputType } from "./format-input-type";
-export { formatBindingOverrides, type BindingOverrideDisplay } from "./format-binding-overrides";
+export { formatBindingOverrides } from "./format-binding-overrides";
+export type { BindingOverrideDisplay } from "../../types/binding-view-models";

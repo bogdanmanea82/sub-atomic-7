@@ -19,6 +19,7 @@ export type {
 } from "./tier-view-models";
 
 export type {
+  BindingOverrideDisplay,
   BindingDetailRow,
 } from "./binding-view-models";
 
