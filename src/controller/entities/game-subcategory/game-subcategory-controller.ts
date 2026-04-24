@@ -1,7 +1,7 @@
 // src/controller/entities/game-subcategory/game-subcategory-controller.ts
 // Layer 3 organism — mounts both JSON API routes and HTML page routes for GameSubcategory
 
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { GameSubcategoryService } from "@model-service/entities/game-subcategory";
 import { GAME_SUBCATEGORY_CONFIG } from "@config/entities/game-subcategory";
 import {
@@ -12,7 +12,16 @@ import {
 } from "../../atoms/middleware";
 import { makeCheckNameHandler } from "../../atoms/handlers";
 import { createCrudRoutes } from "../../molecules/crud-routes";
+import { deriveBodySchema, paginationQuerySchema } from "../../sub-atoms/schema";
 import { GameSubcategoryPages } from "./game-subcategory-pages";
+
+const TAGS = ["Game Subcategories"];
+const bodySchema = deriveBodySchema(GAME_SUBCATEGORY_CONFIG.fields);
+const checkNameQuerySchema = t.Object({
+  name: t.String(),
+  gameCategoryId: t.Optional(t.String()),
+  excludeId: t.Optional(t.String()),
+});
 
 const GameSubcategoryApi = new Elysia()
   .use(errorHandlerPlugin)
@@ -21,8 +30,16 @@ const GameSubcategoryApi = new Elysia()
   .use(validateRequestPlugin)
   .get("/api/game-subcategories/check-name", makeCheckNameHandler(
     GameSubcategoryService, "gameCategoryId", "game_category_id",
-  ))
-  .use(createCrudRoutes("/api/game-subcategories", GameSubcategoryService));
+  ), {
+    query: checkNameQuerySchema,
+    detail: { tags: TAGS },
+  })
+  .use(createCrudRoutes("/api/game-subcategories", GameSubcategoryService, {
+    createSchema: bodySchema,
+    updateSchema: deriveBodySchema(GAME_SUBCATEGORY_CONFIG.fields, "update"),
+    querySchema: paginationQuerySchema,
+    tags: TAGS,
+  }));
 
 export const GameSubcategoryController = new Elysia()
   .use(GameSubcategoryApi)

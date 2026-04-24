@@ -1,7 +1,7 @@
 // src/controller/entities/game-domain/game-domain-controller.ts
 // Layer 3 organism — mounts both JSON API routes and HTML page routes for GameDomain
 
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { GameDomainService } from "@model-service/entities/game-domain";
 import { GAME_DOMAIN_CONFIG } from "@config/entities/game-domain";
 import {
@@ -12,15 +12,31 @@ import {
 } from "../../atoms/middleware";
 import { makeCheckNameHandler } from "../../atoms/handlers";
 import { createCrudRoutes } from "../../molecules/crud-routes";
+import { deriveBodySchema, paginationQuerySchema } from "../../sub-atoms/schema";
 import { GameDomainPages } from "./game-domain-pages";
+
+const TAGS = ["Game Domains"];
+const bodySchema = deriveBodySchema(GAME_DOMAIN_CONFIG.fields);
+const checkNameQuerySchema = t.Object({
+  name: t.String(),
+  excludeId: t.Optional(t.String()),
+});
 
 const GameDomainApi = new Elysia()
   .use(errorHandlerPlugin)
   .use(authenticatePlugin)
   .use(makeAuthorizeMiddleware(GAME_DOMAIN_CONFIG.permissions))
   .use(validateRequestPlugin)
-  .get("/api/game-domains/check-name", makeCheckNameHandler(GameDomainService))
-  .use(createCrudRoutes("/api/game-domains", GameDomainService));
+  .get("/api/game-domains/check-name", makeCheckNameHandler(GameDomainService), {
+    query: checkNameQuerySchema,
+    detail: { tags: TAGS },
+  })
+  .use(createCrudRoutes("/api/game-domains", GameDomainService, {
+    createSchema: bodySchema,
+    updateSchema: deriveBodySchema(GAME_DOMAIN_CONFIG.fields, "update"),
+    querySchema: paginationQuerySchema,
+    tags: TAGS,
+  }));
 
 /**
  * Complete GameDomain controller — mounts API and browser-facing page routes.
