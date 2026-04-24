@@ -26,10 +26,20 @@ export const INTEGER_CONSTRAINTS_PERCENTAGE = {
 } as const;
 
 /**
+ * Full signed integer range — for fields where negative values are valid
+ * (e.g. stat value_min for resistances, modifier value bounds for debuffs).
+ */
+export const INTEGER_CONSTRAINTS_SIGNED = {
+  min: -2147483648,
+  max: 2147483647,
+} as const;
+
+/**
  * Grouped export for convenient importing.
  */
 export const INTEGER_CONSTRAINTS = {
   standard: INTEGER_CONSTRAINTS_STANDARD,
   positive: INTEGER_CONSTRAINTS_POSITIVE,
   percentage: INTEGER_CONSTRAINTS_PERCENTAGE,
+  signed: INTEGER_CONSTRAINTS_SIGNED,
 } as const;
