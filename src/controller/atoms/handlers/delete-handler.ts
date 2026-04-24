@@ -1,7 +1,6 @@
 // src/controller/atoms/handlers/delete-handler.ts
 // Factory — returns a DELETE /:id handler bound to the given service
 
-import type { Context } from "elysia";
 import type { EntityService } from "../../sub-atoms/types";
 import { extractId } from "../../sub-atoms/request";
 import { formatSuccess, formatError } from "../../sub-atoms/response";
@@ -11,8 +10,8 @@ import { formatSuccess, formatError } from "../../sub-atoms/response";
  * Returns 204 No Content on success (null data — record no longer exists).
  */
 export function makeDeleteHandler(service: EntityService<unknown>) {
-  return async ({ params, set }: Context) => {
-    const id = extractId(params as Record<string, string>);
+  return async ({ params, set }: { params: Record<string, string>; set: { status?: number | string } }) => {
+    const id = extractId(params);
     const result = await service.delete(id);
 
     if (result.success) {

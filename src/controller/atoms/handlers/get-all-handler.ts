@@ -1,7 +1,6 @@
 // src/controller/atoms/handlers/get-all-handler.ts
 // Factory — returns a GET / handler bound to the given service
 
-import type { Context } from "elysia";
 import type { EntityService } from "../../sub-atoms/types";
 import { extractQueryConditions } from "../../sub-atoms/request";
 import { formatPaginated, formatError } from "../../sub-atoms/response";
@@ -10,8 +9,8 @@ import { formatPaginated, formatError } from "../../sub-atoms/response";
  * Returns a handler that fetches multiple entities with optional query filters.
  */
 export function makeGetAllHandler<TEntity>(service: EntityService<TEntity>) {
-  return async ({ query, set }: Context) => {
-    const conditions = extractQueryConditions(query as Record<string, string>);
+  return async ({ query, set }: { query: Record<string, string>; set: { status?: number | string } }) => {
+    const conditions = extractQueryConditions(query);
     const result = await service.findMany(conditions);
 
     if (result.success) {

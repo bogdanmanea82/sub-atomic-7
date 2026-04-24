@@ -1,7 +1,6 @@
 // src/controller/atoms/handlers/create-handler.ts
 // Factory — returns a POST handler bound to the given service
 
-import type { Context } from "elysia";
 import type { EntityService } from "../../sub-atoms/types";
 import { parseBody } from "../../sub-atoms/request";
 import { formatSuccess, formatError } from "../../sub-atoms/response";
@@ -11,7 +10,7 @@ import { formatSuccess, formatError } from "../../sub-atoms/response";
  * Pass any Layer 2 service that satisfies EntityService<TEntity>.
  */
 export function makeCreateHandler<TEntity>(service: EntityService<TEntity>) {
-  return async ({ body, set }: Context) => {
+  return async ({ body, set }: { body: unknown; set: { status?: number | string } }) => {
     const input = parseBody(body);
     const result = await service.create(input);
 

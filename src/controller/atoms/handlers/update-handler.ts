@@ -1,7 +1,6 @@
 // src/controller/atoms/handlers/update-handler.ts
 // Factory — returns a PUT /:id handler bound to the given service
 
-import type { Context } from "elysia";
 import type { EntityService } from "../../sub-atoms/types";
 import { extractId, parseBody } from "../../sub-atoms/request";
 import { formatSuccess, formatError } from "../../sub-atoms/response";
@@ -10,7 +9,7 @@ import { formatSuccess, formatError } from "../../sub-atoms/response";
  * Returns a handler that updates an entity by ID and returns the updated record.
  */
 export function makeUpdateHandler<TEntity>(service: EntityService<TEntity>) {
-  return async ({ params, body, set }: Context) => {
+  return async ({ params, body, set }: { params: Record<string, string>; body: unknown; set: { status?: number | string } }) => {
     const id = extractId(params as Record<string, string>);
     const data = parseBody(body);
     const result = await service.update(id, data);
