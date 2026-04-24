@@ -95,4 +95,15 @@ export const GameSubcategoryService = {
     const db = getConnection();
     return deleteEntityWorkflow(db, GameSubcategoryModel, id);
   },
+
+  async checkNameAvailable(
+    name: string,
+    scope?: Record<string, unknown>,
+    excludeId?: string,
+  ): Promise<{ available: boolean }> {
+    if (name.trim() === "") return { available: false };
+    const db = getConnection();
+    const check = await checkNameUniqueness(db, GameSubcategoryModel, name, "", scope, excludeId);
+    return { available: check.available };
+  },
 };
