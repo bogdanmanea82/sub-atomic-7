@@ -10,25 +10,27 @@ import {
   makeAuthorizeMiddleware,
   validateRequestPlugin,
 } from "../../atoms/middleware";
-import { makeCheckNameHandler } from "../../atoms/handlers";
 import { createCrudRoutes } from "../../molecules/crud-routes";
 import { deriveBodySchema, paginationQuerySchema } from "../../sub-atoms/schema";
 import { GameDomainPages } from "./game-domain-pages";
 
 const TAGS = ["Game Domains"];
 const bodySchema = deriveBodySchema(GAME_DOMAIN_CONFIG.fields);
-const checkNameQuerySchema = t.Object({
-  name: t.String(),
-  excludeId: t.Optional(t.String()),
-});
 
 const GameDomainApi = new Elysia()
   .use(errorHandlerPlugin)
   .use(authenticatePlugin)
   .use(makeAuthorizeMiddleware(GAME_DOMAIN_CONFIG.permissions))
   .use(validateRequestPlugin)
-  .get("/api/game-domains/check-name", makeCheckNameHandler(GameDomainService), {
-    query: checkNameQuerySchema,
+  .get("/api/game-domains/check-name", async ({ query }) => {
+    const q = query as Record<string, string>;
+    return GameDomainService.checkNameAvailable(
+      q["name"] ?? "",
+      undefined,
+      q["excludeId"] || undefined,
+    );
+  }, {
+    query: t.Object({ name: t.String(), excludeId: t.Optional(t.String()) }),
     detail: { tags: TAGS },
   })
   .use(createCrudRoutes("/api/game-domains", GameDomainService, {

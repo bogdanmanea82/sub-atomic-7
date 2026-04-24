@@ -10,28 +10,32 @@ import {
   makeAuthorizeMiddleware,
   validateRequestPlugin,
 } from "../../atoms/middleware";
-import { makeCheckNameHandler } from "../../atoms/handlers";
 import { createCrudRoutes } from "../../molecules/crud-routes";
 import { deriveBodySchema, paginationQuerySchema } from "../../sub-atoms/schema";
 import { GameCategoryPages } from "./game-category-pages";
 
 const TAGS = ["Game Categories"];
 const bodySchema = deriveBodySchema(GAME_CATEGORY_CONFIG.fields);
-const checkNameQuerySchema = t.Object({
-  name: t.String(),
-  gameSubdomainId: t.Optional(t.String()),
-  excludeId: t.Optional(t.String()),
-});
 
 const GameCategoryApi = new Elysia()
   .use(errorHandlerPlugin)
   .use(authenticatePlugin)
   .use(makeAuthorizeMiddleware(GAME_CATEGORY_CONFIG.permissions))
   .use(validateRequestPlugin)
-  .get("/api/game-categories/check-name", makeCheckNameHandler(
-    GameCategoryService, "gameSubdomainId", "game_subdomain_id",
-  ), {
-    query: checkNameQuerySchema,
+  .get("/api/game-categories/check-name", async ({ query }) => {
+    const q = query as Record<string, string>;
+    const scopeId = q["gameSubdomainId"] ?? "";
+    return GameCategoryService.checkNameAvailable(
+      q["name"] ?? "",
+      scopeId ? { game_subdomain_id: scopeId } : undefined,
+      q["excludeId"] || undefined,
+    );
+  }, {
+    query: t.Object({
+      name: t.String(),
+      gameSubdomainId: t.Optional(t.String()),
+      excludeId: t.Optional(t.String()),
+    }),
     detail: { tags: TAGS },
   })
   .use(createCrudRoutes("/api/game-categories", GameCategoryService, {
