@@ -299,6 +299,7 @@ const _core = {
 const _tierOrchestration = createTierOrchestration<HasTiers<ItemModifierWithTiers>>(
   ItemModifierTierModel,
   (id) => _core.findById(id),
+  "modifier_id",
 );
 
 // Merge core + tier orchestration into the public export.
