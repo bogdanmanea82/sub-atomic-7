@@ -22,3 +22,5 @@ export { GAME_CATEGORY_REF_FIELD_ATOM } from "./game-category-ref-field-atom";
 export { GAME_SUBCATEGORY_REF_FIELD_ATOM } from "./game-subcategory-ref-field-atom";
 
 export { SORT_ORDER_FIELD_ATOM } from "./sort-order-field-atom";
+
+export { MACHINE_NAME_FIELD_ATOM } from "./machine-name-field-atom";
