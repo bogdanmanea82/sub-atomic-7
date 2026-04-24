@@ -52,3 +52,18 @@ export {
   STAT_DATA_TYPES,
 } from "./stat-data-types";
 export type { StatDataType } from "./stat-data-types";
+
+export {
+  COMBINATION_TYPE_FLAT,
+  COMBINATION_TYPE_INCREASED,
+  COMBINATION_TYPE_MORE,
+  COMBINATION_TYPES,
+} from "./combination-types";
+export type { CombinationType } from "./combination-types";
+
+export {
+  ROLL_SHAPE_SCALAR,
+  ROLL_SHAPE_RANGE,
+  ROLL_SHAPES,
+} from "./roll-shapes";
+export type { RollShape } from "./roll-shapes";
