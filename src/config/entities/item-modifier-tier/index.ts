@@ -1,1 +1,1 @@
-export { ITEM_MODIFIER_TIER_CONFIG, ItemModifierTierConfigFactory } from "./item-modifier-tier-config-factory";
+export { ITEM_MODIFIER_TIER_CONFIG, ModifierTierConfigFactory } from "./item-modifier-tier-config-factory";

@@ -11,3 +11,4 @@ export { MODIFIER_STATUS_FIELDS } from "./status-fields";
 export { MODIFIER_ARCHIVE_FIELDS } from "./archive-fields";
 export { MODIFIER_CODE_FIELD_ATOM } from "./code-field";
 export { MODIFIER_TIERS_FIELDS, MODIFIER_TIER_FORM_META } from "./tiers-fields";
+export { MODIFIER_BINDING_FIELDS } from "./binding-fields";
