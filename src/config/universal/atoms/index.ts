@@ -29,3 +29,11 @@ export { STAT_VALUE_MIN_FIELD_ATOM } from "./stat-value-min-field-atom";
 export { STAT_VALUE_MAX_FIELD_ATOM } from "./stat-value-max-field-atom";
 export { STAT_DEFAULT_VALUE_FIELD_ATOM } from "./stat-default-value-field-atom";
 export { STAT_DATA_TYPE_FIELD_ATOM } from "./stat-data-type-field-atom";
+
+export { TARGET_STAT_ID_FIELD_ATOM } from "./target-stat-id-field-atom";
+export { COMBINATION_TYPE_FIELD_ATOM } from "./combination-type-field-atom";
+export { ROLL_SHAPE_FIELD_ATOM } from "./roll-shape-field-atom";
+export { MODIFIER_VALUE_MIN_FIELD_ATOM } from "./modifier-value-min-field-atom";
+export { MODIFIER_VALUE_MAX_FIELD_ATOM } from "./modifier-value-max-field-atom";
+export { MODIFIER_GROUP_FIELD_ATOM } from "./modifier-group-field-atom";
+export { DISPLAY_TEMPLATE_FIELD_ATOM } from "./display-template-field-atom";
