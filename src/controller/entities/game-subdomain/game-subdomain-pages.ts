@@ -23,7 +23,7 @@ import { buildPaginationMeta } from "@view-service/sub-atoms/pagination";
 const BASE_PATH = "/game-subdomains";
 const FIELD_CONFIG_JSON = GameSubdomainViewService.prepareBrowserFieldConfig();
 
-export const GameSubdomainPages = new Elysia()
+export const GameSubdomainPages = new Elysia({ detail: { hide: true } })
   .use(errorHandlerPlugin)
 
   // ── List ────────────────────────────────────────────────────────────────

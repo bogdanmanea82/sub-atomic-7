@@ -25,7 +25,7 @@ import { buildPaginationMeta } from "@view-service/sub-atoms/pagination";
 const BASE_PATH = "/game-subcategories";
 const FIELD_CONFIG_JSON = GameSubcategoryViewService.prepareBrowserFieldConfig();
 
-export const GameSubcategoryPages = new Elysia()
+export const GameSubcategoryPages = new Elysia({ detail: { hide: true } })
   .use(errorHandlerPlugin)
 
   // ── List ────────────────────────────────────────────────────────────────

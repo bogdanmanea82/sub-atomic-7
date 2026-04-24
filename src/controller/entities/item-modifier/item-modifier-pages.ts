@@ -30,7 +30,7 @@ import { buildPaginationMeta } from "@view-service/sub-atoms/pagination";
 const BASE_PATH = "/modifiers";
 const FIELD_CONFIG_JSON = ItemModifierViewService.prepareBrowserFieldConfig();
 
-export const ItemModifierPages = new Elysia()
+export const ItemModifierPages = new Elysia({ detail: { hide: true } })
   .use(errorHandlerPlugin)
 
   // ── List ────────────────────────────────────────────────────────────────

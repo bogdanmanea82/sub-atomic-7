@@ -29,7 +29,7 @@ const FIELD_CONFIG_JSON = GameDomainViewService.prepareBrowserFieldConfig();
  * POST routes redirect on success — the browser follows the redirect and reloads.
  * GET /game-domains/new must be declared before GET /:id or Elysia matches "new" as an ID.
  */
-export const GameDomainPages = new Elysia()
+export const GameDomainPages = new Elysia({ detail: { hide: true } })
   .use(errorHandlerPlugin)
 
   // ── List ────────────────────────────────────────────────────────────────
