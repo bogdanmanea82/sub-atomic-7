@@ -37,3 +37,6 @@ export { MODIFIER_VALUE_MIN_FIELD_ATOM } from "./modifier-value-min-field-atom";
 export { MODIFIER_VALUE_MAX_FIELD_ATOM } from "./modifier-value-max-field-atom";
 export { MODIFIER_GROUP_FIELD_ATOM } from "./modifier-group-field-atom";
 export { DISPLAY_TEMPLATE_FIELD_ATOM } from "./display-template-field-atom";
+
+export { CHARACTER_ID_FIELD_ATOM } from "./character-id-field-atom";
+export { STAT_ID_FIELD_ATOM } from "./stat-id-field-atom";
