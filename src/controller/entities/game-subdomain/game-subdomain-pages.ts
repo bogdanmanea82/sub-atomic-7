@@ -113,12 +113,11 @@ export const GameSubdomainPages = new Elysia({ detail: { hide: true } })
   })
 
   // ── Create action ─────────────────────────────────────────────────────────
-  .post(BASE_PATH, async ({ body, set }) => {
+  .post(BASE_PATH, async ({ body, set, redirect }) => {
     const input = body as Record<string, unknown>;
     const result = await GameSubdomainService.create(input);
     if (result.success) {
-      set.redirect = `${BASE_PATH}/${(result.data as { id: string }).id}`;
-      return;
+      return redirect(`${BASE_PATH}/${(result.data as { id: string }).id}`);
     }
     setHtml(set.headers);
     set.status = 422;
@@ -129,13 +128,12 @@ export const GameSubdomainPages = new Elysia({ detail: { hide: true } })
   })
 
   // ── Update action ─────────────────────────────────────────────────────────
-  .post(`${BASE_PATH}/:id`, async ({ params, body, set }) => {
+  .post(`${BASE_PATH}/:id`, async ({ params, body, set, redirect }) => {
     const id = params["id"];
     const input = body as Record<string, unknown>;
     const result = await GameSubdomainService.update(id, input);
     if (result.success) {
-      set.redirect = `${BASE_PATH}/${id}`;
-      return;
+      return redirect(`${BASE_PATH}/${id}`);
     }
     setHtml(set.headers);
     set.status = 422;
@@ -146,8 +144,7 @@ export const GameSubdomainPages = new Elysia({ detail: { hide: true } })
   })
 
   // ── Delete action ─────────────────────────────────────────────────────────
-  .post(`${BASE_PATH}/:id/delete`, async ({ params, set }) => {
+  .post(`${BASE_PATH}/:id/delete`, async ({ params, redirect }) => {
     await GameSubdomainService.delete(params["id"]);
-    set.redirect = BASE_PATH;
-    return;
+    return redirect(BASE_PATH);
   });

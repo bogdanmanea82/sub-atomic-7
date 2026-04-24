@@ -27,7 +27,7 @@ export const INTEGER_CONSTRAINTS_PERCENTAGE = {
 
 /**
  * Full signed integer range — for fields where negative values are valid
- * (e.g. stat value_min for resistances, modifier value bounds for debuffs).
+ * (e.g. stat value_min for resistances, modifier value bounds for de-buffs).
  */
 export const INTEGER_CONSTRAINTS_SIGNED = {
   min: -2147483648,

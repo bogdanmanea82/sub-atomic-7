@@ -87,12 +87,11 @@ export const StatPages = new Elysia({ detail: { hide: true } })
   })
 
   // ── Create action ──────────────────────────────────────────────────────
-  .post(BASE_PATH, async ({ body, set }) => {
+  .post(BASE_PATH, async ({ body, set, redirect }) => {
     const input = body as Record<string, unknown>;
     const result = await StatService.create(input);
     if (result.success) {
-      set.redirect = `${BASE_PATH}/${(result.data as { id: string }).id}`;
-      return;
+      return redirect(`${BASE_PATH}/${(result.data as { id: string }).id}`);
     }
     setHtml(set.headers);
     set.status = 422;
@@ -102,13 +101,12 @@ export const StatPages = new Elysia({ detail: { hide: true } })
   })
 
   // ── Update action ──────────────────────────────────────────────────────
-  .post(`${BASE_PATH}/:id`, async ({ params, body, set }) => {
+  .post(`${BASE_PATH}/:id`, async ({ params, body, set, redirect }) => {
     const id = params["id"];
     const input = body as Record<string, unknown>;
     const result = await StatService.update(id, input);
     if (result.success) {
-      set.redirect = `${BASE_PATH}/${id}`;
-      return;
+      return redirect(`${BASE_PATH}/${id}`);
     }
     setHtml(set.headers);
     set.status = 422;
@@ -118,8 +116,7 @@ export const StatPages = new Elysia({ detail: { hide: true } })
   })
 
   // ── Delete action ──────────────────────────────────────────────────────
-  .post(`${BASE_PATH}/:id/delete`, async ({ params, set }) => {
+  .post(`${BASE_PATH}/:id/delete`, async ({ params, redirect }) => {
     await StatService.delete(params["id"]);
-    set.redirect = BASE_PATH;
-    return;
+    return redirect(BASE_PATH);
   });

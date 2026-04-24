@@ -9,6 +9,7 @@ import { formatError } from "../../sub-atoms/response";
  * ElysiaJS parses the body, but this guards against accidental form submissions.
  */
 export const validateRequestPlugin = new Elysia().onBeforeHandle(
+  { as: "scoped" },
   ({ request, set }) => {
     const method = request.method;
     const contentType = request.headers.get("content-type") ?? "";

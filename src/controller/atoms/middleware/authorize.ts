@@ -42,7 +42,7 @@ function hasPermission(user: AuthUser | null, required: PermissionLevel): boolea
  * Usage: .use(makeAuthorizeMiddleware(GAME_DOMAIN_CONFIG.permissions))
  */
 export function makeAuthorizeMiddleware(permissions: PermissionConfig) {
-  return new Elysia().onBeforeHandle(({ request, set, ...rest }) => {
+  return new Elysia().onBeforeHandle({ as: "scoped" }, ({ request, set, ...rest }) => {
     // user is derived by authenticatePlugin earlier in the chain.
     // Elysia's type system doesn't propagate derived properties across plugins,
     // so we read it from the spread context at runtime.

@@ -37,6 +37,9 @@ function resolveUser(authHeader: string | null): AuthUser | null {
  * Derives the current user into handler context from the Authorization header.
  * Every downstream handler receives `user: AuthUser | null`.
  */
-export const authenticatePlugin = new Elysia().derive(({ request }) => ({
-  user: resolveUser(request.headers.get("authorization")),
-}));
+export const authenticatePlugin = new Elysia().derive(
+  { as: "scoped" },
+  ({ request }) => ({
+    user: resolveUser(request.headers.get("authorization")),
+  }),
+);
