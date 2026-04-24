@@ -3,3 +3,4 @@ export * from "./request";
 export * from "./response";
 export * from "./types";
 export * from "./options";
+export * from "./schema";
