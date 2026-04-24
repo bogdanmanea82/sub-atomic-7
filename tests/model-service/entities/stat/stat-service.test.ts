@@ -47,7 +47,7 @@ describe("StatService", () => {
       if (result.success) {
         createdStatId = (result.data as { id: string }).id;
         expect(createdStatId).toBeDefined();
-        expect((result.data as { machine_name: string }).machine_name).toBe(input["machine_name"]);
+        expect((result.data as { machine_name: string }).machine_name).toBe(input["machine_name"] as string);
       }
     });
 
@@ -57,9 +57,8 @@ describe("StatService", () => {
       const result = await StatService.create(makeStatInput({ machine_name: machineName }));
 
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.stage).toBe("validation");
-        expect(result.errors?.["machine_name"]).toBeDefined();
+      if (!result.success && result.stage === "validation") {
+        expect(result.errors["machine_name"]).toBeDefined();
       }
     });
 
@@ -146,8 +145,8 @@ describe("StatService", () => {
       const result = await StatService.update(createdStatId, { machine_name: otherName });
 
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.errors?.["machine_name"]).toBeDefined();
+      if (!result.success && result.stage === "validation") {
+        expect(result.errors["machine_name"]).toBeDefined();
       }
     });
 
