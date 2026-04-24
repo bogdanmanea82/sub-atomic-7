@@ -33,3 +33,21 @@ export {
   DISPLAY_FORMAT_TOGGLE,
   DISPLAY_FORMATS,
 } from "./display-formats";
+
+export {
+  STAT_CATEGORY_ATTRIBUTE,
+  STAT_CATEGORY_RESOURCE,
+  STAT_CATEGORY_OFFENSIVE,
+  STAT_CATEGORY_DEFENSIVE,
+  STAT_CATEGORY_UTILITY,
+  STAT_CATEGORIES,
+} from "./stat-categories";
+export type { StatCategory } from "./stat-categories";
+
+export {
+  STAT_DATA_TYPE_RAW,
+  STAT_DATA_TYPE_PERCENTAGE,
+  STAT_DATA_TYPE_MULTIPLIER,
+  STAT_DATA_TYPES,
+} from "./stat-data-types";
+export type { StatDataType } from "./stat-data-types";
