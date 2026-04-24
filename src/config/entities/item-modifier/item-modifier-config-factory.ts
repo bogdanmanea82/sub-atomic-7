@@ -2,10 +2,15 @@
 // Factory for ItemModifier entity configuration.
 //
 // Composes shared modifier molecules (hierarchy, code, lifecycle) with
-// ItemModifier-specific classification enums (affix_type, semantic_cat,
-// value_type, calc_method). This is the reference implementation — future
+// ItemModifier-specific fields. This is the reference implementation — future
 // modifier domain factories (EnemyModifier, ZoneModifier, etc.) follow the
 // same composition pattern but swap in their own entity-specific fields.
+//
+// Refactored in Milestone 2:
+//   Removed: semantic_cat (stat.category replaces this), calc_method and
+//            value_type (superseded by combination_type + roll_shape)
+//   Added:   target_stat_id (FK to Stat), combination_type, roll_shape,
+//            value_min, value_max, modifier_group, display_template
 
 import { BaseEntityConfigFactory } from "../../factories/base-entity-config-factory";
 import type { FieldConfig, PermissionConfig, RelationshipConfig } from "../../types";
@@ -13,6 +18,13 @@ import {
   ID_FIELD_ATOM,
   NAME_FIELD_ATOM,
   DESCRIPTION_FIELD_ATOM,
+  TARGET_STAT_ID_FIELD_ATOM,
+  COMBINATION_TYPE_FIELD_ATOM,
+  ROLL_SHAPE_FIELD_ATOM,
+  MODIFIER_VALUE_MIN_FIELD_ATOM,
+  MODIFIER_VALUE_MAX_FIELD_ATOM,
+  MODIFIER_GROUP_FIELD_ATOM,
+  DISPLAY_TEMPLATE_FIELD_ATOM,
 } from "../../universal/atoms";
 import { STANDARD_PERMISSIONS, AUDIT_FIELDS } from "../../universal/molecules";
 import {
@@ -40,7 +52,7 @@ export class ItemModifierConfigFactory extends BaseEntityConfigFactory {
   }
 
   /**
-   * Item-specific classification enums — the fields that vary between modifier
+   * Item-specific classification fields — the fields that vary between modifier
    * domain types. Hierarchy, code, and lifecycle come from shared molecules.
    */
   protected getEntitySpecificFields(): readonly FieldConfig[] {
@@ -54,33 +66,13 @@ export class ItemModifierConfigFactory extends BaseEntityConfigFactory {
         displayFormat: "select",
         listOrder: 20,
       },
-      {
-        type: "enum",
-        name: "semantic_cat",
-        label: "Semantic Category",
-        values: ["offensive", "defensive", "utility", "resource"],
-        required: true,
-        displayFormat: "select",
-        listOrder: 21,
-      },
-      {
-        type: "enum",
-        name: "value_type",
-        label: "Value Type",
-        values: ["flat", "increased", "more", "between"],
-        required: true,
-        displayFormat: "select",
-        listOrder: 22,
-      },
-      {
-        type: "enum",
-        name: "calc_method",
-        label: "Calculation Method",
-        values: ["additive", "multiplicative"],
-        required: true,
-        displayFormat: "select",
-        listOrder: 23,
-      },
+      TARGET_STAT_ID_FIELD_ATOM,
+      COMBINATION_TYPE_FIELD_ATOM,
+      ROLL_SHAPE_FIELD_ATOM,
+      MODIFIER_VALUE_MIN_FIELD_ATOM,
+      MODIFIER_VALUE_MAX_FIELD_ATOM,
+      MODIFIER_GROUP_FIELD_ATOM,
+      DISPLAY_TEMPLATE_FIELD_ATOM,
     ] as const;
   }
 
@@ -88,7 +80,7 @@ export class ItemModifierConfigFactory extends BaseEntityConfigFactory {
    * Full field order:
    *   id → hierarchy (domain/subdomain/category/subcategory)
    *   → code → name → description
-   *   → [item-specific enums]
+   *   → [item-specific fields]
    *   → lifecycle (is_active / archived_at / archived_reason)
    *   → audit (created_at / updated_at)
    */
@@ -107,8 +99,8 @@ export class ItemModifierConfigFactory extends BaseEntityConfigFactory {
   }
 
   /**
-   * Virtual form fields that must be stripped before the UPDATE query:
-   *   tiers_json    — serialised tier array submitted by the browser
+   * Virtual form fields stripped before UPDATE:
+   *   tiers_json    — serialised tier array submitted by browser
    *   tiers         — deserialized counterpart (defensive)
    *   status_action — radio value translated to is_active by applyStatusAction()
    *   status_reason — textarea value consumed by applyStatusAction()
