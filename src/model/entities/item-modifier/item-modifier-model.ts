@@ -18,7 +18,8 @@ import { buildDeleteQuery } from "../../universal/atoms/build-delete-query";
 
 /**
  * The TypeScript type for a deserialized ItemModifier entity.
- * Includes all four parent FK fields, dual classification, and archive lifecycle.
+ * Includes all four parent FK fields, item classification, mechanical fields,
+ * and archive lifecycle.
  */
 export type ItemModifier = {
   readonly id: string;
@@ -30,9 +31,13 @@ export type ItemModifier = {
   readonly name: string;
   readonly description: string | null;
   readonly affix_type: string;
-  readonly semantic_cat: string;
-  readonly value_type: string;
-  readonly calc_method: string;
+  readonly target_stat_id: string | null;
+  readonly combination_type: string;
+  readonly roll_shape: string;
+  readonly value_min: number;
+  readonly value_max: number;
+  readonly modifier_group: string;
+  readonly display_template: string;
   readonly is_active: boolean;
   readonly archived_at: Date | null;
   readonly archived_reason: string | null;

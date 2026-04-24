@@ -37,7 +37,7 @@ function deriveCurrentState(values?: Record<string, unknown>): "active" | "disab
 /**
  * Pre-binds ITEM_MODIFIER_CONFIG so callers never import config directly.
  * Form methods accept four sets of FK options for cascading dropdowns.
- * Enum fields (affix_type, semantic_cat) auto-generate options from config via buildFormView.
+ * Enum fields (affix_type, combination_type, roll_shape) auto-generate options from config via buildFormView.
  */
 /** Fields excluded from modifier list view — shown as filter dropdowns instead */
 const LIST_EXCLUDE_FIELDS = new Set<string>(MODIFIER_HIERARCHY_FIELDS.map((f) => f.name));
