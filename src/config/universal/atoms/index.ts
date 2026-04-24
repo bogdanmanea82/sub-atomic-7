@@ -24,3 +24,8 @@ export { GAME_SUBCATEGORY_REF_FIELD_ATOM } from "./game-subcategory-ref-field-at
 export { SORT_ORDER_FIELD_ATOM } from "./sort-order-field-atom";
 
 export { MACHINE_NAME_FIELD_ATOM } from "./machine-name-field-atom";
+
+export { STAT_VALUE_MIN_FIELD_ATOM } from "./stat-value-min-field-atom";
+export { STAT_VALUE_MAX_FIELD_ATOM } from "./stat-value-max-field-atom";
+export { STAT_DEFAULT_VALUE_FIELD_ATOM } from "./stat-default-value-field-atom";
+export { STAT_DATA_TYPE_FIELD_ATOM } from "./stat-data-type-field-atom";
