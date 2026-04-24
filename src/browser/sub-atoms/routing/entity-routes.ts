@@ -128,6 +128,12 @@ export const ENTITY_ROUTES: readonly EntityRouteConfig[] = [
     },
   },
   {
+    basePath: "/stats",
+    apiBasePath: "/api/stats",
+    displayName: "Stat",
+    checkNameUrl: "/api/stats/check-machine-name",
+  },
+  {
     basePath: "/modifiers",
     apiBasePath: "/api/modifiers",
     displayName: "Modifier",

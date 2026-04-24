@@ -5,12 +5,14 @@ import {
   GameSubdomainController,
   GameCategoryController,
   GameSubcategoryController,
+  StatController,
   ItemModifierController,
 } from "@controller/entities";
 import { GameDomainService } from "@model-service/entities/game-domain";
 import { GameSubdomainService } from "@model-service/entities/game-subdomain";
 import { GameCategoryService } from "@model-service/entities/game-category";
 import { GameSubcategoryService } from "@model-service/entities/game-subcategory";
+import { StatService } from "@model-service/entities/stat";
 import { ItemModifierService } from "@model-service/entities/item-modifier";
 import { homePage } from "@view/organisms/pages";
 import type { EntityCardData } from "@view/organisms/pages";
@@ -24,6 +26,7 @@ const app = new Elysia()
         { name: "Game Subdomains",    description: "Subdivisions within a domain" },
         { name: "Game Categories",    description: "Classifications within subdomains" },
         { name: "Game Subcategories", description: "Fine-grained category levels" },
+        { name: "Stats",              description: "Numeric stat dimensions — health, mana, armor, etc." },
         { name: "Item Modifiers",     description: "Atomic gameplay stat modifiers" },
       ],
     },
@@ -32,6 +35,7 @@ const app = new Elysia()
   .use(GameSubdomainController)
   .use(GameCategoryController)
   .use(GameSubcategoryController)
+  .use(StatController)
   .use(ItemModifierController)
   // Serve the browser bundle as a static asset
   .get("/public/main.js", () => Bun.file("public/main.js"))
@@ -40,11 +44,12 @@ const app = new Elysia()
     set.headers["content-type"] = "text/html; charset=utf-8";
 
     // Fetch entity counts for the dashboard cards
-    const [gameDomainResult, gameSubdomainResult, gameCategoryResult, gameSubcategoryResult, modifierResult] = await Promise.all([
+    const [gameDomainResult, gameSubdomainResult, gameCategoryResult, gameSubcategoryResult, statResult, modifierResult] = await Promise.all([
       GameDomainService.findMany(),
       GameSubdomainService.findMany(),
       GameCategoryService.findMany(),
       GameSubcategoryService.findMany(),
+      StatService.findMany(),
       ItemModifierService.findMany(),
     ]);
     const gameDomainCount = gameDomainResult.success
@@ -58,6 +63,9 @@ const app = new Elysia()
       : 0;
     const gameSubcategoryCount = gameSubcategoryResult.success
       ? (gameSubcategoryResult.data as unknown[]).length
+      : 0;
+    const statCount = statResult.success
+      ? (statResult.data as unknown[]).length
       : 0;
     const modifierCount = modifierResult.success
       ? (modifierResult.data as unknown[]).length
@@ -91,6 +99,13 @@ const app = new Elysia()
         href: "/game-subcategories",
         count: gameSubcategoryCount,
         icon: "📑",
+      },
+      {
+        name: "Stats",
+        description: "Numeric stat dimensions — health, mana, armor, and more.",
+        href: "/stats",
+        count: statCount,
+        icon: "📊",
       },
       {
         name: "Modifiers",
