@@ -1,4 +1,5 @@
 import { Elysia } from "elysia";
+import { openapi } from "@elysiajs/openapi";
 import {
   GameDomainController,
   GameSubdomainController,
@@ -15,6 +16,18 @@ import { homePage } from "@view/organisms/pages";
 import type { EntityCardData } from "@view/organisms/pages";
 
 const app = new Elysia()
+  .use(openapi({
+    documentation: {
+      info: { title: "Sub-Atomic 7 CMS", version: "0.1.0" },
+      tags: [
+        { name: "Game Domains",       description: "Top-level game worlds" },
+        { name: "Game Subdomains",    description: "Subdivisions within a domain" },
+        { name: "Game Categories",    description: "Classifications within subdomains" },
+        { name: "Game Subcategories", description: "Fine-grained category levels" },
+        { name: "Item Modifiers",     description: "Atomic gameplay stat modifiers" },
+      ],
+    },
+  }))
   .use(GameDomainController)
   .use(GameSubdomainController)
   .use(GameCategoryController)
