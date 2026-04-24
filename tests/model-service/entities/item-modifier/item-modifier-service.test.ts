@@ -13,6 +13,7 @@ let testDomainId: string;
 let testSubdomainId: string;
 let testCategoryId: string;
 let testSubcategoryId: string;
+let testStatId: string;
 let createdModifierId: string | null = null;
 
 const TIERS_JSON_3 = JSON.stringify([
@@ -56,6 +57,9 @@ beforeAll(async () => {
     [subcategoryId, domainId, subdomainId, categoryId, "TestSubcategory-" + Date.now(), "test", true]
   );
   testSubcategoryId = subcategoryId;
+
+  const statRows = await db.unsafe<{ id: string }[]>(`SELECT id FROM stat LIMIT 1`);
+  testStatId = statRows[0]!.id;
 });
 
 afterAll(async () => {
@@ -79,9 +83,13 @@ function makeModifierInput(overrides?: Record<string, unknown>): Record<string, 
     name: "Test ItemModifier " + Date.now(),
     description: "A test modifier",
     affix_type: "prefix",
-    semantic_cat: "offensive",
-    value_type: "flat",
-    calc_method: "additive",
+    target_stat_id: testStatId,
+    combination_type: "flat",
+    roll_shape: "scalar",
+    value_min: 0,
+    value_max: 100,
+    modifier_group: "test_group",
+    display_template: "+{value} Test Stat",
     is_active: true,
     tiers_json: TIERS_JSON_3,
     ...overrides,

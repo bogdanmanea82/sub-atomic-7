@@ -22,11 +22,15 @@ export class ModifierTierConfigFactory extends BaseEntityConfigFactory {
   }
 
   protected getDisplayName(): string {
-    return `${this.parentEntityName} Tier`;
+    return `${this.splitPascalCase(this.parentEntityName)} Tier`;
   }
 
   protected getPluralDisplayName(): string {
-    return `${this.parentEntityName} Tiers`;
+    return `${this.splitPascalCase(this.parentEntityName)} Tiers`;
+  }
+
+  private splitPascalCase(name: string): string {
+    return name.replace(/([A-Z])/g, " $1").trim();
   }
 
   protected getPermissions(): PermissionConfig {
