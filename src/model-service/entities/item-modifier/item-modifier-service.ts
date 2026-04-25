@@ -5,6 +5,7 @@ import type { ItemModifier } from "@model/entities/item-modifier/item-modifier-m
 import type { ItemModifierTier } from "@model/entities/item-modifier-tier/item-modifier-tier-model";
 import { ItemModifierModel } from "@model/entities/item-modifier/item-modifier-model";
 import { ItemModifierTierModel } from "@model/entities/item-modifier-tier/item-modifier-tier-model";
+import { ItemModifierBindingModel } from "@model/entities/item-modifier-binding/item-modifier-binding-model";
 import { ITEM_MODIFIER_CONFIG } from "@config/entities/item-modifier";
 import { getConnection, withTransaction, executeWrite } from "../../sub-atoms/database";
 import {
@@ -134,6 +135,45 @@ async function validateModifierInput(
   return { valid: true, tiers };
 }
 
+import type { SQL } from "bun";
+
+/**
+ * Inserts a default binding for the modifier's own subcategory (or category as
+ * fallback) inside an already-open transaction.
+ * Runs silently — auto-binding failure never blocks modifier creation.
+ * Called only from _core.create(); the public API uses ItemModifierBindingService.
+ */
+async function insertAutoBinding(
+  txDb: SQL,
+  modifierId: string,
+  input: Record<string, unknown>,
+): Promise<void> {
+  const subcategoryId = input["game_subcategory_id"];
+  const categoryId = input["game_category_id"];
+
+  const targetType = typeof subcategoryId === "string" && subcategoryId.trim()
+    ? "subcategory" as const
+    : typeof categoryId === "string" && categoryId.trim()
+    ? "category" as const
+    : null;
+
+  const targetId = targetType === "subcategory" ? (subcategoryId as string)
+    : targetType === "category" ? (categoryId as string)
+    : null;
+
+  if (!targetType || !targetId) return;
+
+  const query = ItemModifierBindingModel.prepareCreate({
+    id: crypto.randomUUID(),
+    modifier_id: modifierId,
+    target_type: targetType,
+    target_id: targetId,
+    is_active: true,
+    is_included: true,
+  });
+  await insertRecord(txDb, query);
+}
+
 // Core service methods — no tier orchestration yet.
 // Named _core so the orchestration factory can reference findById before the
 // final export is assembled. The lazy closure is not needed here because
@@ -166,6 +206,7 @@ const _core = {
       await withTransaction(db, async (txDb) => {
         await insertRecord(txDb, modifierQuery);
         await insertTiers(txDb, ItemModifierTierModel, modifierId, tiers);
+        await insertAutoBinding(txDb, modifierId, input);
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Database error";

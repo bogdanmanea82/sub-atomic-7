@@ -17,7 +17,10 @@ import { ItemModifierBindingApi } from "./item-modifier-binding-api";
 import { ItemModifierTierApi } from "./item-modifier-tier-api";
 
 const TAGS = ["Item Modifiers"];
-const bodySchema = deriveBodySchema(ITEM_MODIFIER_CONFIG.fields);
+const passthroughKeys = ITEM_MODIFIER_CONFIG.nonColumnKeys ?? [];
+// is_active is always set by applyStatusAction() from status_action — browser never sends it directly
+const alwaysOptionalKeys = ["is_active"];
+const bodySchema = deriveBodySchema(ITEM_MODIFIER_CONFIG.fields, "create", passthroughKeys, alwaysOptionalKeys);
 
 const ModifierApi = new Elysia()
   .use(errorHandlerPlugin)
@@ -60,7 +63,7 @@ const ModifierApi = new Elysia()
   })
   .use(createCrudRoutes("/api/modifiers", ItemModifierService, {
     createSchema: bodySchema,
-    updateSchema: deriveBodySchema(ITEM_MODIFIER_CONFIG.fields, "update"),
+    updateSchema: deriveBodySchema(ITEM_MODIFIER_CONFIG.fields, "update", passthroughKeys),
     querySchema: paginationQuerySchema,
     tags: TAGS,
   }))

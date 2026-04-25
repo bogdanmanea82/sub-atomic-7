@@ -28,10 +28,21 @@ export function attachFormSubmitHandler(
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    // Collect all field values from the form
+    // Collect all field values from the form, coercing types to match TypeBox schema.
+    // FormData always yields strings — number inputs and boolean strings need conversion.
     const formData = new FormData(form);
     const data: Record<string, unknown> = {};
     for (const [key, value] of formData.entries()) {
+      if (value === "true")  { data[key] = true;  continue; }
+      if (value === "false") { data[key] = false; continue; }
+
+      const numEl = form.querySelector<HTMLInputElement>(`input[name="${key}"][type="number"]`);
+      if (numEl) {
+        // Empty number inputs are omitted entirely — TypeBox t.Number() rejects "" strings.
+        if (value !== "") data[key] = Number(value);
+        continue;
+      }
+
       data[key] = value;
     }
 

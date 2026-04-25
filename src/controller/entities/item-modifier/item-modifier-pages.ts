@@ -8,6 +8,7 @@ import { GameDomainService } from "@model-service/entities/game-domain";
 import { GameSubdomainService } from "@model-service/entities/game-subdomain";
 import { GameCategoryService } from "@model-service/entities/game-category";
 import { GameSubcategoryService } from "@model-service/entities/game-subcategory";
+import { StatService } from "@model-service/entities/stat";
 import {
   ItemModifierViewService,
   ItemModifierBindingViewService,
@@ -53,16 +54,22 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
     if (filterSubcategoryId) conditions["game_subcategory_id"] = filterSubcategoryId;
     const hasConditions = Object.keys(conditions).length > 0;
 
-    const [result, { domainOptions, subdomainOptions, categoryOptions, subcategoryOptions }] = await Promise.all([
+    const [result, { domainOptions, subdomainOptions, categoryOptions, subcategoryOptions }, statOptions] = await Promise.all([
       ItemModifierService.findManyPaginated(pagination, hasConditions ? conditions : undefined),
       buildCascadingOptions({ domainId: filterDomainId, subdomainId: filterSubdomainId, categoryId: filterCategoryId }),
+      fetchOptions(StatService),
     ]);
     if (!result.success) return `<p>Error loading records.</p>`;
+
+    const referenceLookup = buildReferenceLookup([
+      { fieldName: "target_stat_id", options: statOptions },
+    ]);
 
     const paginationMeta = buildPaginationMeta(result.totalCount, pagination.page, pagination.pageSize);
     const view = ItemModifierViewService.prepareFilteredListView(
       result.data as unknown as Record<string, unknown>[],
       paginationMeta,
+      referenceLookup,
     );
 
     const filterOptions: ItemModifierFilterOptions = {
@@ -80,12 +87,16 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
   // ── Create form ────────────────────────────────────────────────────────
   .get(`${BASE_PATH}/new`, async ({ set }) => {
     setHtml(set.headers);
-    const { domainOptions, subdomainOptions, categoryOptions, subcategoryOptions } = await buildCascadingOptions({});
+    const [{ domainOptions, subdomainOptions, categoryOptions, subcategoryOptions }, statOptions] = await Promise.all([
+      buildCascadingOptions({}),
+      fetchOptions(StatService),
+    ]);
     const view = ItemModifierViewService.prepareCreateForm({
       game_domain_id: domainOptions,
       game_subdomain_id: subdomainOptions,
       game_category_id: categoryOptions,
       game_subcategory_id: subcategoryOptions,
+      target_stat_id: statOptions,
     });
     return createPage(view, BASE_PATH, FIELD_CONFIG_JSON);
   })
@@ -96,7 +107,7 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
   .get(`${BASE_PATH}/:id`, async ({ params, set }) => {
     setHtml(set.headers);
     const modifierId = params["id"];
-    const [result, bindings, domainOptions, subdomainOptions, categoryOptions, subcategoryOptions, allSubcatsResult] = await Promise.all([
+    const [result, bindings, domainOptions, subdomainOptions, categoryOptions, subcategoryOptions, allSubcatsResult, statOptions] = await Promise.all([
       ItemModifierService.findById(modifierId),
       ItemModifierBindingService.findByModifier(modifierId),
       fetchOptions(GameDomainService),
@@ -104,6 +115,7 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
       fetchOptions(GameCategoryService),
       fetchOptions(GameSubcategoryService),
       GameSubcategoryService.findMany(),
+      fetchOptions(StatService),
     ]);
     if (!result.success) {
       set.status = result.stage === "not_found" ? 404 : 500;
@@ -114,6 +126,7 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
       { fieldName: "game_subdomain_id", options: subdomainOptions },
       { fieldName: "game_category_id", options: categoryOptions },
       { fieldName: "game_subcategory_id", options: subcategoryOptions },
+      { fieldName: "target_stat_id", options: statOptions },
     ]);
     const categoryLookup = Object.fromEntries(categoryOptions.map((o) => [o.value, o.label]));
     const subcategoryLookup = Object.fromEntries(subcategoryOptions.map((o) => [o.value, o.label]));
@@ -162,10 +175,11 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
     const domainId = entity["game_domain_id"] as string;
     const subdomainId = entity["game_subdomain_id"] as string;
     const categoryId = entity["game_category_id"] as string;
-    const [{ domainOptions, subdomainOptions, categoryOptions, subcategoryOptions }, allCatOptions, allSubcatsResult] = await Promise.all([
+    const [{ domainOptions, subdomainOptions, categoryOptions, subcategoryOptions }, allCatOptions, allSubcatsResult, statOptions] = await Promise.all([
       buildCascadingOptions({ domainId, subdomainId, categoryId }),
       fetchOptions(GameCategoryService),
       GameSubcategoryService.findMany(),
+      fetchOptions(StatService),
     ]);
     const categoryLookup = Object.fromEntries(categoryOptions.map((o) => [o.value, o.label]));
     const subcategoryLookup = Object.fromEntries(subcategoryOptions.map((o) => [o.value, o.label]));
@@ -175,6 +189,7 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
         game_subdomain_id: subdomainOptions,
         game_category_id: categoryOptions,
         game_subcategory_id: subcategoryOptions,
+        target_stat_id: statOptions,
       },
       entity,
       undefined,
@@ -216,14 +231,17 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
     const domainId = entity["game_domain_id"] as string;
     const subdomainId = entity["game_subdomain_id"] as string;
     const categoryId = entity["game_category_id"] as string;
-    const { domainOptions, subdomainOptions, categoryOptions, subcategoryOptions } =
-      await buildCascadingOptions({ domainId, subdomainId, categoryId });
+    const [{ domainOptions, subdomainOptions, categoryOptions, subcategoryOptions }, statOptions] = await Promise.all([
+      buildCascadingOptions({ domainId, subdomainId, categoryId }),
+      fetchOptions(StatService),
+    ]);
     const view = ItemModifierViewService.prepareDuplicateForm(
       {
         game_domain_id: domainOptions,
         game_subdomain_id: subdomainOptions,
         game_category_id: categoryOptions,
         game_subcategory_id: subcategoryOptions,
+        target_stat_id: statOptions,
       },
       entity,
       ItemModifierViewService.tiersToFormRows(tiers),
@@ -244,8 +262,10 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
     const domainId = input["game_domain_id"] as string | undefined;
     const subdomainId = input["game_subdomain_id"] as string | undefined;
     const categoryId = input["game_category_id"] as string | undefined;
-    const { domainOptions, subdomainOptions, categoryOptions, subcategoryOptions } =
-      await buildCascadingOptions({ domainId, subdomainId, categoryId });
+    const [{ domainOptions, subdomainOptions, categoryOptions, subcategoryOptions }, statOptions] = await Promise.all([
+      buildCascadingOptions({ domainId, subdomainId, categoryId }),
+      fetchOptions(StatService),
+    ]);
     const tierRows = ItemModifierViewService.parseTiersJsonForRerender(input);
     const statusReason = typeof input["status_reason"] === "string" ? input["status_reason"] : undefined;
     const archivedReason = input["archived_reason"] != null ? String(input["archived_reason"]) : undefined;
@@ -255,6 +275,7 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
         game_subdomain_id: subdomainOptions,
         game_category_id: categoryOptions,
         game_subcategory_id: subcategoryOptions,
+        target_stat_id: statOptions,
       },
       input, errors,
       tierRows.length > 0 ? tierRows : undefined,
@@ -277,8 +298,10 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
     const domainId = input["game_domain_id"] as string | undefined;
     const subdomainId = input["game_subdomain_id"] as string | undefined;
     const categoryId = input["game_category_id"] as string | undefined;
-    const { domainOptions, subdomainOptions, categoryOptions, subcategoryOptions } =
-      await buildCascadingOptions({ domainId, subdomainId, categoryId });
+    const [{ domainOptions, subdomainOptions, categoryOptions, subcategoryOptions }, statOptions] = await Promise.all([
+      buildCascadingOptions({ domainId, subdomainId, categoryId }),
+      fetchOptions(StatService),
+    ]);
     const tierRows = ItemModifierViewService.parseTiersJsonForRerender(input);
     const archivedReason = input["archived_reason"] != null ? String(input["archived_reason"]) : undefined;
     const base = ItemModifierViewService.prepareEditForm(
@@ -287,6 +310,7 @@ export const ItemModifierPages = new Elysia({ detail: { hide: true } })
         game_subdomain_id: subdomainOptions,
         game_category_id: categoryOptions,
         game_subcategory_id: subcategoryOptions,
+        target_stat_id: statOptions,
       },
       input, errors,
       tierRows.length > 0 ? tierRows : undefined,

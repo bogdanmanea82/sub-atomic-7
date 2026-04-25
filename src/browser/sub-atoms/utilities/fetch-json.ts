@@ -20,6 +20,7 @@ export async function fetchJson<T>(
     ...options,
     headers: {
       "Content-Type": "application/json",
+      "Authorization": "Bearer dev-admin-token",
       ...options?.headers,
     },
   });

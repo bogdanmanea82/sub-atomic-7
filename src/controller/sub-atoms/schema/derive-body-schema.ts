@@ -14,11 +14,24 @@ import type { FieldConfig } from "@config/types";
  * Auto-managed fields are always skipped:
  *   - uuid with autoGenerate:true  (server-generated)
  *   - timestamp with autoSet!='none' (server-managed)
+ *
+ * passthroughKeys — virtual form fields (e.g. tiers_json, status_action) that the
+ * service reads but are not stored as columns. Elysia calls Value.Clean() on the body
+ * before the handler runs, which silently removes any key not present in this schema.
+ * Listing them here as optional strings ensures they survive the clean step.
+ *
+ * alwaysOptionalKeys — real column fields that the service layer always derives from
+ * other inputs (e.g. is_active is set by applyStatusAction from status_action).
+ * These keep their proper type but are wrapped in t.Optional so the browser can omit
+ * them without triggering a 422.
  */
 export function deriveBodySchema(
   fields: readonly FieldConfig[],
   mode: "create" | "update" = "create",
+  passthroughKeys: readonly string[] = [],
+  alwaysOptionalKeys: readonly string[] = [],
 ) {
+  const alwaysOptionalSet = new Set(alwaysOptionalKeys);
   const shape: Record<string, unknown> = {};
 
   for (const field of fields) {
@@ -26,9 +39,14 @@ export function deriveBodySchema(
     if (field.type === "timestamp" && field.autoSet !== "none") continue;
 
     const base = buildBaseType(field);
-    shape[field.name] = !field.required || mode === "update"
+    const isAlwaysOptional = alwaysOptionalSet.has(field.name);
+    shape[field.name] = !field.required || mode === "update" || isAlwaysOptional
       ? t.Optional(base)
       : base;
+  }
+
+  for (const key of passthroughKeys) {
+    shape[key] = t.Optional(t.String());
   }
 
   return t.Object(shape as Parameters<typeof t.Object>[0]);

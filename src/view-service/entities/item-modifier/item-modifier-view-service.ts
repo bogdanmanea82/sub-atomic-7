@@ -50,8 +50,9 @@ export const ItemModifierViewService = {
   prepareFilteredListView(
     entities: Record<string, unknown>[],
     pagination?: PaginationMeta,
+    referenceLookup?: ReferenceLookup,
   ): ListView {
-    const view = buildListView(entities, ITEM_MODIFIER_CONFIG, undefined, pagination);
+    const view = buildListView(entities, ITEM_MODIFIER_CONFIG, referenceLookup, pagination);
     return {
       ...view,
       columns: view.columns.filter((c) => !LIST_EXCLUDE_FIELDS.has(c.name)),
