@@ -1,6 +1,6 @@
 -- seeds/09-modifiers-shields.sql
 -- 8 shield modifiers — bound to Shields category.
--- Representative subcategory: Strength.
+-- Representative subcategory: Tower Shield (Str).
 
 DO $$
 DECLARE
@@ -12,7 +12,7 @@ BEGIN
   SELECT id INTO v_dom     FROM game_domain    WHERE name = 'Items';
   SELECT id INTO v_armour  FROM game_subdomain WHERE name = 'Armour';
   SELECT id INTO v_shields FROM game_category  WHERE name = 'Shields' AND game_subdomain_id = v_armour;
-  SELECT id INTO v_shld_s  FROM game_subcategory WHERE name = 'Strength' AND game_category_id = v_shields;
+  SELECT id INTO v_shld_s  FROM game_subcategory WHERE name = 'Tower Shield' AND game_category_id = v_shields;
 
   -- Defence
   PERFORM seed_insert_mod(v_dom, v_armour, v_shields, v_shld_s, 'shield_added_armour',   'prefix', 'armor_rating',    'flat',      'scalar', 20, 300, 'Armor Rating');

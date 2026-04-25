@@ -1,6 +1,6 @@
 -- seeds/05-modifiers-helmets.sql
 -- 12 helmet modifiers — bound to Helmets category.
--- Representative subcategory: Intelligence.
+-- Representative subcategory: Energy Shield Helmet (Int).
 
 DO $$
 DECLARE
@@ -12,7 +12,7 @@ BEGIN
   SELECT id INTO v_dom    FROM game_domain    WHERE name = 'Items';
   SELECT id INTO v_armour FROM game_subdomain WHERE name = 'Armour';
   SELECT id INTO v_helm   FROM game_category  WHERE name = 'Helmets' AND game_subdomain_id = v_armour;
-  SELECT id INTO v_helm_i FROM game_subcategory WHERE name = 'Intelligence' AND game_category_id = v_helm;
+  SELECT id INTO v_helm_i FROM game_subcategory WHERE name = 'Energy Shield Helmet' AND game_category_id = v_helm;
 
   -- Life & mana
   PERFORM seed_insert_mod(v_dom, v_armour, v_helm, v_helm_i, 'helm_added_mana',      'prefix', 'mana_max',            'flat',      'scalar', 20, 150, 'Maximum Mana');

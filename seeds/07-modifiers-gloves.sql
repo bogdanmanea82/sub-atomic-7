@@ -1,6 +1,6 @@
 -- seeds/07-modifiers-gloves.sql
 -- 10 glove modifiers — bound to Gloves category.
--- Representative subcategory: Dexterity.
+-- Representative subcategory: Evasion Gloves (Dex).
 
 DO $$
 DECLARE
@@ -12,7 +12,7 @@ BEGIN
   SELECT id INTO v_dom    FROM game_domain    WHERE name = 'Items';
   SELECT id INTO v_armour FROM game_subdomain WHERE name = 'Armour';
   SELECT id INTO v_gloves FROM game_category  WHERE name = 'Gloves' AND game_subdomain_id = v_armour;
-  SELECT id INTO v_glv_d  FROM game_subcategory WHERE name = 'Dexterity' AND game_category_id = v_gloves;
+  SELECT id INTO v_glv_d  FROM game_subcategory WHERE name = 'Evasion Gloves' AND game_category_id = v_gloves;
 
   -- Offensive
   PERFORM seed_insert_mod(v_dom, v_armour, v_gloves, v_glv_d, 'gloves_inc_attack_speed','prefix', 'attack_speed',      'increased', 'scalar', 3,  25,  'Increased Attack Speed');

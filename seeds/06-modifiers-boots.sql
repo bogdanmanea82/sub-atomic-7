@@ -1,6 +1,6 @@
 -- seeds/06-modifiers-boots.sql
 -- 10 boot modifiers — bound to Boots category.
--- Representative subcategory: Dexterity.
+-- Representative subcategory: Evasion Boots (Dex).
 
 DO $$
 DECLARE
@@ -12,7 +12,7 @@ BEGIN
   SELECT id INTO v_dom    FROM game_domain    WHERE name = 'Items';
   SELECT id INTO v_armour FROM game_subdomain WHERE name = 'Armour';
   SELECT id INTO v_boots  FROM game_category  WHERE name = 'Boots' AND game_subdomain_id = v_armour;
-  SELECT id INTO v_boot_d FROM game_subcategory WHERE name = 'Dexterity' AND game_category_id = v_boots;
+  SELECT id INTO v_boot_d FROM game_subcategory WHERE name = 'Evasion Boots' AND game_category_id = v_boots;
 
   -- Utility
   PERFORM seed_insert_mod(v_dom, v_armour, v_boots, v_boot_d, 'boots_inc_movement',  'prefix', 'movement_speed',   'increased', 'scalar', 5,  24,  'Increased Movement Speed');

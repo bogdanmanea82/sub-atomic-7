@@ -1,6 +1,6 @@
 -- seeds/04-modifiers-body-armour.sql
 -- 16 body armour modifiers — bound to Body Armour category.
--- Representative subcategory: Strength.
+-- Representative subcategory: Heavy Armour (Str).
 
 DO $$
 DECLARE
@@ -12,7 +12,7 @@ BEGIN
   SELECT id INTO v_dom    FROM game_domain    WHERE name = 'Items';
   SELECT id INTO v_armour FROM game_subdomain WHERE name = 'Armour';
   SELECT id INTO v_ba_cat FROM game_category  WHERE name = 'Body Armour' AND game_subdomain_id = v_armour;
-  SELECT id INTO v_ba_str FROM game_subcategory WHERE name = 'Strength' AND game_category_id = v_ba_cat;
+  SELECT id INTO v_ba_str FROM game_subcategory WHERE name = 'Heavy Armour' AND game_category_id = v_ba_cat;
 
   -- Life & mana
   PERFORM seed_insert_mod(v_dom, v_armour, v_ba_cat, v_ba_str, 'body_added_life',        'prefix', 'life_max',            'flat',      'scalar', 30, 200, 'Maximum Life');

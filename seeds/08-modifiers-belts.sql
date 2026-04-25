@@ -1,6 +1,6 @@
 -- seeds/08-modifiers-belts.sql
 -- 10 belt modifiers — bound to Belts category.
--- Representative subcategory: Strength.
+-- Representative subcategory: Heavy Belt (Str).
 
 DO $$
 DECLARE
@@ -12,7 +12,7 @@ BEGIN
   SELECT id INTO v_dom    FROM game_domain    WHERE name = 'Items';
   SELECT id INTO v_armour FROM game_subdomain WHERE name = 'Armour';
   SELECT id INTO v_belts  FROM game_category  WHERE name = 'Belts' AND game_subdomain_id = v_armour;
-  SELECT id INTO v_belt_s FROM game_subcategory WHERE name = 'Strength' AND game_category_id = v_belts;
+  SELECT id INTO v_belt_s FROM game_subcategory WHERE name = 'Heavy Belt' AND game_category_id = v_belts;
 
   -- Life & regen
   PERFORM seed_insert_mod(v_dom, v_armour, v_belts, v_belt_s, 'belt_added_life',     'prefix', 'life_max',            'flat',      'scalar', 20, 150, 'Maximum Life');
