@@ -1,14 +1,17 @@
 -- seeds/02-hierarchy.sql
--- Inserts the full item hierarchy: 1 domain → 3 subdomains → 9 categories → 26 subcategories.
+-- Inserts the full item hierarchy: 1 domain → 3 subdomains → 9 categories → 31 subcategories.
 --
--- Path A: Jewellery restructured — single "Jewellery" category with Ring / Amulet subcategories.
--- Path C: Armour subcategories renamed to slot-specific descriptive names so CMS dropdowns
---         show "Heavy Armour", "Evasion Helmet", etc. instead of repeated "Strength / Dexterity".
+-- Weapons subdomain restructured into hand-slot categories:
+--   1-Handed  → 1H Sword, 1H Axe, 1H Mace, Dagger, Wand
+--   2-Handed  → 2H Sword, 2H Axe, 2H Mace, Staff, Bow, Crossbow
+--   Off-hand  → Shield, Quiver, Focus
+--   (Shields moved from Armour into Off-hand)
 --
--- Armour naming pattern:
---   Str  → Heavy <slot>    (Tower Shield for Shields)
---   Dex  → Evasion <slot>  (Buckler for Shields)
---   Int  → Energy Shield <slot>  (Arcane Belt / Runic Shield for those slots)
+-- Armour subcategories named by material/style (Path C):
+--   Str → Heavy <slot>  |  Dex → Evasion <slot>  |  Int → Energy Shield <slot>
+--   Exceptions: Belts (Arcane Belt for Int), Shields (Tower Shield/Buckler/Runic Shield)
+--
+-- Jewellery: single category with Ring + Amulet subcategories (Path A).
 
 -- ══════════════════════════════════════════════════════════════════════════════
 -- Domain
@@ -24,57 +27,57 @@ VALUES (gen_random_uuid(), 'Items', 'All equippable item types in the game', 100
 INSERT INTO game_subdomain (id, game_domain_id, name, description, sort_order, is_active, created_at, updated_at)
 VALUES
   (gen_random_uuid(), (SELECT id FROM game_domain WHERE name = 'Items'),
-   'Weapons',   'Offensive equipment for dealing damage',         100, true, now(), now()),
+   'Weapons',   'Weapons and off-hand equipment',             100, true, now(), now()),
   (gen_random_uuid(), (SELECT id FROM game_domain WHERE name = 'Items'),
-   'Armour',    'Defensive equipment for protection',             200, true, now(), now()),
+   'Armour',    'Defensive body armour pieces',               200, true, now(), now()),
   (gen_random_uuid(), (SELECT id FROM game_domain WHERE name = 'Items'),
-   'Jewellery', 'Accessory equipment for utility and stats',      300, true, now(), now());
+   'Jewellery', 'Accessory equipment for utility and stats',  300, true, now(), now());
 
 -- ══════════════════════════════════════════════════════════════════════════════
 -- Categories
 -- ══════════════════════════════════════════════════════════════════════════════
 
--- Weapons → Melee, Ranged
+-- Weapons → 1-Handed, 2-Handed, Off-hand
 INSERT INTO game_category (id, game_domain_id, game_subdomain_id, name, description, sort_order, is_active, created_at, updated_at)
 VALUES
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
-   'Melee',  'Close-range weapons',  100, true, now(), now()),
+   '1-Handed', 'One-handed weapons — swords, axes, maces, daggers, wands',  100, true, now(), now()),
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
-   'Ranged', 'Long-range weapons',   200, true, now(), now());
+   '2-Handed', 'Two-handed weapons — greatswords, axes, bows, staves',       200, true, now(), now()),
+  (gen_random_uuid(),
+   (SELECT id FROM game_domain    WHERE name = 'Items'),
+   (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
+   'Off-hand',  'Off-hand equipment — shields, quivers, foci',               300, true, now(), now());
 
--- Armour → Body Armour, Helmets, Boots, Gloves, Belts, Shields
+-- Armour → Body Armour, Helmets, Boots, Gloves, Belts  (Shields moved to Off-hand)
 INSERT INTO game_category (id, game_domain_id, game_subdomain_id, name, description, sort_order, is_active, created_at, updated_at)
 VALUES
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Armour'),
-   'Body Armour', 'Chest protection',                100, true, now(), now()),
+   'Body Armour', 'Chest protection',   100, true, now(), now()),
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Armour'),
-   'Helmets',     'Head protection',                 200, true, now(), now()),
+   'Helmets',     'Head protection',    200, true, now(), now()),
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Armour'),
-   'Boots',       'Foot protection',                 300, true, now(), now()),
+   'Boots',       'Foot protection',    300, true, now(), now()),
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Armour'),
-   'Gloves',      'Hand protection',                 400, true, now(), now()),
+   'Gloves',      'Hand protection',    400, true, now(), now()),
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Armour'),
-   'Belts',       'Waist equipment',                 500, true, now(), now()),
-  (gen_random_uuid(),
-   (SELECT id FROM game_domain    WHERE name = 'Items'),
-   (SELECT id FROM game_subdomain WHERE name = 'Armour'),
-   'Shields',     'Off-hand defensive equipment',    600, true, now(), now());
+   'Belts',       'Waist equipment',    500, true, now(), now());
 
--- Jewellery → single "Jewellery" category (Path A: Ring + Amulet become subcategories)
+-- Jewellery → single "Jewellery" category
 INSERT INTO game_category (id, game_domain_id, game_subdomain_id, name, description, sort_order, is_active, created_at, updated_at)
 VALUES
   (gen_random_uuid(),
@@ -86,49 +89,101 @@ VALUES
 -- Subcategories
 -- ══════════════════════════════════════════════════════════════════════════════
 
--- Melee → Sword, Axe, Mace
+-- 1-Handed → 1H Sword, 1H Axe, 1H Mace, Dagger, Wand
 INSERT INTO game_subcategory (id, game_domain_id, game_subdomain_id, game_category_id, name, description, sort_order, is_active, created_at, updated_at)
 VALUES
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
-   (SELECT id FROM game_category  WHERE name = 'Melee'
+   (SELECT id FROM game_category  WHERE name = '1-Handed'
       AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
-   'Sword', 'Balanced melee weapon',    100, true, now(), now()),
+   '1H Sword', 'One-handed sword — balanced speed and damage', 100, true, now(), now()),
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
-   (SELECT id FROM game_category  WHERE name = 'Melee'
+   (SELECT id FROM game_category  WHERE name = '1-Handed'
       AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
-   'Axe',   'Heavy cleaving weapon',    200, true, now(), now()),
+   '1H Axe',   'One-handed axe — high raw damage',            200, true, now(), now()),
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
-   (SELECT id FROM game_category  WHERE name = 'Melee'
+   (SELECT id FROM game_category  WHERE name = '1-Handed'
       AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
-   'Mace',  'Blunt crushing weapon',    300, true, now(), now());
+   '1H Mace',  'One-handed mace — high stun potential',       300, true, now(), now()),
+  (gen_random_uuid(),
+   (SELECT id FROM game_domain    WHERE name = 'Items'),
+   (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
+   (SELECT id FROM game_category  WHERE name = '1-Handed'
+      AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
+   'Dagger',   'Fast one-handed weapon — crit-focused',        400, true, now(), now()),
+  (gen_random_uuid(),
+   (SELECT id FROM game_domain    WHERE name = 'Items'),
+   (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
+   (SELECT id FROM game_category  WHERE name = '1-Handed'
+      AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
+   'Wand',     'One-handed spell weapon — intelligence-based', 500, true, now(), now());
 
--- Ranged → Bow, Crossbow, Wand
+-- 2-Handed → 2H Sword, 2H Axe, 2H Mace, Staff, Bow, Crossbow
 INSERT INTO game_subcategory (id, game_domain_id, game_subdomain_id, game_category_id, name, description, sort_order, is_active, created_at, updated_at)
 VALUES
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
-   (SELECT id FROM game_category  WHERE name = 'Ranged'
+   (SELECT id FROM game_category  WHERE name = '2-Handed'
       AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
-   'Bow',      'Dexterity-based ranged weapon',   100, true, now(), now()),
+   '2H Sword',   'Two-handed sword — reach and damage',          100, true, now(), now()),
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
-   (SELECT id FROM game_category  WHERE name = 'Ranged'
+   (SELECT id FROM game_category  WHERE name = '2-Handed'
       AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
-   'Crossbow', 'Mechanical ranged weapon',        200, true, now(), now()),
+   '2H Axe',     'Two-handed axe — massive cleave damage',        200, true, now(), now()),
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
-   (SELECT id FROM game_category  WHERE name = 'Ranged'
+   (SELECT id FROM game_category  WHERE name = '2-Handed'
       AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
-   'Wand',     'Spell-casting ranged weapon',     300, true, now(), now());
+   '2H Mace',    'Two-handed mace — high stun and armor-break',   300, true, now(), now()),
+  (gen_random_uuid(),
+   (SELECT id FROM game_domain    WHERE name = 'Items'),
+   (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
+   (SELECT id FROM game_category  WHERE name = '2-Handed'
+      AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
+   'Staff',      'Two-handed spell weapon — intelligence-based',  400, true, now(), now()),
+  (gen_random_uuid(),
+   (SELECT id FROM game_domain    WHERE name = 'Items'),
+   (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
+   (SELECT id FROM game_category  WHERE name = '2-Handed'
+      AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
+   'Bow',        'Two-handed ranged weapon — dexterity-based',    500, true, now(), now()),
+  (gen_random_uuid(),
+   (SELECT id FROM game_domain    WHERE name = 'Items'),
+   (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
+   (SELECT id FROM game_category  WHERE name = '2-Handed'
+      AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
+   'Crossbow',   'Mechanical two-handed ranged weapon',           600, true, now(), now());
+
+-- Off-hand → Shield, Quiver, Focus
+INSERT INTO game_subcategory (id, game_domain_id, game_subdomain_id, game_category_id, name, description, sort_order, is_active, created_at, updated_at)
+VALUES
+  (gen_random_uuid(),
+   (SELECT id FROM game_domain    WHERE name = 'Items'),
+   (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
+   (SELECT id FROM game_category  WHERE name = 'Off-hand'
+      AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
+   'Shield', 'Defensive off-hand — blocks and armour',     100, true, now(), now()),
+  (gen_random_uuid(),
+   (SELECT id FROM game_domain    WHERE name = 'Items'),
+   (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
+   (SELECT id FROM game_category  WHERE name = 'Off-hand'
+      AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
+   'Quiver', 'Ammunition off-hand for bows',               200, true, now(), now()),
+  (gen_random_uuid(),
+   (SELECT id FROM game_domain    WHERE name = 'Items'),
+   (SELECT id FROM game_subdomain WHERE name = 'Weapons'),
+   (SELECT id FROM game_category  WHERE name = 'Off-hand'
+      AND game_subdomain_id = (SELECT id FROM game_subdomain WHERE name = 'Weapons')),
+   'Focus',  'Caster off-hand — amplifies spells',         300, true, now(), now());
 
 -- Body Armour → Heavy Armour (Str), Evasion Armour (Dex), Energy Shield Armour (Int)
 INSERT INTO game_subcategory (id, game_domain_id, game_subdomain_id, game_category_id, name, description, sort_order, is_active, created_at, updated_at)
@@ -213,38 +268,19 @@ VALUES
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Armour'),
    (SELECT id FROM game_category  WHERE name = 'Belts'),
-   'Heavy Belt',    'Strength-based belt',            100, true, now(), now()),
+   'Heavy Belt',    'Strength-based belt',      100, true, now(), now()),
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Armour'),
    (SELECT id FROM game_category  WHERE name = 'Belts'),
-   'Evasion Belt',  'Dexterity-based belt',           200, true, now(), now()),
+   'Evasion Belt',  'Dexterity-based belt',     200, true, now(), now()),
   (gen_random_uuid(),
    (SELECT id FROM game_domain    WHERE name = 'Items'),
    (SELECT id FROM game_subdomain WHERE name = 'Armour'),
    (SELECT id FROM game_category  WHERE name = 'Belts'),
-   'Arcane Belt',   'Intelligence-based belt',        300, true, now(), now());
+   'Arcane Belt',   'Intelligence-based belt',  300, true, now(), now());
 
--- Shields → Tower Shield (Str), Buckler (Dex), Runic Shield (Int)
-INSERT INTO game_subcategory (id, game_domain_id, game_subdomain_id, game_category_id, name, description, sort_order, is_active, created_at, updated_at)
-VALUES
-  (gen_random_uuid(),
-   (SELECT id FROM game_domain    WHERE name = 'Items'),
-   (SELECT id FROM game_subdomain WHERE name = 'Armour'),
-   (SELECT id FROM game_category  WHERE name = 'Shields'),
-   'Tower Shield',  'Strength-based heavy shield',    100, true, now(), now()),
-  (gen_random_uuid(),
-   (SELECT id FROM game_domain    WHERE name = 'Items'),
-   (SELECT id FROM game_subdomain WHERE name = 'Armour'),
-   (SELECT id FROM game_category  WHERE name = 'Shields'),
-   'Buckler',       'Dexterity-based light shield',   200, true, now(), now()),
-  (gen_random_uuid(),
-   (SELECT id FROM game_domain    WHERE name = 'Items'),
-   (SELECT id FROM game_subdomain WHERE name = 'Armour'),
-   (SELECT id FROM game_category  WHERE name = 'Shields'),
-   'Runic Shield',  'Intelligence-based magic shield', 300, true, now(), now());
-
--- Jewellery → Ring, Amulet  (Path A: subcategories of the single Jewellery category)
+-- Jewellery → Ring, Amulet
 INSERT INTO game_subcategory (id, game_domain_id, game_subdomain_id, game_category_id, name, description, sort_order, is_active, created_at, updated_at)
 VALUES
   (gen_random_uuid(),

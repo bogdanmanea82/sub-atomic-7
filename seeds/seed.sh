@@ -24,7 +24,7 @@ FILES=(
   "06-modifiers-boots.sql"
   "07-modifiers-gloves.sql"
   "08-modifiers-belts.sql"
-  "09-modifiers-shields.sql"
+  "09-modifiers-offhand.sql"
   "10-modifiers-jewellery.sql"
   "12-characters.sql"
   "13-character-stat-bases.sql"
