@@ -1,77 +1,33 @@
 -- seeds/06-modifiers-boots.sql
--- 45 boots modifiers (15 per attribute × 3 attributes) + 1 tier each.
+-- 10 boot modifiers — bound to Boots category.
+-- Representative subcategory: Dexterity.
 
 DO $$
 DECLARE
-  v_dom UUID;
-  v_sub UUID;
-  v_cat UUID;
-  v_str UUID;
-  v_dex UUID;
-  v_int UUID;
+  v_dom    UUID;
+  v_armour UUID;
+  v_boots  UUID;
+  v_boot_d UUID;
 BEGIN
-  SELECT id INTO v_dom FROM game_domain WHERE name = 'Items';
-  SELECT id INTO v_sub FROM game_subdomain WHERE name = 'Armour';
-  SELECT id INTO v_cat FROM game_category WHERE name = 'Boots' AND game_subdomain_id = v_sub;
-  SELECT id INTO v_str FROM game_subcategory WHERE name = 'Strength' AND game_category_id = v_cat;
-  SELECT id INTO v_dex FROM game_subcategory WHERE name = 'Dexterity' AND game_category_id = v_cat;
-  SELECT id INTO v_int FROM game_subcategory WHERE name = 'Intelligence' AND game_category_id = v_cat;
+  SELECT id INTO v_dom    FROM game_domain    WHERE name = 'Items';
+  SELECT id INTO v_armour FROM game_subdomain WHERE name = 'Armour';
+  SELECT id INTO v_boots  FROM game_category  WHERE name = 'Boots' AND game_subdomain_id = v_armour;
+  SELECT id INTO v_boot_d FROM game_subcategory WHERE name = 'Dexterity' AND game_category_id = v_boots;
 
-  -- ════════════════════════════════════════════════════════════════════════════
-  -- BOOTS — STRENGTH (15 mods: 6 core + 9 specific)
-  -- ════════════════════════════════════════════════════════════════════════════
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'flat_max_life',       'suffix', 'life_max',            'flat',      'scalar', 10,  80, 'Added Maximum Life');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'flat_fire_res',       'suffix', 'fire_resistance',     'flat',      'scalar', 5,   40, 'Added Fire Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'flat_cold_res',       'suffix', 'cold_resistance',     'flat',      'scalar', 5,   40, 'Added Cold Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'flat_lightning_res',  'suffix', 'lightning_resistance','flat',      'scalar', 5,   40, 'Added Lightning Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'flat_chaos_res',      'suffix', 'chaos_resistance',    'flat',      'scalar', 5,   30, 'Added Chaos Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'flat_all_ele_res',    'suffix', 'fire_resistance',     'flat',      'scalar', 5,   20, 'Added All Elemental Resistances');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'flat_strength',       'suffix', 'strength',            'flat',      'scalar', 5,   20, 'Added Strength');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'flat_armour',         'prefix', 'armor_rating',        'flat',      'scalar', 20, 150, 'Added Armour');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'inc_armour',          'prefix', 'armor_rating',        'increased', 'scalar', 10,  50, 'Increased Armour');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'flat_max_mana',       'suffix', 'mana_max',            'flat',      'scalar', 5,   40, 'Added Maximum Mana');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'inc_movement_speed',  'suffix', 'movement_speed',      'increased', 'scalar', 5,   20, 'Increased Movement Speed');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'flat_life_regen',     'suffix', 'life_regen',          'flat',      'scalar', 5,   30, 'Life Regeneration per Second');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'inc_max_life',        'prefix', 'life_max',            'increased', 'scalar', 10,  40, 'Increased Maximum Life');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'inc_stun_recovery',   'suffix', 'stun_threshold',      'increased', 'scalar', 10,  30, 'Increased Stun Recovery');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_str, 'cannot_be_frozen',    'suffix', 'stun_threshold',      'flat',      'scalar', 1,   1,  'Cannot Be Frozen');
-
-  -- ════════════════════════════════════════════════════════════════════════════
-  -- BOOTS — DEXTERITY (15 mods: 6 core + 9 specific)
-  -- ════════════════════════════════════════════════════════════════════════════
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'flat_max_life',       'suffix', 'life_max',            'flat',      'scalar', 10,  80, 'Added Maximum Life');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'flat_fire_res',       'suffix', 'fire_resistance',     'flat',      'scalar', 5,   40, 'Added Fire Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'flat_cold_res',       'suffix', 'cold_resistance',     'flat',      'scalar', 5,   40, 'Added Cold Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'flat_lightning_res',  'suffix', 'lightning_resistance','flat',      'scalar', 5,   40, 'Added Lightning Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'flat_chaos_res',      'suffix', 'chaos_resistance',    'flat',      'scalar', 5,   30, 'Added Chaos Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'flat_all_ele_res',    'suffix', 'fire_resistance',     'flat',      'scalar', 5,   20, 'Added All Elemental Resistances');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'flat_dexterity',      'suffix', 'dexterity',           'flat',      'scalar', 5,   20, 'Added Dexterity');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'flat_evasion',        'prefix', 'evasion_rating',      'flat',      'scalar', 20, 150, 'Added Evasion Rating');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'inc_evasion',         'prefix', 'evasion_rating',      'increased', 'scalar', 10,  50, 'Increased Evasion Rating');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'flat_max_mana',       'suffix', 'mana_max',            'flat',      'scalar', 5,   40, 'Added Maximum Mana');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'inc_movement_speed',  'suffix', 'movement_speed',      'increased', 'scalar', 5,   20, 'Increased Movement Speed');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'flat_life_regen',     'suffix', 'life_regen',          'flat',      'scalar', 5,   30, 'Life Regeneration per Second');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'inc_max_life',        'prefix', 'life_max',            'increased', 'scalar', 10,  40, 'Increased Maximum Life');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'inc_dodge_chance',    'prefix', 'evasion_rating',      'increased', 'scalar', 5,   20, 'Increased Dodge Chance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_dex, 'cannot_be_frozen',    'suffix', 'stun_threshold',      'flat',      'scalar', 1,   1,  'Cannot Be Frozen');
-
-  -- ════════════════════════════════════════════════════════════════════════════
-  -- BOOTS — INTELLIGENCE (15 mods: 6 core + 9 specific)
-  -- ════════════════════════════════════════════════════════════════════════════
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'flat_max_life',       'suffix', 'life_max',            'flat',      'scalar', 10,  80, 'Added Maximum Life');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'flat_fire_res',       'suffix', 'fire_resistance',     'flat',      'scalar', 5,   40, 'Added Fire Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'flat_cold_res',       'suffix', 'cold_resistance',     'flat',      'scalar', 5,   40, 'Added Cold Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'flat_lightning_res',  'suffix', 'lightning_resistance','flat',      'scalar', 5,   40, 'Added Lightning Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'flat_chaos_res',      'suffix', 'chaos_resistance',    'flat',      'scalar', 5,   30, 'Added Chaos Resistance');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'flat_all_ele_res',    'suffix', 'fire_resistance',     'flat',      'scalar', 5,   20, 'Added All Elemental Resistances');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'flat_intelligence',   'suffix', 'intelligence',        'flat',      'scalar', 5,   20, 'Added Intelligence');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'flat_energy_shield',  'prefix', 'life_max',            'flat',      'scalar', 10, 100, 'Added Energy Shield');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'inc_energy_shield',   'prefix', 'life_max',            'increased', 'scalar', 10,  50, 'Increased Energy Shield');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'flat_max_mana',       'suffix', 'mana_max',            'flat',      'scalar', 5,   40, 'Added Maximum Mana');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'inc_movement_speed',  'suffix', 'movement_speed',      'increased', 'scalar', 5,   20, 'Increased Movement Speed');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'flat_life_regen',     'suffix', 'life_regen',          'flat',      'scalar', 5,   30, 'Life Regeneration per Second');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'inc_max_life',        'prefix', 'life_max',            'increased', 'scalar', 10,  40, 'Increased Maximum Life');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'inc_mana_regen',      'suffix', 'mana_regen',          'increased', 'scalar', 10,  40, 'Increased Mana Regeneration');
-  PERFORM seed_insert_mod(v_dom, v_sub, v_cat, v_int, 'cannot_be_frozen',    'suffix', 'stun_threshold',      'flat',      'scalar', 1,   1,  'Cannot Be Frozen');
-
-END $$;
+  -- Utility
+  PERFORM seed_insert_mod(v_dom, v_armour, v_boots, v_boot_d, 'boots_inc_movement',  'prefix', 'movement_speed',   'increased', 'scalar', 5,  24,  'Increased Movement Speed');
+  PERFORM seed_insert_mod(v_dom, v_armour, v_boots, v_boot_d, 'boots_stun_threshold','suffix', 'stun_threshold',   'flat',      'scalar', 10, 120, 'Stun Threshold');
+  -- Defence
+  PERFORM seed_insert_mod(v_dom, v_armour, v_boots, v_boot_d, 'boots_added_evasion', 'prefix', 'evasion_rating',   'flat',      'scalar', 15, 220, 'Evasion Rating');
+  PERFORM seed_insert_mod(v_dom, v_armour, v_boots, v_boot_d, 'boots_added_armour',  'prefix', 'armor_rating',     'flat',      'scalar', 15, 220, 'Armor Rating');
+  -- Life & regen
+  PERFORM seed_insert_mod(v_dom, v_armour, v_boots, v_boot_d, 'boots_added_life',    'suffix', 'life_max',         'flat',      'scalar', 10, 70,  'Added Maximum Life');
+  PERFORM seed_insert_mod(v_dom, v_armour, v_boots, v_boot_d, 'boots_life_regen',    'suffix', 'life_regen',       'flat',      'scalar', 1,  15,  'Life Regeneration');
+  -- Resistances
+  PERFORM seed_insert_mod(v_dom, v_armour, v_boots, v_boot_d, 'boots_fire_res',      'suffix', 'fire_resistance',  'increased', 'scalar', 6,  35,  'Fire Resistance');
+  PERFORM seed_insert_mod(v_dom, v_armour, v_boots, v_boot_d, 'boots_cold_res',      'suffix', 'cold_resistance',  'increased', 'scalar', 6,  35,  'Cold Resistance');
+  -- Attributes
+  PERFORM seed_insert_mod(v_dom, v_armour, v_boots, v_boot_d, 'boots_added_dex',     'suffix', 'dexterity',        'flat',      'scalar', 3,  20,  'Added Dexterity');
+  PERFORM seed_insert_mod(v_dom, v_armour, v_boots, v_boot_d, 'boots_added_strength','suffix', 'strength',         'flat',      'scalar', 3,  18,  'Added Strength');
+END;
+$$;

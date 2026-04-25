@@ -1,21 +1,17 @@
 -- seeds/01-helpers.sql
--- Helper for inserting an item_modifier + 4 progressive tiers + auto subcategory binding.
+-- Helper for inserting an item_modifier + 4 progressive tiers + category-level binding.
 -- Dropped by 99-cleanup.sql after seeding completes.
 --
 -- Tier derivation: given overall value_min (M) and value_max (X), step = (X-M)/4.
---   Tier 0 (level_req  1, weight 1000): [M,           M + step]
---   Tier 1 (level_req 20, weight  600): [M + step,    M + step*2]
---   Tier 2 (level_req 40, weight  300): [M + step*2,  M + step*3]
---   Tier 3 (level_req 60, weight  100): [M + step*3,  X]
+--   Tier 0 (level_req  1, weight 1000): [M,           LEAST(M+step, X)]
+--   Tier 1 (level_req 20, weight  600): [LEAST(M+step, X),   LEAST(M+step*2, X)]
+--   Tier 2 (level_req 40, weight  300): [LEAST(M+step*2, X), LEAST(M+step*3, X)]
+--   Tier 3 (level_req 60, weight  100): [LEAST(M+step*3, X), X]
+-- All boundaries are clamped to X so min <= max always holds for small ranges.
 --
--- Stat proxy notes (where modifier targets a concept not in the stat registry):
---   energy_shield mods → life_max    (both are HP pools)
---   projectile_speed   → accuracy_rating (ranged offensive)
---   area_of_effect     → attack_range    (spatial reach)
---   flask_duration     → life_regen      (recovery mechanic)
---   life/mana_leech    → life_regen / mana_regen (closest recovery stat)
---   flat_all_ele_res   → fire_resistance (representative element)
---   cannot_be_frozen   → stun_threshold  (status immunity proxy)
+-- Binding: target_type = 'category' so one modifier entry covers all subcategories
+-- under that category (e.g. one "Added Physical Damage" covers Sword + Axe + Mace).
+-- p_subcategory_id is still required to satisfy the NOT NULL FK in item_modifier.
 
 CREATE OR REPLACE FUNCTION seed_insert_mod(
   p_domain_id         UUID,
@@ -50,7 +46,6 @@ BEGIN
     p_name, true, now(), now()
   ) RETURNING id INTO v_mod_id;
 
-  -- Divide range into 4 steps; clamp all boundaries to p_value_max so min <= max always holds.
   v_step := GREATEST(1, (p_value_max - p_value_min) / 4);
 
   INSERT INTO item_modifier_tier
@@ -61,10 +56,10 @@ BEGIN
     (gen_random_uuid(), v_mod_id, 2, LEAST(p_value_min + v_step*2,  p_value_max),         LEAST(p_value_min + v_step*3,  p_value_max), 40,  300, now(), now()),
     (gen_random_uuid(), v_mod_id, 3, LEAST(p_value_min + v_step*3,  p_value_max),         p_value_max,                                60,  100, now(), now());
 
-  -- Mirror the service-layer auto-binding: bind to the modifier's own subcategory
+  -- Category-level binding: one modifier entry covers all subcategories under the category.
   INSERT INTO item_modifier_binding
     (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at)
   VALUES
-    (gen_random_uuid(), v_mod_id, 'subcategory', p_subcategory_id, true, true, now(), now());
+    (gen_random_uuid(), v_mod_id, 'category', p_category_id, true, true, now(), now());
 END;
 $$ LANGUAGE plpgsql;
