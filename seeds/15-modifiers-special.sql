@@ -12,18 +12,18 @@
 --   F. Multi-category across armour slots + exclusions
 --
 -- Modifiers in this file:
---  1. Vital Essence       (A) — life_max       on Body Armour + Helmets + Belts
---  2. Chaos Ward          (A) — chaos_res      on all 5 armour categories
---  3. Iron Grip           (B) — strength       1-Handed incl., Wand excl.
---  4. Scholar's Will      (B) — intelligence   Helmets incl., Heavy Helmet excl.
---  5. Runic Inscription   (B) — mana_regen     2-Handed incl., 2H Sword/Axe/Mace excl.
---  6. Fleet-Footed        (B) — movement_speed Boots incl., Heavy Boots excl.
---  7. Sigil of the Ring   (C) — mana_max       Jewellery excl., Ring incl.
---  8. Pendant of Vitality (C) — life_regen     Jewellery excl., Amulet incl.
---  9. Death Knell         (D) — crit_chance    Dagger only
--- 10. Arcane Conduit      (D) — cast_speed     Focus only
--- 11. Sharpshooter's Mark (E) — accuracy       2-Handed incl. + Quiver incl.
--- 12. Phantom Step        (F) — evasion_rating Gloves incl. + Boots incl., Heavy* excl.
+--  1. Maximum Life              (A) — life_max       Body Armour + Helmets + Belts
+--  2. Chaos Resistance          (A) — chaos_res      all 5 armour categories
+--  3. Added Strength            (B) — strength       1-Handed incl., Wand excl.
+--  4. Added Intelligence        (B) — intelligence   Helmets incl., Heavy Helmet excl.
+--  5. Mana Regeneration         (B) — mana_regen     2-Handed incl., 2H Sword/Axe/Mace excl.
+--  6. Increased Movement Speed  (B) — movement_speed Boots incl., Heavy Boots excl.
+--  7. Maximum Mana              (C) — mana_max       Jewellery excl., Ring incl.
+--  8. Life Regeneration         (C) — life_regen     Jewellery excl., Amulet incl.
+--  9. Critical Strike Chance    (D) — crit_chance    Dagger only
+-- 10. Cast Speed                (D) — cast_speed     Focus only
+-- 11. Added Accuracy Rating     (E) — accuracy       2-Handed incl. + Quiver incl.
+-- 12. Evasion Rating            (F) — evasion_rating Gloves incl. + Boots incl., Heavy* excl.
 
 DO $$
 DECLARE
@@ -120,13 +120,13 @@ BEGIN
   SELECT id INTO v_amulet FROM game_subcategory WHERE name = 'Amulet' AND game_category_id = v_jewcat;
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 1. VITAL ESSENCE — flat life_max, prefix
+  -- 1. MAXIMUM LIFE — flat life_max, prefix
   -- Pattern A: Body Armour + Helmets + Belts (multiple category inclusions)
   -- Boots and Gloves are deliberately NOT bound — extremities feel less "vital".
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_body, v_heavy_armour,
-    'vital_essence', 'prefix', 'life_max', 'flat', 'scalar', 25, 350, 'Vital Essence'
+    'vital_essence', 'prefix', 'life_max', 'flat', 'scalar', 25, 350, 'Maximum Life'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  25,  80,  1, 1000, now(), now()),
@@ -139,13 +139,13 @@ BEGIN
     (gen_random_uuid(), v_mod, 'category', v_belts, true, true, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 2. CHAOS WARD — increased chaos_resistance, suffix
+  -- 2. CHAOS RESISTANCE — increased chaos_resistance, suffix
   -- Pattern A: All 5 armour categories — chaos res is rare and valuable everywhere.
   -- Steep level requirements; T3 needs level 70.
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_body, v_heavy_armour,
-    'chaos_ward', 'suffix', 'chaos_resistance', 'increased', 'scalar', 4, 60, 'Chaos Ward'
+    'chaos_ward', 'suffix', 'chaos_resistance', 'increased', 'scalar', 4, 60, 'Chaos Resistance'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  4, 12,  1,  800, now(), now()),
@@ -160,13 +160,13 @@ BEGIN
     (gen_random_uuid(), v_mod, 'category', v_belts,  true, true, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 3. IRON GRIP — flat strength, suffix
+  -- 3. ADDED STRENGTH — flat strength, suffix
   -- Pattern B: 1-Handed category included, Wand subcategory excluded.
   -- Wands are intelligence weapons — strength is thematically wrong.
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_1h, v_1h_sword,
-    'iron_grip', 'suffix', 'strength', 'flat', 'scalar', 3, 35, 'Iron Grip'
+    'iron_grip', 'suffix', 'strength', 'flat', 'scalar', 3, 35, 'Added Strength'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  3, 10,  1, 1000, now(), now()),
@@ -178,13 +178,13 @@ BEGIN
     (gen_random_uuid(), v_mod, 'subcategory', v_wand, true, false, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 4. SCHOLAR'S WILL — flat intelligence, suffix
+  -- 4. ADDED INTELLIGENCE — flat intelligence, suffix
   -- Pattern B: Helmets category included, Heavy Helmet excluded.
   -- Physical strength helmets don't enhance arcane knowledge.
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_helm, v_es_helmet,
-    'scholars_will', 'suffix', 'intelligence', 'flat', 'scalar', 3, 35, 'Scholar''s Will'
+    'scholars_will', 'suffix', 'intelligence', 'flat', 'scalar', 3, 35, 'Added Intelligence'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  3, 10,  1, 1000, now(), now()),
@@ -196,13 +196,13 @@ BEGIN
     (gen_random_uuid(), v_mod, 'subcategory', v_heavy_helmet, true, false, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 5. RUNIC INSCRIPTION — increased mana_regen, suffix
+  -- 5. MANA REGENERATION — increased mana_regen, suffix
   -- Pattern B: 2-Handed category included; 2H Sword, 2H Axe, 2H Mace excluded.
   -- Physical melee two-handers don't channel mana — Staff, Bow, Crossbow do.
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_2h, v_staff,
-    'runic_inscription', 'suffix', 'mana_regen', 'increased', 'scalar', 8, 120, 'Runic Inscription'
+    'runic_inscription', 'suffix', 'mana_regen', 'increased', 'scalar', 8, 120, 'Mana Regeneration'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,   8,  25,  1, 1000, now(), now()),
@@ -210,19 +210,19 @@ BEGIN
     (gen_random_uuid(), v_mod, 2,  50,  80, 50,  250, now(), now()),
     (gen_random_uuid(), v_mod, 3,  80, 120, 70,   80, now(), now());
   INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category',    v_2h,      true, true,  now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_2h_sword,true, false, now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_2h_axe,  true, false, now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_2h_mace, true, false, now(), now());
+    (gen_random_uuid(), v_mod, 'category',    v_2h,       true, true,  now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_2h_sword, true, false, now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_2h_axe,   true, false, now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_2h_mace,  true, false, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 6. FLEET-FOOTED — increased movement_speed, prefix
+  -- 6. INCREASED MOVEMENT SPEED — increased movement_speed, prefix
   -- Pattern B: Boots category included, Heavy Boots excluded.
   -- Steel-reinforced boots are too heavy for nimble footwork.
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_boots, v_ev_boots,
-    'fleet_footed', 'prefix', 'movement_speed', 'increased', 'scalar', 5, 30, 'Fleet-Footed'
+    'fleet_footed', 'prefix', 'movement_speed', 'increased', 'scalar', 5, 30, 'Increased Movement Speed'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  5, 10,  1,  800, now(), now()),
@@ -234,14 +234,14 @@ BEGIN
     (gen_random_uuid(), v_mod, 'subcategory', v_heavy_boots, true, false, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 7. SIGIL OF THE RING — flat mana_max, prefix
+  -- 7. MAXIMUM MANA — flat mana_max, prefix
   -- Pattern C: Jewellery category excluded; Ring subcategory explicitly included.
   -- The subcategory inclusion overrides the category exclusion for Rings only.
   -- Amulets get neither — effectively Ring-exclusive via explicit hierarchy.
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_jewel, v_jewcat, v_ring,
-    'sigil_of_the_ring', 'prefix', 'mana_max', 'flat', 'scalar', 8, 90, 'Sigil of the Ring'
+    'sigil_of_the_ring', 'prefix', 'mana_max', 'flat', 'scalar', 8, 90, 'Maximum Mana'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  8, 20,  1, 1000, now(), now()),
@@ -253,13 +253,13 @@ BEGIN
     (gen_random_uuid(), v_mod, 'subcategory', v_ring,   true, true,  now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 8. PENDANT OF VITALITY — flat life_regen, suffix
+  -- 8. LIFE REGENERATION — flat life_regen, suffix
   -- Pattern C: Jewellery category excluded; Amulet subcategory explicitly included.
-  -- Mirror of Sigil of the Ring — Amulet-exclusive via same override pattern.
+  -- Mirror of Maximum Mana — Amulet-exclusive via same override pattern.
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_jewel, v_jewcat, v_amulet,
-    'pendant_of_vitality', 'suffix', 'life_regen', 'flat', 'scalar', 2, 22, 'Pendant of Vitality'
+    'pendant_of_vitality', 'suffix', 'life_regen', 'flat', 'scalar', 2, 22, 'Life Regeneration'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  2,  5,  1, 1000, now(), now()),
@@ -271,14 +271,13 @@ BEGIN
     (gen_random_uuid(), v_mod, 'subcategory', v_amulet, true, true,  now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 9. DEATH KNELL — increased critical_strike_chance, suffix
+  -- 9. CRITICAL STRIKE CHANCE — increased critical_strike_chance, suffix
   -- Pattern D: Dagger subcategory only. No category binding at all.
-  -- High crit values exclusive to the assassin weapon — Swords and Axes
-  -- share the 1H pool crit mod; this is Dagger's premium tier on top.
+  -- High crit values exclusive to the assassin weapon.
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_1h, v_dagger,
-    'death_knell', 'suffix', 'critical_strike_chance', 'increased', 'scalar', 10, 90, 'Death Knell'
+    'death_knell', 'suffix', 'critical_strike_chance', 'increased', 'scalar', 10, 90, 'Critical Strike Chance'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0, 10, 25,  1,  800, now(), now()),
@@ -289,13 +288,13 @@ BEGIN
     (gen_random_uuid(), v_mod, 'subcategory', v_dagger, true, true, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 10. ARCANE CONDUIT — increased cast_speed, prefix
+  -- 10. CAST SPEED — increased cast_speed, prefix
   -- Pattern D: Focus subcategory only. No category binding.
   -- Caster off-hand amplifies spells; Shield and Quiver don't channel arcane energy.
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_offh, v_focus,
-    'arcane_conduit', 'prefix', 'cast_speed', 'increased', 'scalar', 8, 50, 'Arcane Conduit'
+    'arcane_conduit', 'prefix', 'cast_speed', 'increased', 'scalar', 8, 50, 'Cast Speed'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  8, 18,  1,  800, now(), now()),
@@ -306,13 +305,13 @@ BEGIN
     (gen_random_uuid(), v_mod, 'subcategory', v_focus, true, true, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 11. SHARPSHOOTER'S MARK — flat accuracy_rating, prefix
+  -- 11. ADDED ACCURACY RATING — flat accuracy_rating, prefix
   -- Pattern E: 2-Handed category included AND Quiver subcategory included.
   -- Ranged characters stack accuracy on their weapon AND their ammo pouch.
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_2h, v_2h_sword,
-    'sharpshooters_mark', 'prefix', 'accuracy_rating', 'flat', 'scalar', 15, 250, 'Sharpshooter''s Mark'
+    'sharpshooters_mark', 'prefix', 'accuracy_rating', 'flat', 'scalar', 15, 250, 'Added Accuracy Rating'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  15,  50,  1, 1000, now(), now()),
@@ -320,17 +319,17 @@ BEGIN
     (gen_random_uuid(), v_mod, 2, 100, 175, 40,  300, now(), now()),
     (gen_random_uuid(), v_mod, 3, 175, 250, 60,  100, now(), now());
   INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category',    v_2h,    true, true, now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_quiver,true, true, now(), now());
+    (gen_random_uuid(), v_mod, 'category',    v_2h,     true, true, now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_quiver, true, true, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
-  -- 12. PHANTOM STEP — flat evasion_rating, prefix
+  -- 12. EVASION RATING — flat evasion_rating, prefix
   -- Pattern F: Gloves + Boots categories included; Heavy Gloves + Heavy Boots excluded.
   -- Evasion is for light and magical armour — plate extremities don't dodge.
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_gloves, v_ev_gloves,
-    'phantom_step', 'prefix', 'evasion_rating', 'flat', 'scalar', 15, 280, 'Phantom Step'
+    'phantom_step', 'prefix', 'evasion_rating', 'flat', 'scalar', 15, 280, 'Evasion Rating'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  15,  50,  1, 1000, now(), now()),
