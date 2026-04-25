@@ -126,7 +126,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_body, v_heavy_armour,
-    'vital_essence', 'prefix', 'life_max', 'flat', 'scalar', 25, 350, 'Maximum Life'
+    'maximum_life', 'prefix', 'life_max', 'flat', 'scalar', 25, 350, 'Maximum Life'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  25,  80,  1, 1000, now(), now()),
@@ -145,7 +145,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_body, v_heavy_armour,
-    'chaos_ward', 'suffix', 'chaos_resistance', 'increased', 'scalar', 4, 60, 'Chaos Resistance'
+    'chaos_resistance', 'suffix', 'chaos_resistance', 'increased', 'scalar', 4, 60, 'Chaos Resistance'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  4, 12,  1,  800, now(), now()),
@@ -166,7 +166,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_1h, v_1h_sword,
-    'iron_grip', 'suffix', 'strength', 'flat', 'scalar', 3, 35, 'Added Strength'
+    'added_strength', 'suffix', 'strength', 'flat', 'scalar', 3, 35, 'Added Strength'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  3, 10,  1, 1000, now(), now()),
@@ -184,7 +184,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_helm, v_es_helmet,
-    'scholars_will', 'suffix', 'intelligence', 'flat', 'scalar', 3, 35, 'Added Intelligence'
+    'added_intelligence', 'suffix', 'intelligence', 'flat', 'scalar', 3, 35, 'Added Intelligence'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  3, 10,  1, 1000, now(), now()),
@@ -202,7 +202,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_2h, v_staff,
-    'runic_inscription', 'suffix', 'mana_regen', 'increased', 'scalar', 8, 120, 'Mana Regeneration'
+    'mana_regeneration', 'suffix', 'mana_regen', 'increased', 'scalar', 8, 120, 'Mana Regeneration'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,   8,  25,  1, 1000, now(), now()),
@@ -222,7 +222,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_boots, v_ev_boots,
-    'fleet_footed', 'prefix', 'movement_speed', 'increased', 'scalar', 5, 30, 'Increased Movement Speed'
+    'movement_speed', 'prefix', 'movement_speed', 'increased', 'scalar', 5, 30, 'Increased Movement Speed'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  5, 10,  1,  800, now(), now()),
@@ -241,7 +241,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_jewel, v_jewcat, v_ring,
-    'sigil_of_the_ring', 'prefix', 'mana_max', 'flat', 'scalar', 8, 90, 'Maximum Mana'
+    'maximum_mana', 'prefix', 'mana_max', 'flat', 'scalar', 8, 90, 'Maximum Mana'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  8, 20,  1, 1000, now(), now()),
@@ -259,7 +259,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_jewel, v_jewcat, v_amulet,
-    'pendant_of_vitality', 'suffix', 'life_regen', 'flat', 'scalar', 2, 22, 'Life Regeneration'
+    'life_regeneration', 'suffix', 'life_regen', 'flat', 'scalar', 2, 22, 'Life Regeneration'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  2,  5,  1, 1000, now(), now()),
@@ -277,7 +277,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_1h, v_dagger,
-    'death_knell', 'suffix', 'critical_strike_chance', 'increased', 'scalar', 10, 90, 'Critical Strike Chance'
+    'critical_strike_chance', 'suffix', 'critical_strike_chance', 'increased', 'scalar', 10, 90, 'Critical Strike Chance'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0, 10, 25,  1,  800, now(), now()),
@@ -294,7 +294,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_offh, v_focus,
-    'arcane_conduit', 'prefix', 'cast_speed', 'increased', 'scalar', 8, 50, 'Cast Speed'
+    'cast_speed', 'prefix', 'cast_speed', 'increased', 'scalar', 8, 50, 'Cast Speed'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  8, 18,  1,  800, now(), now()),
@@ -311,7 +311,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_2h, v_2h_sword,
-    'sharpshooters_mark', 'prefix', 'accuracy_rating', 'flat', 'scalar', 15, 250, 'Added Accuracy Rating'
+    'accuracy_rating', 'prefix', 'accuracy_rating', 'flat', 'scalar', 15, 250, 'Added Accuracy Rating'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  15,  50,  1, 1000, now(), now()),
@@ -329,7 +329,7 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_gloves, v_ev_gloves,
-    'phantom_step', 'prefix', 'evasion_rating', 'flat', 'scalar', 15, 280, 'Evasion Rating'
+    'evasion_rating', 'prefix', 'evasion_rating', 'flat', 'scalar', 15, 280, 'Evasion Rating'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  15,  50,  1, 1000, now(), now()),
