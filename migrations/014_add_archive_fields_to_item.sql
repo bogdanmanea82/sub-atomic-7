@@ -1,0 +1,3 @@
+ALTER TABLE item
+  ADD COLUMN IF NOT EXISTS archived_at      TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS archived_reason  TEXT;

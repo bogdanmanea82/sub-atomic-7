@@ -5,7 +5,7 @@
 import type { ListView, SelectOption } from "@view-service/types";
 import type { ItemFormView, ItemDetailView } from "@view-service/types";
 import { mainLayout } from "../../organisms/layouts";
-import { pageHeader, formSection, detailSection, dataTable } from "../../molecules";
+import { pageHeader, formSection, detailSection, dataTable, statusFormSection } from "../../molecules";
 import { link, deleteForm, filterSelect, ICON_EDIT, ICON_COPY, statusBadgeInline } from "../../sub-atoms";
 import { statSheetFormSection } from "./stat-sheet-form-section";
 import { statSheetDetailSection } from "./stat-sheet-detail-section";
@@ -71,7 +71,7 @@ export function detailPage(
   const content = `
     ${pageHeader({
       title: view.title,
-      badge: view.isActive !== undefined ? statusBadgeInline(view.isActive) : undefined,
+      badge: view.isActive !== undefined ? statusBadgeInline(view.isActive, view.archivedAt) : undefined,
       breadcrumbs: [{ label: listName, href: basePath }, { label: view.title }],
       actions,
     })}
@@ -89,12 +89,18 @@ export function createPage(
   fieldConfigJson?: string,
 ): string {
   const listName = basePath.slice(1).split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  const displayView = view.currentState !== undefined
+    ? { ...view, fields: view.fields.filter((f) => f.name !== "is_active") }
+    : view;
+  const statusHtml = view.currentState !== undefined
+    ? statusFormSection(view.currentState, view.statusReason)
+    : "";
   const content = `
     ${pageHeader({
       title: view.title,
       breadcrumbs: [{ label: listName, href: basePath }, { label: "New" }],
     })}
-    ${formSection(view, basePath, basePath, fieldConfigJson, statSheetFormSection(view.statSheet))}`;
+    ${formSection(displayView, basePath, basePath, fieldConfigJson, `${statusHtml}${statSheetFormSection(view.statSheet)}`)}`;
 
   return mainLayout(content, view.title, basePath);
 }
@@ -108,12 +114,18 @@ export function editPage(
   fieldConfigJson?: string,
 ): string {
   const listName = basePath.slice(1).split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  const displayView = view.currentState !== undefined
+    ? { ...view, fields: view.fields.filter((f) => f.name !== "is_active") }
+    : view;
+  const statusHtml = view.currentState !== undefined
+    ? statusFormSection(view.currentState, view.statusReason)
+    : "";
   const content = `
     ${pageHeader({
       title: view.title,
       breadcrumbs: [{ label: listName, href: basePath }, { label: view.title }],
     })}
-    ${formSection(view, `${basePath}/${id}`, `${basePath}/${id}`, fieldConfigJson, statSheetFormSection(view.statSheet))}
+    ${formSection(displayView, `${basePath}/${id}`, `${basePath}/${id}`, fieldConfigJson, `${statusHtml}${statSheetFormSection(view.statSheet)}`)}
     <div style="margin-top:1rem; max-width:1100px">
       ${link("Duplicate", `${basePath}/${id}/duplicate`, "secondary", ICON_COPY, true)}
     </div>`;
@@ -129,6 +141,8 @@ export function duplicatePage(
   fieldConfigJson?: string,
 ): string {
   const listName = basePath.slice(1).split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  const displayView = { ...view, fields: view.fields.filter((f) => f.name !== "is_active") };
+  const statusHtml = statusFormSection("active");
   const content = `
     ${pageHeader({
       title: view.title,
@@ -137,7 +151,7 @@ export function duplicatePage(
     <div class="duplicate-notice">
       <strong>Duplicating entry.</strong> Update the Name and Machine Name before saving.
     </div>
-    ${formSection(view, basePath, basePath, fieldConfigJson, statSheetFormSection(view.statSheet))}`;
+    ${formSection(displayView, basePath, basePath, fieldConfigJson, `${statusHtml}${statSheetFormSection(view.statSheet)}`)}`;
 
   return mainLayout(content, view.title, basePath);
 }

@@ -18,7 +18,7 @@ import {
   DESCRIPTION_FIELD_ATOM,
   IS_ACTIVE_FIELD_ATOM,
 } from "../../universal/atoms";
-import { STANDARD_PERMISSIONS, AUDIT_FIELDS } from "../../universal/molecules";
+import { STANDARD_PERMISSIONS, AUDIT_FIELDS, ARCHIVE_FIELDS } from "../../universal/molecules";
 import { MODIFIER_HIERARCHY_FIELDS } from "../../molecules/modifier";
 
 export class ItemConfigFactory extends BaseEntityConfigFactory {
@@ -46,12 +46,13 @@ export class ItemConfigFactory extends BaseEntityConfigFactory {
       NAME_FIELD_ATOM,
       DESCRIPTION_FIELD_ATOM,
       IS_ACTIVE_FIELD_ATOM,
+      ...ARCHIVE_FIELDS,
       ...AUDIT_FIELDS,
     ] as const;
   }
 
   protected override getNonColumnKeys(): readonly string[] {
-    return ["stat_sheet_json"];
+    return ["stat_sheet_json", "status_action", "status_reason"];
   }
 
   protected override getRelationships(): readonly RelationshipConfig[] {

@@ -27,6 +27,8 @@ export type Item = {
   readonly name: string;
   readonly description: string | null;
   readonly is_active: boolean;
+  readonly archived_at: Date | null;
+  readonly archived_reason: string | null;
   readonly created_at: Date;
   readonly updated_at: Date;
 };

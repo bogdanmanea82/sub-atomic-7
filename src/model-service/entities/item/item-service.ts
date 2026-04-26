@@ -37,6 +37,7 @@ import {
   type DeleteWorkflowResult,
 } from "../../molecules/workflows/delete-entity-workflow";
 import { checkNameAndMachineNameUniqueness, checkNameUniqueness, checkFieldUniqueness } from "../../atoms/uniqueness";
+import { applyStatusAction } from "../../sub-atoms/apply-status-action";
 import { insertRecord, selectMany } from "../../atoms/crud";
 
 // ── Public types ──────────────────────────────────────────────────────────────
@@ -264,6 +265,8 @@ export const ItemService = {
     if (boundsErrors) {
       return { success: false, stage: "validation", errors: boundsErrors };
     }
+
+    applyStatusAction(data);
 
     const nonColumnKeys = ITEM_CONFIG.nonColumnKeys ?? [];
     const itemData = Object.fromEntries(

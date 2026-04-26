@@ -10,6 +10,7 @@ import { ITEM_CONFIG } from "@config/entities/item";
 import type { ListView, PaginationMeta, ReferenceLookup, SelectOption } from "../../types";
 import type { ItemFormView, ItemDetailView, ItemStatBaseViewRow } from "../../types";
 import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig, buildFilteredListView } from "../../molecules/views";
+import { buildStatusFormExtension } from "../../sub-atoms";
 import { MODIFIER_HIERARCHY_FIELDS } from "@config/molecules/modifier";
 
 // ── Stat sheet helpers ─────────────────────────────────────────────────────────
@@ -124,7 +125,7 @@ export const ItemViewService = {
     const base = buildFormView(ITEM_CONFIG, values, errors, selectOptions);
     const submittedOverrides = parseSubmittedValues(values);
     const statSheet = buildStatSheetFromAllStats(allStats, new Map(), submittedOverrides, errors);
-    return { ...base, statSheet };
+    return { ...base, ...buildStatusFormExtension(values), statSheet };
   },
 
   prepareEditForm(
@@ -143,7 +144,7 @@ export const ItemViewService = {
     );
     const submittedOverrides = parseSubmittedValues(submittedValues);
     const statSheet = buildStatSheetFromAllStats(allStats, savedValues, submittedOverrides, errors);
-    return { ...base, statSheet };
+    return { ...base, ...buildStatusFormExtension(displayValues), statSheet };
   },
 
   prepareDuplicateForm(
