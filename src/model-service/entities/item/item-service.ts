@@ -191,6 +191,8 @@ export const ItemService = {
       return { success: false, stage: "validation", errors: boundsErrors };
     }
 
+    applyStatusAction(input);
+
     const itemId = crypto.randomUUID();
     const inputWithId = { ...input, id: itemId };
 
