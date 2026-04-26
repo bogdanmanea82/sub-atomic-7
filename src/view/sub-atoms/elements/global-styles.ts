@@ -16,7 +16,7 @@ export function globalStyles(): string {
     .nav-item--has-dropdown:hover .nav-item__trigger { color: white; background: rgba(255,255,255,0.08); }
     .nav-item--active .nav-item__trigger { color: white; background: rgba(255,255,255,0.1); }
     .nav-item__caret { font-size: 0.65rem; opacity: 0.7; }
-    .nav-item__dropdown { display: none; position: absolute; top: calc(100% + 4px); left: 0; background: #1a1a2e; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; min-width: 180px; z-index: 200; padding: 0.35rem 0; box-shadow: 0 4px 16px rgba(0,0,0,0.4); list-style: none; }
+    .nav-item__dropdown { display: none; position: absolute; top: 100%; left: 0; background: #1a1a2e; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; min-width: 180px; z-index: 200; padding: 0.35rem 0; padding-top: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); list-style: none; }
     .nav-item--has-dropdown:hover .nav-item__dropdown { display: block; }
     .nav-item__dropdown li { list-style: none; }
     .nav-item__dropdown a { display: block; padding: 0.45rem 0.9rem; color: #ccc; text-decoration: none; font-size: 0.9rem; white-space: nowrap; }
