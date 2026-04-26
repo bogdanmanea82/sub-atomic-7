@@ -50,6 +50,10 @@ export class ItemConfigFactory extends BaseEntityConfigFactory {
     ] as const;
   }
 
+  protected override getNonColumnKeys(): readonly string[] {
+    return ["stat_sheet_json"];
+  }
+
   protected override getRelationships(): readonly RelationshipConfig[] {
     return [
       {

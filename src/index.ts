@@ -8,6 +8,7 @@ import {
   StatController,
   ItemModifierController,
   CharacterClassController,
+  ItemController,
 } from "@controller/entities";
 import { GameDomainService } from "@model-service/entities/game-domain";
 import { GameSubdomainService } from "@model-service/entities/game-subdomain";
@@ -16,6 +17,7 @@ import { GameSubcategoryService } from "@model-service/entities/game-subcategory
 import { StatService } from "@model-service/entities/stat";
 import { ItemModifierService } from "@model-service/entities/item-modifier";
 import { CharacterClassService } from "@model-service/entities/character-class";
+import { ItemService } from "@model-service/entities/item";
 import { homePage } from "@view/organisms/pages";
 import type { EntityCardData } from "@view/organisms/pages";
 
@@ -31,6 +33,7 @@ const app = new Elysia()
         { name: "Stats",              description: "Numeric stat dimensions — health, mana, armor, etc." },
         { name: "Item Modifiers",     description: "Atomic gameplay stat modifiers" },
         { name: "Character Classes",  description: "Playable archetypes with per-stat base values" },
+        { name: "Items",              description: "Equipment and loot item templates" },
       ],
     },
   }))
@@ -41,6 +44,7 @@ const app = new Elysia()
   .use(StatController)
   .use(ItemModifierController)
   .use(CharacterClassController)
+  .use(ItemController)
   // Serve the browser bundle as a static asset
   .get("/public/main.js", () => Bun.file("public/main.js"))
   // Home page — HTML with live entity counts
@@ -48,7 +52,7 @@ const app = new Elysia()
     set.headers["content-type"] = "text/html; charset=utf-8";
 
     // Fetch entity counts for the dashboard cards
-    const [gameDomainResult, gameSubdomainResult, gameCategoryResult, gameSubcategoryResult, statResult, modifierResult, characterClassResult] = await Promise.all([
+    const [gameDomainResult, gameSubdomainResult, gameCategoryResult, gameSubcategoryResult, statResult, modifierResult, characterClassResult, itemResult] = await Promise.all([
       GameDomainService.findMany(),
       GameSubdomainService.findMany(),
       GameCategoryService.findMany(),
@@ -56,6 +60,7 @@ const app = new Elysia()
       StatService.findMany(),
       ItemModifierService.findMany(),
       CharacterClassService.findMany(),
+      ItemService.findMany(),
     ]);
     const gameDomainCount = gameDomainResult.success
       ? (gameDomainResult.data as unknown[]).length
@@ -77,6 +82,9 @@ const app = new Elysia()
       : 0;
     const characterClassCount = characterClassResult.success
       ? (characterClassResult.data as unknown[]).length
+      : 0;
+    const itemCount = itemResult.success
+      ? (itemResult.data as unknown[]).length
       : 0;
 
     const entities: EntityCardData[] = [
@@ -128,6 +136,13 @@ const app = new Elysia()
         href: "/character-classes",
         count: characterClassCount,
         icon: "🧙",
+      },
+      {
+        name: "Items",
+        description: "Equipment and loot item templates with per-stat base values.",
+        href: "/items",
+        count: itemCount,
+        icon: "🗡️",
       },
     ];
 

@@ -15,4 +15,5 @@ export const NAV_ITEMS: readonly NavItemConfig[] = [
   { label: "Stats", href: "/stats" },
   { label: "Modifiers", href: "/modifiers" },
   { label: "Character Classes", href: "/character-classes" },
+  { label: "Items", href: "/items" },
 ];

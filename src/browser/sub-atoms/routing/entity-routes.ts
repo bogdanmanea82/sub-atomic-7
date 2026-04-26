@@ -152,6 +152,63 @@ export const ENTITY_ROUTES: readonly EntityRouteConfig[] = [
     },
   },
   {
+    basePath: "/items",
+    apiBasePath: "/api/items",
+    displayName: "Item",
+    checkNameUrl: "/api/items/check-name",
+    checkMachineNameUrl: "/api/items/check-machine-name",
+    cascades: [domainToSubdomain, subdomainToCategory, categoryToSubcategory],
+    onListInit(): void {
+      const filterForm = document.querySelector<HTMLFormElement>(".filter-bar");
+      if (!filterForm) return;
+      attachCascadeDropdownHandler(filterForm, filterDomainToSubdomain);
+      attachCascadeDropdownHandler(filterForm, filterSubdomainToCategory);
+      attachCascadeDropdownHandler(filterForm, filterCategoryToSubcategory);
+
+      const domainSelect = filterForm.querySelector<HTMLSelectElement>("#filter_game_domain_id");
+      const categorySelect = filterForm.querySelector<HTMLSelectElement>("#filter_game_category_id");
+      const subcategorySelect = filterForm.querySelector<HTMLSelectElement>("#filter_game_subcategory_id");
+      if (domainSelect && categorySelect) {
+        domainSelect.addEventListener("change", () => {
+          categorySelect.innerHTML = '<option value="">All Categories</option>';
+          if (subcategorySelect) {
+            subcategorySelect.innerHTML = '<option value="">All Subcategories</option>';
+          }
+        });
+      }
+      const subdomainSelect = filterForm.querySelector<HTMLSelectElement>("#filter_game_subdomain_id");
+      if (subdomainSelect && subcategorySelect) {
+        subdomainSelect.addEventListener("change", () => {
+          subcategorySelect.innerHTML = '<option value="">All Subcategories</option>';
+        });
+      }
+    },
+    onFormInit(form: HTMLFormElement): void {
+      const domainSelect = form.querySelector<HTMLSelectElement>('[name="game_domain_id"]');
+      const categorySelect = form.querySelector<HTMLSelectElement>('[name="game_category_id"]');
+      const subcategorySelect = form.querySelector<HTMLSelectElement>('[name="game_subcategory_id"]');
+      const subdomainSelect = form.querySelector<HTMLSelectElement>('[name="game_subdomain_id"]');
+
+      if (domainSelect && categorySelect) {
+        domainSelect.addEventListener("change", () => {
+          categorySelect.innerHTML = '<option value="">-- Select Category --</option>';
+          categorySelect.value = "";
+          if (subcategorySelect) {
+            subcategorySelect.innerHTML = '<option value="">-- Select Subcategory --</option>';
+            subcategorySelect.value = "";
+          }
+        });
+      }
+      if (subdomainSelect && subcategorySelect) {
+        subdomainSelect.addEventListener("change", () => {
+          subcategorySelect.innerHTML = '<option value="">-- Select Subcategory --</option>';
+          subcategorySelect.value = "";
+        });
+      }
+      attachStatSheetHandler(form);
+    },
+  },
+  {
     basePath: "/modifiers",
     apiBasePath: "/api/modifiers",
     displayName: "Modifier",
