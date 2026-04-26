@@ -16,7 +16,9 @@ import { ItemPages } from "./item-pages";
 
 const TAGS = ["Items"];
 const passthroughKeys = ITEM_CONFIG.nonColumnKeys ?? [];
-const bodySchema = deriveBodySchema(ITEM_CONFIG.fields, "create", passthroughKeys);
+// is_active is always set by applyStatusAction() from status_action — browser never sends it directly
+const alwaysOptionalKeys = ["is_active"];
+const bodySchema = deriveBodySchema(ITEM_CONFIG.fields, "create", passthroughKeys, alwaysOptionalKeys);
 
 const ItemApi = new Elysia()
   .use(errorHandlerPlugin)
@@ -39,7 +41,7 @@ const ItemApi = new Elysia()
   })
   .use(createCrudRoutes("/api/items", ItemService, {
     createSchema: bodySchema,
-    updateSchema: deriveBodySchema(ITEM_CONFIG.fields, "update", passthroughKeys),
+    updateSchema: deriveBodySchema(ITEM_CONFIG.fields, "update", passthroughKeys, alwaysOptionalKeys),
     querySchema: paginationQuerySchema,
     tags: TAGS,
   }));
