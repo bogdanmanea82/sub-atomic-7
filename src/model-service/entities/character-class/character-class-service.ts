@@ -125,6 +125,7 @@ async function insertStatSheet(
       id: crypto.randomUUID(),
       character_id: characterId,
       stat_id: row.stat_id,
+      combination_type: "flat",
       base_value: row.base_value,
     });
     await insertRecord(txDb, query);

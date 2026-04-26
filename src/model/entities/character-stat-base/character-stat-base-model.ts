@@ -18,6 +18,7 @@ export type CharacterStatBase = {
   readonly id: string;
   readonly character_id: string;
   readonly stat_id: string;
+  readonly combination_type: string;
   readonly base_value: number;
   readonly created_at: Date;
   readonly updated_at: Date;

@@ -11,6 +11,7 @@ import {
   ID_FIELD_ATOM,
   CHARACTER_ID_FIELD_ATOM,
   STAT_ID_FIELD_ATOM,
+  COMBINATION_TYPE_FIELD_ATOM,
 } from "../../universal/atoms";
 import { STANDARD_PERMISSIONS, AUDIT_FIELDS } from "../../universal/molecules";
 import { DISPLAY_FORMATS, FIELD_MARKERS, INTEGER_CONSTRAINTS } from "../../universal/sub-atoms";
@@ -37,6 +38,7 @@ export class CharacterStatBaseConfigFactory extends BaseEntityConfigFactory {
       ID_FIELD_ATOM,
       CHARACTER_ID_FIELD_ATOM,
       STAT_ID_FIELD_ATOM,
+      COMBINATION_TYPE_FIELD_ATOM,
       {
         name: "base_value",
         type: "integer",
