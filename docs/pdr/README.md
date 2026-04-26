@@ -23,6 +23,25 @@ operations, delivery, or QA documents.
 
 ---
 
+---
+
+## Layer Reference Documents
+
+Operational reference for working inside each layer — full file inventory, function mapping,
+and step-by-step workflows for feature development, debugging, testing, and committing.
+
+| Document | Layer |
+|---|---|
+| [LAYER-000: Configuration Reference](LAYER-000-configuration-reference.md) | L0 — Config: types, sub-atoms, atoms, molecules, factories, entity configs |
+| [LAYER-001: Model Reference](LAYER-001-model-reference.md) | L1 — Model: validation, serialization, query-building sub-atoms, atoms, molecules, entity organisms |
+| [LAYER-002: Model Service Reference](LAYER-002-model-service-reference.md) | L2 — Model Service: database sub-atoms, CRUD atoms, uniqueness atoms, universal workflows, entity services |
+| [LAYER-003: Controller Reference](LAYER-003-controller-reference.md) | L3 — Controller: schema derivation, handler factories, middleware plugins, CRUD route factory, entity controllers |
+| [LAYER-004: View Service Reference](LAYER-004-view-service-reference.md) | L4 — View Service: formatters, view model builders, entity view services, browser field config bridge |
+| [LAYER-005: View Reference](LAYER-005-view-reference.md) | L5 — View: HTML rendering sub-atoms, atoms, molecules, organisms, entity-specific page functions |
+| [LAYER-006: Browser Reference](LAYER-006-browser-reference.md) | L6 — Browser: data-driven router, validation, cascades, tier/binding CRUD, flash messaging |
+
+---
+
 ## Architecture Decision Records
 
 Short records explaining why key technology and design choices were made.
