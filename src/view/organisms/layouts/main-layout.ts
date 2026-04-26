@@ -2,10 +2,14 @@
 // Root HTML document wrapper — every page renders inside this
 
 import { escapeHtml, NAV_ITEMS, globalStyles } from "../../sub-atoms";
+import type { NavItemConfig } from "../../sub-atoms/elements/nav-config";
 import { navItem } from "../../atoms";
 
-function isActive(itemHref: string, currentPath: string): boolean {
-  return itemHref === "/" ? currentPath === "/" : currentPath.startsWith(itemHref);
+function isItemActive(item: NavItemConfig, currentPath: string): boolean {
+  if (item.href) {
+    return item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href);
+  }
+  return item.children?.some((c) => currentPath.startsWith(c.href)) ?? false;
 }
 
 function navigation(currentPath: string): string {
@@ -13,7 +17,7 @@ function navigation(currentPath: string): string {
     <nav class="main-nav">
       <a href="/" class="main-nav__brand">RPG CMS</a>
       <ul class="main-nav__links">
-        ${NAV_ITEMS.map((item) => navItem(item.label, item.href, isActive(item.href, currentPath))).join("\n        ")}
+        ${NAV_ITEMS.map((item) => navItem(item, isItemActive(item, currentPath))).join("\n        ")}
       </ul>
     </nav>`;
 }

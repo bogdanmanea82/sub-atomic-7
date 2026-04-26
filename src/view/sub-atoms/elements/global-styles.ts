@@ -7,9 +7,20 @@ export function globalStyles(): string {
     body { font-family: system-ui, sans-serif; color: #1a1a1a; background: #f5f5f5; }
     .main-nav { background: #1a1a2e; color: white; padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 48px; }
     .main-nav__brand { font-weight: 700; font-size: 1.1rem; color: #e0b84a; text-decoration: none; }
-    .main-nav__links { list-style: none; display: flex; gap: 1rem; }
-    .nav-item a { color: #ccc; text-decoration: none; padding: 0.25rem 0.5rem; border-radius: 4px; }
-    .nav-item--active a { color: white; background: rgba(255,255,255,0.1); }
+    .main-nav__links { list-style: none; display: flex; gap: 0.25rem; align-items: center; }
+    .nav-item > a { color: #ccc; text-decoration: none; padding: 0.25rem 0.5rem; border-radius: 4px; display: inline-block; }
+    .nav-item > a:hover { color: white; background: rgba(255,255,255,0.08); }
+    .nav-item--active > a { color: white; background: rgba(255,255,255,0.1); }
+    .nav-item { position: relative; list-style: none; }
+    .nav-item__trigger { color: #ccc; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: default; user-select: none; display: flex; align-items: center; gap: 0.25rem; font-size: 0.9rem; white-space: nowrap; }
+    .nav-item--has-dropdown:hover .nav-item__trigger { color: white; background: rgba(255,255,255,0.08); }
+    .nav-item--active .nav-item__trigger { color: white; background: rgba(255,255,255,0.1); }
+    .nav-item__caret { font-size: 0.65rem; opacity: 0.7; }
+    .nav-item__dropdown { display: none; position: absolute; top: calc(100% + 4px); left: 0; background: #1a1a2e; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; min-width: 180px; z-index: 200; padding: 0.35rem 0; box-shadow: 0 4px 16px rgba(0,0,0,0.4); list-style: none; }
+    .nav-item--has-dropdown:hover .nav-item__dropdown { display: block; }
+    .nav-item__dropdown li { list-style: none; }
+    .nav-item__dropdown a { display: block; padding: 0.45rem 0.9rem; color: #ccc; text-decoration: none; font-size: 0.9rem; white-space: nowrap; }
+    .nav-item__dropdown a:hover { background: rgba(255,255,255,0.08); color: white; }
     main { margin: 2rem auto; padding: 0 2rem; }
     .main--home { max-width: 1400px; margin: 0 auto; }
     .page-header { margin-bottom: 1.5rem; }

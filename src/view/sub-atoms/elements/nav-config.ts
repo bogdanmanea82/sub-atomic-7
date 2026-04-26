@@ -1,19 +1,45 @@
 // src/view/sub-atoms/elements/nav-config.ts
 // Data-driven navigation configuration. Add new entities here — the layout picks them up automatically.
 
-export interface NavItemConfig {
+export interface NavChildItem {
   readonly label: string;
   readonly href: string;
 }
 
+export interface NavItemConfig {
+  readonly label: string;
+  readonly href?: string;
+  readonly children?: readonly NavChildItem[];
+}
+
 export const NAV_ITEMS: readonly NavItemConfig[] = [
   { label: "Home", href: "/" },
-  { label: "Game Domains", href: "/game-domains" },
-  { label: "Game Subdomains", href: "/game-subdomains" },
-  { label: "Game Categories", href: "/game-categories" },
-  { label: "Game Subcategories", href: "/game-subcategories" },
+  {
+    label: "Hierarchy",
+    children: [
+      { label: "Domains",       href: "/game-domains" },
+      { label: "Subdomains",    href: "/game-subdomains" },
+      { label: "Categories",    href: "/game-categories" },
+      { label: "Subcategories", href: "/game-subcategories" },
+    ],
+  },
   { label: "Stats", href: "/stats" },
-  { label: "Modifiers", href: "/modifiers" },
-  { label: "Character Classes", href: "/character-classes" },
-  { label: "Items", href: "/items" },
+  {
+    label: "Character",
+    children: [
+      { label: "Character Classes", href: "/character-classes" },
+    ],
+  },
+  {
+    label: "Modifiers",
+    children: [
+      { label: "Item Modifiers", href: "/modifiers" },
+    ],
+  },
+  {
+    label: "Assets",
+    children: [
+      { label: "Base Items", href: "/items" },
+    ],
+  },
 ];
