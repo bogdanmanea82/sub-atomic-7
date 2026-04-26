@@ -228,5 +228,19 @@ export function globalStyles(): string {
     .history-icon--archived { background: #fff3cd; color: #856404; }
     .history-icon--deleted { background: #f8d7da; color: #721c24; }
     .history-icon--renamed { background: #fce4ec; color: #ad1457; }
-    .history-table td:first-child { width: 30px; text-align: center; }`;
+    .history-table td:first-child { width: 30px; text-align: center; }
+
+    /* Stat sheet — detail and form */
+    .stat-sheet-section { margin-top: 2rem; max-width: 1100px; }
+    .stat-sheet-section h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; color: #1a1a2e; }
+    .stat-sheet-hint { font-size: 0.85rem; color: #888; margin-bottom: 0.75rem; }
+    .stat-sheet-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 0.9rem; }
+    .stat-sheet-table th { background: #f0f2f5; padding: 0.5rem 0.75rem; text-align: left; font-size: 0.8rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat-sheet-table td { padding: 0.45rem 0.75rem; border-top: 1px solid #f0f0f0; vertical-align: middle; }
+    .stat-sheet-row:hover td { background: #f8f9fa; }
+    .stat-sheet-category-row td { background: #e8ecf2; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #1a1a2e; padding: 0.35rem 0.75rem; border-top: 2px solid #d0d6e0; }
+    .stat-sheet-category-row:first-child td { border-top: none; }
+    .stat-unit { font-size: 0.75rem; color: #888; margin-left: 2px; }
+    .stat-value-input { width: 90px; padding: 0.3rem 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; text-align: right; }
+    .stat-value-input:focus { border-color: #1a1a2e; outline: none; }`;
 }
