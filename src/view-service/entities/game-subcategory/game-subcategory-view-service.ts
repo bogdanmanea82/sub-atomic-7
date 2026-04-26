@@ -4,8 +4,8 @@
 import { GAME_SUBCATEGORY_CONFIG } from "@config/entities/game-subcategory";
 import { GAME_DOMAIN_REF_FIELD_ATOM, GAME_SUBDOMAIN_REF_FIELD_ATOM, GAME_CATEGORY_REF_FIELD_ATOM } from "@config/universal/atoms";
 import type { ListView, DetailView, FormView, SelectOption, PaginationMeta, ReferenceLookup } from "../../types";
-import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig } from "../../molecules/views";
-import { deriveCurrentState } from "../../sub-atoms";
+import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig, buildFilteredListView } from "../../molecules/views";
+import { buildStatusFormExtension } from "../../sub-atoms";
 
 /**
  * Pre-binds GAME_SUBCATEGORY_CONFIG so callers never import config directly.
@@ -30,14 +30,7 @@ export const GameSubcategoryViewService = {
     referenceLookup?: ReferenceLookup,
   ): ListView {
     const view = buildListView(entities, GAME_SUBCATEGORY_CONFIG, referenceLookup, pagination);
-    return {
-      ...view,
-      columns: view.columns.filter((c) => !LIST_EXCLUDE_FIELDS.has(c.name)),
-      rows: view.rows.map((r) => ({
-        ...r,
-        fields: r.fields.filter((f) => !LIST_EXCLUDE_FIELDS.has(f.name)),
-      })),
-    };
+    return buildFilteredListView(view, LIST_EXCLUDE_FIELDS);
   },
 
   prepareDetailView(
@@ -53,7 +46,7 @@ export const GameSubcategoryViewService = {
     errors?: Record<string, string>,
   ): FormView {
     const base = buildFormView(GAME_SUBCATEGORY_CONFIG, values, errors, selectOptions);
-    return { ...base, currentState: deriveCurrentState(values), statusReason: String(values?.["archived_reason"] ?? "") || undefined };
+    return { ...base, ...buildStatusFormExtension(values) };
   },
 
   prepareEditForm(
@@ -62,7 +55,7 @@ export const GameSubcategoryViewService = {
     errors?: Record<string, string>,
   ): FormView {
     const base = buildFormView(GAME_SUBCATEGORY_CONFIG, currentValues, errors, selectOptions);
-    return { ...base, currentState: deriveCurrentState(currentValues), statusReason: String(currentValues["archived_reason"] ?? "") || undefined };
+    return { ...base, ...buildStatusFormExtension(currentValues) };
   },
 
   prepareDuplicateForm(

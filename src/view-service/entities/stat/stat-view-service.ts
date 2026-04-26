@@ -5,7 +5,7 @@
 import { STAT_CONFIG } from "@config/entities/stat";
 import type { ListView, DetailView, FormView, PaginationMeta, ReferenceLookup } from "../../types";
 import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig } from "../../molecules/views";
-import { deriveCurrentState } from "../../sub-atoms";
+import { buildStatusFormExtension } from "../../sub-atoms";
 
 export const StatViewService = {
   prepareListView(
@@ -25,7 +25,7 @@ export const StatViewService = {
     errors?: Record<string, string>,
   ): FormView {
     const base = buildFormView(STAT_CONFIG, values, errors);
-    return { ...base, currentState: deriveCurrentState(values), statusReason: String(values?.["archived_reason"] ?? "") || undefined };
+    return { ...base, ...buildStatusFormExtension(values) };
   },
 
   prepareEditForm(
@@ -33,7 +33,7 @@ export const StatViewService = {
     errors?: Record<string, string>,
   ): FormView {
     const base = buildFormView(STAT_CONFIG, currentValues, errors);
-    return { ...base, currentState: deriveCurrentState(currentValues), statusReason: String(currentValues["archived_reason"] ?? "") || undefined };
+    return { ...base, ...buildStatusFormExtension(currentValues) };
   },
 
   prepareDuplicateForm(sourceValues: Record<string, unknown>): FormView {

@@ -4,7 +4,7 @@
 import { GAME_DOMAIN_CONFIG } from "@config/entities/game-domain";
 import type { ListView, DetailView, FormView, PaginationMeta, ReferenceLookup } from "../../types";
 import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig } from "../../molecules/views";
-import { deriveCurrentState } from "../../sub-atoms";
+import { buildStatusFormExtension } from "../../sub-atoms";
 
 /**
  * Pre-binds GAME_DOMAIN_CONFIG so callers never import config directly.
@@ -28,7 +28,7 @@ export const GameDomainViewService = {
     errors?: Record<string, string>,
   ): FormView {
     const base = buildFormView(GAME_DOMAIN_CONFIG, values, errors);
-    return { ...base, currentState: deriveCurrentState(values), statusReason: String(values?.["archived_reason"] ?? "") || undefined };
+    return { ...base, ...buildStatusFormExtension(values) };
   },
 
   prepareEditForm(
@@ -36,7 +36,7 @@ export const GameDomainViewService = {
     errors?: Record<string, string>,
   ): FormView {
     const base = buildFormView(GAME_DOMAIN_CONFIG, currentValues, errors);
-    return { ...base, currentState: deriveCurrentState(currentValues), statusReason: String(currentValues["archived_reason"] ?? "") || undefined };
+    return { ...base, ...buildStatusFormExtension(currentValues) };
   },
 
   prepareDuplicateForm(sourceValues: Record<string, unknown>): FormView {

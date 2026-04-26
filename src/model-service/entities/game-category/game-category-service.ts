@@ -32,7 +32,7 @@ import {
   deleteEntityWorkflow,
   type DeleteWorkflowResult,
 } from "../../molecules/workflows/delete-entity-workflow";
-import { checkNameUniqueness, checkFieldUniqueness } from "../../atoms/uniqueness";
+import { checkNameUniqueness, checkFieldUniqueness, checkNameAndMachineNameUniqueness } from "../../atoms/uniqueness";
 import { applyStatusAction } from "../../sub-atoms/apply-status-action";
 
 const NAME_ERROR = "A Game Category with this name already exists in this subdomain.";
@@ -45,22 +45,10 @@ export const GameCategoryService = {
     applyStatusAction(input);
     const db = getConnection();
 
-    const name = input["name"];
     const gameSubdomainId = input["game_subdomain_id"];
-    if (typeof name === "string" && name.trim() !== "" && typeof gameSubdomainId === "string") {
-      const check = await checkNameUniqueness(db, GameCategoryModel, name, NAME_ERROR, { game_subdomain_id: gameSubdomainId });
-      if (!check.available) {
-        return { success: false, stage: "validation", errors: { name: check.error } };
-      }
-    }
-
-    const machineName = input["machine_name"];
-    if (typeof machineName === "string" && machineName.trim() !== "") {
-      const check = await checkFieldUniqueness(db, GameCategoryModel, "machine_name", machineName, MACHINE_NAME_ERROR);
-      if (!check.available) {
-        return { success: false, stage: "validation", errors: { machine_name: check.error } };
-      }
-    }
+    const nameScope = typeof gameSubdomainId === "string" ? { game_subdomain_id: gameSubdomainId } : false;
+    const conflict = await checkNameAndMachineNameUniqueness(db, GameCategoryModel, input, NAME_ERROR, MACHINE_NAME_ERROR, nameScope);
+    if (conflict) return conflict;
 
     return createEntityWorkflow(db, GameCategoryModel, input);
   },
@@ -92,22 +80,10 @@ export const GameCategoryService = {
     applyStatusAction(data);
     const db = getConnection();
 
-    const name = data["name"];
     const gameSubdomainId = data["game_subdomain_id"];
-    if (typeof name === "string" && name.trim() !== "" && typeof gameSubdomainId === "string") {
-      const check = await checkNameUniqueness(db, GameCategoryModel, name, NAME_ERROR, { game_subdomain_id: gameSubdomainId }, id);
-      if (!check.available) {
-        return { success: false, stage: "validation", errors: { name: check.error } };
-      }
-    }
-
-    const machineName = data["machine_name"];
-    if (typeof machineName === "string" && machineName.trim() !== "") {
-      const check = await checkFieldUniqueness(db, GameCategoryModel, "machine_name", machineName, MACHINE_NAME_ERROR, undefined, id);
-      if (!check.available) {
-        return { success: false, stage: "validation", errors: { machine_name: check.error } };
-      }
-    }
+    const nameScope = typeof gameSubdomainId === "string" ? { game_subdomain_id: gameSubdomainId } : false;
+    const conflict = await checkNameAndMachineNameUniqueness(db, GameCategoryModel, data, NAME_ERROR, MACHINE_NAME_ERROR, nameScope, id);
+    if (conflict) return conflict;
 
     return updateEntityWorkflow(db, GameCategoryModel, id, data, GAME_CATEGORY_CONFIG.nonColumnKeys);
   },

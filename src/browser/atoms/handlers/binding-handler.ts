@@ -231,21 +231,12 @@ function checkEmptyState(section: HTMLElement): void {
   }
 }
 
-/**
- * Main entry point — attaches all binding CRUD handlers to the panel.
- * Safe to call on any page — no-ops if no .binding-panel is found.
- */
-export function attachBindingHandler(): void {
-  const panel = document.querySelector<HTMLElement>(".binding-panel");
-  if (!panel) return;
+// ── Private handler functions ──────────────────────────────────────────────
 
-  const modifierId = getModifierIdFromUrl();
-  if (!modifierId) return;
-
-  // Cache for target options (loaded once per section when form opens)
-  const targetOptionsCache = new Map<string, TargetOption[]>();
-
-  // ── "Add Binding" button handler ──────────────────────────────────────
+function attachAddHandler(
+  panel: HTMLElement,
+  targetOptionsCache: Map<string, TargetOption[]>,
+): void {
   panel.addEventListener("click", async (e) => {
     const addBtn = (e.target as HTMLElement).closest<HTMLButtonElement>(".binding-add-btn");
     if (!addBtn) return;
@@ -284,8 +275,9 @@ export function attachBindingHandler(): void {
     formEl.style.display = "";
     addBtn.style.display = "none";
   });
+}
 
-  // ── "Cancel" button handler ───────────────────────────────────────────
+function attachCancelHandler(panel: HTMLElement): void {
   panel.addEventListener("click", (e) => {
     const cancelBtn = (e.target as HTMLElement).closest<HTMLButtonElement>(".binding-form__cancel");
     if (!cancelBtn) return;
@@ -301,8 +293,13 @@ export function attachBindingHandler(): void {
     const addBtn = panel.querySelector<HTMLButtonElement>(`.binding-add-btn[data-target-type="${targetType}"]`);
     if (addBtn) addBtn.style.display = "";
   });
+}
 
-  // ── "Save Binding" button handler (create or update) ──────────────────
+function attachSaveHandler(
+  panel: HTMLElement,
+  modifierId: string,
+  targetOptionsCache: Map<string, TargetOption[]>,
+): void {
   panel.addEventListener("click", async (e) => {
     const saveBtn = (e.target as HTMLElement).closest<HTMLButtonElement>(".binding-form__save");
     if (!saveBtn) return;
@@ -385,8 +382,13 @@ export function attachBindingHandler(): void {
       saveBtn.textContent = "Save Binding";
     }
   });
+}
 
-  // ── "Edit" button handler ─────────────────────────────────────────────
+function attachEditHandler(
+  panel: HTMLElement,
+  modifierId: string,
+  targetOptionsCache: Map<string, TargetOption[]>,
+): void {
   panel.addEventListener("click", async (e) => {
     const editBtn = (e.target as HTMLElement).closest<HTMLButtonElement>(".binding-edit-btn");
     if (!editBtn) return;
@@ -452,8 +454,9 @@ export function attachBindingHandler(): void {
       showToast("Failed to load binding data", "error");
     }
   });
+}
 
-  // ── "Remove" button handler ───────────────────────────────────────────
+function attachRemoveHandler(panel: HTMLElement, modifierId: string): void {
   panel.addEventListener("click", async (e) => {
     const removeBtn = (e.target as HTMLElement).closest<HTMLButtonElement>(".binding-remove-btn");
     if (!removeBtn) return;
@@ -480,4 +483,27 @@ export function attachBindingHandler(): void {
       showToast("Failed to remove binding", "error");
     }
   });
+}
+
+// ── Public entry point ─────────────────────────────────────────────────────
+
+/**
+ * Main entry point — attaches all binding CRUD handlers to the panel.
+ * Safe to call on any page — no-ops if no .binding-panel is found.
+ */
+export function attachBindingHandler(): void {
+  const panel = document.querySelector<HTMLElement>(".binding-panel");
+  if (!panel) return;
+
+  const modifierId = getModifierIdFromUrl();
+  if (!modifierId) return;
+
+  // Cache for target options (loaded once per section when form opens)
+  const targetOptionsCache = new Map<string, TargetOption[]>();
+
+  attachAddHandler(panel, targetOptionsCache);
+  attachCancelHandler(panel);
+  attachSaveHandler(panel, modifierId, targetOptionsCache);
+  attachEditHandler(panel, modifierId, targetOptionsCache);
+  attachRemoveHandler(panel, modifierId);
 }

@@ -6,8 +6,8 @@ import { ITEM_MODIFIER_CONFIG } from "@config/entities/item-modifier";
 import { MODIFIER_HIERARCHY_FIELDS, MODIFIER_TIER_FORM_META } from "@config/molecules/modifier";
 import type { ListView, DetailView, FormView, SelectOption, PaginationMeta, ReferenceLookup } from "../../types";
 import type { TierFormRow, TierDetailRow, TierFieldMeta } from "../../types";
-import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig } from "../../molecules/views";
-import { formatNumber, deriveCurrentState } from "../../sub-atoms";
+import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig, buildFilteredListView } from "../../molecules/views";
+import { formatNumber, buildStatusFormExtension } from "../../sub-atoms";
 
 // ── Tier field metadata ───────────────────────────────────────────────────
 // MODIFIER_TIER_FORM_META lives in L0 (src/config/molecules/modifier/tiers-fields.ts).
@@ -40,14 +40,7 @@ export const ItemModifierViewService = {
     referenceLookup?: ReferenceLookup,
   ): ListView {
     const view = buildListView(entities, ITEM_MODIFIER_CONFIG, referenceLookup, pagination);
-    return {
-      ...view,
-      columns: view.columns.filter((c) => !LIST_EXCLUDE_FIELDS.has(c.name)),
-      rows: view.rows.map((r) => ({
-        ...r,
-        fields: r.fields.filter((f) => !LIST_EXCLUDE_FIELDS.has(f.name)),
-      })),
-    };
+    return buildFilteredListView(view, LIST_EXCLUDE_FIELDS);
   },
 
   prepareDetailView(
@@ -78,7 +71,7 @@ export const ItemModifierViewService = {
       ...base,
       tierRows: tierRows ?? [defaultTier],
       tierFieldMeta: MODIFIER_TIER_FORM_META,
-      currentState: deriveCurrentState(values),
+      ...buildStatusFormExtension(values),
     };
   },
 
@@ -93,7 +86,7 @@ export const ItemModifierViewService = {
       ...base,
       tierRows: tierRows ?? [],
       tierFieldMeta: MODIFIER_TIER_FORM_META,
-      currentState: deriveCurrentState(currentValues),
+      ...buildStatusFormExtension(currentValues),
     };
   },
 
