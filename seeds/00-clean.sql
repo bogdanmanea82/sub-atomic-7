@@ -18,7 +18,7 @@ DELETE FROM game_domain;
 
 -- character_stat_base (references character and stat)
 DELETE FROM character_stat_base;
-DELETE FROM "character";
+DELETE FROM character_class;
 
 -- formula (references stat via RESTRICT)
 DELETE FROM formula;

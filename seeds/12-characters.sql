@@ -3,7 +3,7 @@
 -- IDs are stable gen_random_uuid() — referenced by 13-character-stat-bases.sql
 -- via (SELECT id FROM character WHERE machine_name = '...') lookups.
 
-INSERT INTO character (id, machine_name, name, description, is_active, created_at, updated_at)
+INSERT INTO character_class (id, machine_name, name, description, is_active, created_at, updated_at)
 VALUES
   (gen_random_uuid(), 'warrior', 'Warrior',
    'A resilient melee fighter who excels in close combat. High life and armour, moderate strength-based offence.',

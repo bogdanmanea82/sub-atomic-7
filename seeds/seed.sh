@@ -41,7 +41,7 @@ psql "$DATABASE_URL" --quiet --tuples-only -c "
   UNION ALL SELECT 'game_subcategory:     ' || count(*) FROM game_subcategory
   UNION ALL SELECT 'item_modifier:        ' || count(*) FROM item_modifier
   UNION ALL SELECT 'item_modifier_tier:   ' || count(*) FROM item_modifier_tier
-  UNION ALL SELECT 'character:            ' || count(*) FROM \"character\"
+  UNION ALL SELECT 'character_class:      ' || count(*) FROM character_class
   UNION ALL SELECT 'character_stat_base:  ' || count(*) FROM character_stat_base
   UNION ALL SELECT 'formula:              ' || count(*) FROM formula;
 "

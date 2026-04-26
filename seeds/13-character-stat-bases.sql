@@ -95,5 +95,5 @@ FROM (
     ('wizard', 'stun_threshold',              34)
 
 ) AS v(character_name, stat_name, base_value)
-JOIN "character" c ON c.machine_name = v.character_name
+JOIN character_class c ON c.machine_name = v.character_name
 JOIN stat s ON s.machine_name = v.stat_name;

@@ -14,3 +14,4 @@ export { attachTierHandlers } from "./tier-row-handler";
 export { attachTabSwitchHandler } from "./tab-switch-handler";
 export { attachBindingHandler } from "./binding-handler";
 export { attachTierDetailHandler } from "./tier-detail-handler";
+export { attachStatSheetHandler } from "./stat-sheet-handler";

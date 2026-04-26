@@ -3,7 +3,7 @@
 // Adding a new entity to the browser = adding one entry here.
 
 import type { CascadeDropdownOptions } from "../../atoms/handlers";
-import { attachCascadeDropdownHandler, attachTierHandlers, attachTabSwitchHandler, attachBindingHandler, attachTierDetailHandler } from "../../atoms/handlers";
+import { attachCascadeDropdownHandler, attachTierHandlers, attachTabSwitchHandler, attachBindingHandler, attachTierDetailHandler, attachStatSheetHandler } from "../../atoms/handlers";
 import type { EntityRouteConfig } from "./route-config";
 
 // ── Cascade configs ──────────────────────────────────────────────────────
@@ -140,6 +140,16 @@ export const ENTITY_ROUTES: readonly EntityRouteConfig[] = [
     displayName: "Stat",
     checkNameUrl: "/api/stats/check-name",
     checkMachineNameUrl: "/api/stats/check-machine-name",
+  },
+  {
+    basePath: "/character-classes",
+    apiBasePath: "/api/character-classes",
+    displayName: "Character Class",
+    checkNameUrl: "/api/character-classes/check-name",
+    checkMachineNameUrl: "/api/character-classes/check-machine-name",
+    onFormInit(form: HTMLFormElement): void {
+      attachStatSheetHandler(form);
+    },
   },
   {
     basePath: "/modifiers",

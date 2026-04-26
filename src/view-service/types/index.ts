@@ -29,3 +29,9 @@ export type {
   AssignmentSummary,
   AssignmentPanelData,
 } from "./assignment-view-models";
+
+export type {
+  StatSheetViewRow,
+  CharacterClassFormView,
+  CharacterClassDetailView,
+} from "./character-class-view-models";

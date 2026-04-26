@@ -14,4 +14,5 @@ export const NAV_ITEMS: readonly NavItemConfig[] = [
   { label: "Game Subcategories", href: "/game-subcategories" },
   { label: "Stats", href: "/stats" },
   { label: "Modifiers", href: "/modifiers" },
+  { label: "Character Classes", href: "/character-classes" },
 ];
