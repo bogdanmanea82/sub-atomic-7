@@ -15,6 +15,7 @@ const VALID_INPUT: Record<string, unknown> = {
   value_max: 9999,
   default_value: 10,
   category: "attribute",
+  is_active: true,
 };
 
 describe("StatModel", () => {

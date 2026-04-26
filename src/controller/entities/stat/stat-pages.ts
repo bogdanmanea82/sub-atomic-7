@@ -32,6 +32,7 @@ export const StatPages = new Elysia({ detail: { hide: true } })
     const paginationMeta = buildPaginationMeta(result.totalCount, pagination.page, pagination.pageSize);
     const view = StatViewService.prepareListView(
       result.data as unknown as Record<string, unknown>[],
+      undefined,
       paginationMeta,
     );
     return listPage(view, BASE_PATH);

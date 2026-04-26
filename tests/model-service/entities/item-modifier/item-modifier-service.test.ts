@@ -79,7 +79,7 @@ function makeModifierInput(overrides?: Record<string, unknown>): Record<string, 
     game_subdomain_id: testSubdomainId,
     game_category_id: testCategoryId,
     game_subcategory_id: testSubcategoryId,
-    code: "test_mod_" + Date.now(),
+    machine_name: "test_mod_" + Date.now(),
     name: "Test ItemModifier " + Date.now(),
     description: "A test modifier",
     affix_type: "prefix",
@@ -111,7 +111,7 @@ describe("ItemModifierService", () => {
     });
 
     it("rejects creation with no tiers_json", async () => {
-      const input = makeModifierInput({ tiers_json: undefined, name: "NoTiers-" + Date.now(), code: "no_tiers_" + Date.now() });
+      const input = makeModifierInput({ tiers_json: undefined, name: "NoTiers-" + Date.now(), machine_name: "no_tiers_" + Date.now() });
       const result = await ItemModifierService.create(input);
 
       expect(result.success).toBe(false);
@@ -121,7 +121,7 @@ describe("ItemModifierService", () => {
     });
 
     it("rejects creation with empty tiers array", async () => {
-      const input = makeModifierInput({ tiers_json: "[]", name: "EmptyTiers-" + Date.now(), code: "empty_tiers_" + Date.now() });
+      const input = makeModifierInput({ tiers_json: "[]", name: "EmptyTiers-" + Date.now(), machine_name: "empty_tiers_" + Date.now() });
       const result = await ItemModifierService.create(input);
 
       expect(result.success).toBe(false);
@@ -135,7 +135,7 @@ describe("ItemModifierService", () => {
         { tier_index: 0, min_value: 10, max_value: 20, level_req: 10, spawn_weight: 50 },
         { tier_index: 1, min_value: 5, max_value: 25, level_req: 5, spawn_weight: 100 },
       ]);
-      const input = makeModifierInput({ tiers_json: badTiers, name: "BadTiers-" + Date.now(), code: "bad_tiers_" + Date.now() });
+      const input = makeModifierInput({ tiers_json: badTiers, name: "BadTiers-" + Date.now(), machine_name: "bad_tiers_" + Date.now() });
       const result = await ItemModifierService.create(input);
 
       expect(result.success).toBe(false);
@@ -232,7 +232,7 @@ describe("ItemModifierService", () => {
       ]);
       const input = makeModifierInput({
         name: "TierOps-" + Date.now(),
-        code: "tier_ops_" + Date.now(),
+        machine_name: "tier_ops_" + Date.now(),
         tiers_json: twoTiers,
       });
       const result = await ItemModifierService.create(input);

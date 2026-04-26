@@ -29,7 +29,15 @@ export async function fetchJson<T>(
     let message = `Request failed (${response.status})`;
     try {
       const body = (await response.json()) as Record<string, unknown>;
-      if (typeof body["error"] === "string") message = body["error"];
+      if (typeof body["error"] === "string") {
+        message = body["error"];
+      } else if (typeof body["summary"] === "string") {
+        // Elysia TypeBox validation error — include first field path if available
+        const errors = Array.isArray(body["errors"]) ? body["errors"] : [];
+        const firstErr = errors[0] as Record<string, unknown> | undefined;
+        const path = firstErr && typeof firstErr["path"] === "string" ? firstErr["path"] : "";
+        message = path ? `Validation: ${path} — ${body["summary"]}` : `Validation: ${body["summary"]}`;
+      }
     } catch {
       // response body wasn't JSON — keep the default message
     }

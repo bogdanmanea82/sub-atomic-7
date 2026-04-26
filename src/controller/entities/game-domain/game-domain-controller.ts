@@ -15,7 +15,9 @@ import { deriveBodySchema, paginationQuerySchema } from "../../sub-atoms/schema"
 import { GameDomainPages } from "./game-domain-pages";
 
 const TAGS = ["Game Domains"];
-const bodySchema = deriveBodySchema(GAME_DOMAIN_CONFIG.fields);
+const passthroughKeys = GAME_DOMAIN_CONFIG.nonColumnKeys ?? [];
+const alwaysOptionalKeys = ["is_active"];
+const bodySchema = deriveBodySchema(GAME_DOMAIN_CONFIG.fields, "create", passthroughKeys, alwaysOptionalKeys);
 
 const GameDomainApi = new Elysia()
   .use(errorHandlerPlugin)
@@ -33,9 +35,19 @@ const GameDomainApi = new Elysia()
     query: t.Object({ name: t.String(), excludeId: t.Optional(t.String()) }),
     detail: { tags: TAGS },
   })
+  .get("/api/game-domains/check-machine-name", async ({ query }) => {
+    const q = query as Record<string, string>;
+    return GameDomainService.checkMachineNameAvailable(
+      q["machineName"] ?? "",
+      q["excludeId"] || undefined,
+    );
+  }, {
+    query: t.Object({ machineName: t.String(), excludeId: t.Optional(t.String()) }),
+    detail: { tags: TAGS },
+  })
   .use(createCrudRoutes("/api/game-domains", GameDomainService, {
     createSchema: bodySchema,
-    updateSchema: deriveBodySchema(GAME_DOMAIN_CONFIG.fields, "update"),
+    updateSchema: deriveBodySchema(GAME_DOMAIN_CONFIG.fields, "update", passthroughKeys),
     querySchema: paginationQuerySchema,
     tags: TAGS,
   }));

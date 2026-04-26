@@ -7,28 +7,7 @@ import { MODIFIER_HIERARCHY_FIELDS, MODIFIER_TIER_FORM_META } from "@config/mole
 import type { ListView, DetailView, FormView, SelectOption, PaginationMeta, ReferenceLookup } from "../../types";
 import type { TierFormRow, TierDetailRow, TierFieldMeta } from "../../types";
 import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig } from "../../molecules/views";
-import { formatNumber } from "../../sub-atoms/formatters";
-
-// ── Status derivation ─────────────────────────────────────────────────────
-
-/**
- * Derives the 3-state current status from raw entity/form values.
- * Called by all form-preparation methods so L5 receives a pre-computed
- * currentState and never needs to inspect field arrays itself.
- *
- * Rules (evaluated in order):
- *   1. archived_reason present → "archived"
- *   2. is_active === true (boolean or "true" string) → "active"
- *   3. otherwise → "disabled"
- *   4. no values (new entity) → "active" (default)
- */
-function deriveCurrentState(values?: Record<string, unknown>): "active" | "disabled" | "archived" {
-  if (!values) return "active";
-  const archivedReason = values["archived_reason"];
-  if (archivedReason != null && archivedReason !== "") return "archived";
-  const isActive = values["is_active"] === true || values["is_active"] === "true";
-  return isActive ? "active" : "disabled";
-}
+import { formatNumber, deriveCurrentState } from "../../sub-atoms";
 
 // ── Tier field metadata ───────────────────────────────────────────────────
 // MODIFIER_TIER_FORM_META lives in L0 (src/config/molecules/modifier/tiers-fields.ts).
@@ -43,6 +22,14 @@ function deriveCurrentState(values?: Record<string, unknown>): "active" | "disab
 const LIST_EXCLUDE_FIELDS = new Set<string>(MODIFIER_HIERARCHY_FIELDS.map((f) => f.name));
 
 export const ItemModifierViewService = {
+  prepareListView(
+    entities: Record<string, unknown>[],
+    referenceLookup?: ReferenceLookup,
+    pagination?: PaginationMeta,
+  ): ListView {
+    return buildListView(entities, ITEM_MODIFIER_CONFIG, referenceLookup, pagination);
+  },
+
   /**
    * Builds a filtered modifier list view without the 4 hierarchy columns.
    * Those columns are replaced by filter dropdowns above the table.

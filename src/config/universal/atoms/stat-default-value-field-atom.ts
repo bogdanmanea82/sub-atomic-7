@@ -7,7 +7,7 @@ export const STAT_DEFAULT_VALUE_FIELD_ATOM = {
   name: "default_value",
   type: "integer",
   label: "Default Value",
-  ...INTEGER_CONSTRAINTS.standard,
+  ...INTEGER_CONSTRAINTS.signed,
   ...FIELD_MARKERS.required,
   ...DISPLAY_FORMATS.number,
 } as const;

@@ -9,6 +9,7 @@ interface BreadcrumbItem {
 
 interface PageHeaderOptions {
   title: string;
+  badge?: string;
   backUrl?: string;
   breadcrumbs?: readonly BreadcrumbItem[];
   actionLabel?: string;
@@ -50,7 +51,10 @@ export function pageHeader(options: PageHeaderOptions): string {
     <header class="page-header">
       ${nav}
       <div class="page-header__title-row">
-        <h1>${escapeHtml(options.title)}</h1>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <h1>${escapeHtml(options.title)}</h1>
+          ${options.badge ?? ""}
+        </div>
         ${rightSide}
       </div>
     </header>`;

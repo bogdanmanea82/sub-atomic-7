@@ -19,6 +19,10 @@ interface NameAvailabilityOptions {
   readonly excludeId?: string;
   /** When true, the button starts disabled and shows a hint (duplicate mode). */
   readonly startDisabled: boolean;
+  /** The form input field name to watch. Defaults to "name". */
+  readonly fieldName?: string;
+  /** The query param key sent to the check URL. Defaults to "name". */
+  readonly queryParam?: string;
 }
 
 /**
@@ -31,7 +35,9 @@ export function attachNameAvailabilityHandler(
   form: HTMLFormElement,
   options: NameAvailabilityOptions
 ): void {
-  const nameInput = form.querySelector<HTMLInputElement>('[name="name"]');
+  const field = options.fieldName ?? "name";
+  const param = options.queryParam ?? "name";
+  const nameInput = form.querySelector<HTMLInputElement>(`[name="${field}"]`);
   const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
   if (!nameInput || !submitBtn) return;
 
@@ -66,7 +72,7 @@ export function attachNameAvailabilityHandler(
 
     // Call the API with optional excludeId
     try {
-      let url = `${options.checkUrl}?name=${encodeURIComponent(name)}`;
+      let url = `${options.checkUrl}?${param}=${encodeURIComponent(name)}`;
       if (options.excludeId) {
         url += `&excludeId=${encodeURIComponent(options.excludeId)}`;
       }

@@ -78,16 +78,21 @@ export const ENTITY_ROUTES: readonly EntityRouteConfig[] = [
     apiBasePath: "/api/game-domains",
     displayName: "Game Domain",
     checkNameUrl: "/api/game-domains/check-name",
+    checkMachineNameUrl: "/api/game-domains/check-machine-name",
   },
   {
     basePath: "/game-subdomains",
     apiBasePath: "/api/game-subdomains",
     displayName: "Game Subdomain",
+    checkNameUrl: "/api/game-subdomains/check-name",
+    checkMachineNameUrl: "/api/game-subdomains/check-machine-name",
   },
   {
     basePath: "/game-categories",
     apiBasePath: "/api/game-categories",
     displayName: "Game Category",
+    checkNameUrl: "/api/game-categories/check-name",
+    checkMachineNameUrl: "/api/game-categories/check-machine-name",
     cascades: [domainToSubdomain],
     onListInit(): void {
       const filterForm = document.querySelector<HTMLFormElement>(".filter-bar");
@@ -99,6 +104,8 @@ export const ENTITY_ROUTES: readonly EntityRouteConfig[] = [
     basePath: "/game-subcategories",
     apiBasePath: "/api/game-subcategories",
     displayName: "Game Subcategory",
+    checkNameUrl: "/api/game-subcategories/check-name",
+    checkMachineNameUrl: "/api/game-subcategories/check-machine-name",
     cascades: [domainToSubdomain, subdomainToCategory],
     onListInit(): void {
       const filterForm = document.querySelector<HTMLFormElement>(".filter-bar");
@@ -131,12 +138,15 @@ export const ENTITY_ROUTES: readonly EntityRouteConfig[] = [
     basePath: "/stats",
     apiBasePath: "/api/stats",
     displayName: "Stat",
-    checkNameUrl: "/api/stats/check-machine-name",
+    checkNameUrl: "/api/stats/check-name",
+    checkMachineNameUrl: "/api/stats/check-machine-name",
   },
   {
     basePath: "/modifiers",
     apiBasePath: "/api/modifiers",
     displayName: "Modifier",
+    checkNameUrl: "/api/modifiers/check-name",
+    checkMachineNameUrl: "/api/modifiers/check-machine-name",
     cascades: [domainToSubdomain, subdomainToCategory, categoryToSubcategory],
     onListInit(): void {
       const filterForm = document.querySelector<HTMLFormElement>(".filter-bar");

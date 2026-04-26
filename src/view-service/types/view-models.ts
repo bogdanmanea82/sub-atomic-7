@@ -64,6 +64,8 @@ export interface ListView {
 export interface DetailView {
   readonly title: string;
   readonly fields: readonly DisplayField[];
+  readonly isActive?: boolean;
+  readonly archivedAt?: string;
 }
 
 /**
@@ -89,10 +91,14 @@ export interface FormField {
 
 /**
  * Complete data for rendering a create or edit form.
+ * currentState and statusReason trigger automatic status section injection
+ * in the generic page organisms (create-page, edit-page, duplicate-page).
  */
 export interface FormView {
   readonly title: string;
   readonly fields: readonly FormField[];
+  readonly currentState?: "active" | "disabled" | "archived";
+  readonly statusReason?: string;
 }
 
 /**

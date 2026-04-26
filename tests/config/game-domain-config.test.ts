@@ -21,15 +21,15 @@ describe("GAME_DOMAIN_CONFIG", () => {
 
   // ── Field count ────────────────────────────────────────────────────────
 
-  it("has exactly 6 fields (id + standard entity fields + audit)", () => {
-    expect(GAME_DOMAIN_CONFIG.fields).toHaveLength(6);
+  it("has exactly 9 fields (id + machine_name + standard entity fields + archive fields + audit)", () => {
+    expect(GAME_DOMAIN_CONFIG.fields).toHaveLength(9);
   });
 
   // ── Field order and names ──────────────────────────────────────────────
 
-  it("has fields in correct order: id, name, description, is_active, created_at, updated_at", () => {
+  it("has fields in correct order: id, machine_name, name, description, is_active, archived_at, archived_reason, created_at, updated_at", () => {
     const names = GAME_DOMAIN_CONFIG.fields.map((f) => f.name);
-    expect(names).toEqual(["id", "name", "description", "is_active", "created_at", "updated_at"]);
+    expect(names).toEqual(["id", "machine_name", "name", "description", "is_active", "archived_at", "archived_reason", "created_at", "updated_at"]);
   });
 
   // ── ID field ───────────────────────────────────────────────────────────

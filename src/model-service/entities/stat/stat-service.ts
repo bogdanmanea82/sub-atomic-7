@@ -1,14 +1,12 @@
 // src/model-service/entities/stat/stat-service.ts
 // Layer 2 organism — public API for all Stat database operations.
-//
-// Uniqueness note: machine_name (not name) is Stat's unique identifier.
-// checkNameUniqueness() hardcodes { name } conditions, so machine_name
-// uniqueness is checked inline via selectManyWorkflow with { machine_name }.
 
 import type { Stat } from "@model/entities/stat/stat-model";
+import type { PaginationParams } from "@model/universal/sub-atoms/types/pagination-params";
 import { StatModel } from "@model/entities/stat/stat-model";
 import { STAT_CONFIG } from "@config/entities/stat";
 import { getConnection } from "../../sub-atoms/database";
+import { applyStatusAction } from "../../sub-atoms/apply-status-action";
 import {
   createEntityWorkflow,
   type CreateWorkflowResult,
@@ -25,7 +23,6 @@ import {
   selectManyPaginatedWorkflow,
   type SelectManyPaginatedResult,
 } from "../../molecules/workflows/select-many-paginated-workflow";
-import type { PaginationParams } from "@model/universal/sub-atoms/types/pagination-params";
 import {
   updateEntityWorkflow,
   type UpdateWorkflowResult,
@@ -34,20 +31,31 @@ import {
   deleteEntityWorkflow,
   type DeleteWorkflowResult,
 } from "../../molecules/workflows/delete-entity-workflow";
+import { checkNameUniqueness, checkFieldUniqueness } from "../../atoms/uniqueness";
 
+const NAME_ERROR = "A Stat with this name already exists.";
 const MACHINE_NAME_ERROR = "A Stat with this machine_name already exists.";
 
 export const StatService = {
   async create(
     input: Record<string, unknown>,
   ): Promise<CreateWorkflowResult<Stat>> {
+    applyStatusAction(input);
     const db = getConnection();
+
+    const name = input["name"];
+    if (typeof name === "string" && name.trim() !== "") {
+      const check = await checkNameUniqueness(db, StatModel, name, NAME_ERROR);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { name: check.error } };
+      }
+    }
 
     const machineName = input["machine_name"];
     if (typeof machineName === "string" && machineName.trim() !== "") {
-      const existing = await selectManyWorkflow(db, StatModel, { machine_name: machineName });
-      if (existing.success && existing.data.length > 0) {
-        return { success: false, stage: "validation", errors: { machine_name: MACHINE_NAME_ERROR } };
+      const check = await checkFieldUniqueness(db, StatModel, "machine_name", machineName, MACHINE_NAME_ERROR);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { machine_name: check.error } };
       }
     }
 
@@ -78,25 +86,41 @@ export const StatService = {
     id: string,
     data: Record<string, unknown>,
   ): Promise<UpdateWorkflowResult<Stat>> {
+    applyStatusAction(data);
     const db = getConnection();
 
-    const machineName = data["machine_name"];
-    if (typeof machineName === "string" && machineName.trim() !== "") {
-      const existing = await selectManyWorkflow(db, StatModel, { machine_name: machineName });
-      const conflicts = existing.success
-        ? existing.data.filter((s) => s.id !== id)
-        : [];
-      if (conflicts.length > 0) {
-        return { success: false, stage: "validation", errors: { machine_name: MACHINE_NAME_ERROR } };
+    const name = data["name"];
+    if (typeof name === "string" && name.trim() !== "") {
+      const check = await checkNameUniqueness(db, StatModel, name, NAME_ERROR, undefined, id);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { name: check.error } };
       }
     }
 
-    return updateEntityWorkflow(db, StatModel, id, data);
+    const machineName = data["machine_name"];
+    if (typeof machineName === "string" && machineName.trim() !== "") {
+      const check = await checkFieldUniqueness(db, StatModel, "machine_name", machineName, MACHINE_NAME_ERROR, undefined, id);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { machine_name: check.error } };
+      }
+    }
+
+    return updateEntityWorkflow(db, StatModel, id, data, STAT_CONFIG.nonColumnKeys);
   },
 
   async delete(id: string): Promise<DeleteWorkflowResult> {
     const db = getConnection();
     return deleteEntityWorkflow(db, StatModel, id);
+  },
+
+  async checkNameAvailable(
+    name: string,
+    excludeId?: string,
+  ): Promise<{ available: boolean }> {
+    if (name.trim() === "") return { available: false };
+    const db = getConnection();
+    const check = await checkNameUniqueness(db, StatModel, name, "", undefined, excludeId);
+    return { available: check.available };
   },
 
   async checkMachineNameAvailable(
@@ -105,11 +129,7 @@ export const StatService = {
   ): Promise<{ available: boolean }> {
     if (machineName.trim() === "") return { available: false };
     const db = getConnection();
-    const existing = await selectManyWorkflow(db, StatModel, { machine_name: machineName });
-    if (!existing.success) return { available: true };
-    const conflicts = excludeId
-      ? existing.data.filter((s) => s.id !== excludeId)
-      : existing.data;
-    return { available: conflicts.length === 0 };
+    const check = await checkFieldUniqueness(db, StatModel, "machine_name", machineName, "", undefined, excludeId);
+    return { available: check.available };
   },
 };

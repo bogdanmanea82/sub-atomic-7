@@ -21,13 +21,14 @@ import {
   MACHINE_NAME_FIELD_ATOM,
   NAME_FIELD_ATOM,
   DESCRIPTION_FIELD_ATOM,
+  IS_ACTIVE_FIELD_ATOM,
   STAT_DATA_TYPE_FIELD_ATOM,
   STAT_VALUE_MIN_FIELD_ATOM,
   STAT_VALUE_MAX_FIELD_ATOM,
   STAT_DEFAULT_VALUE_FIELD_ATOM,
+  STAT_CATEGORY_FIELD_ATOM,
 } from "../../universal/atoms";
-import { STANDARD_PERMISSIONS, AUDIT_FIELDS } from "../../universal/molecules";
-import { STAT_CATEGORIES } from "../../universal/sub-atoms";
+import { STANDARD_PERMISSIONS, AUDIT_FIELDS, ARCHIVE_FIELDS } from "../../universal/molecules";
 
 export class StatConfigFactory extends BaseEntityConfigFactory {
   protected getEntityName(): string {
@@ -56,22 +57,15 @@ export class StatConfigFactory extends BaseEntityConfigFactory {
       STAT_VALUE_MIN_FIELD_ATOM,
       STAT_VALUE_MAX_FIELD_ATOM,
       STAT_DEFAULT_VALUE_FIELD_ATOM,
-      {
-        type: "enum",
-        name: "category",
-        label: "Category",
-        values: [
-          STAT_CATEGORIES.attribute,
-          STAT_CATEGORIES.resource,
-          STAT_CATEGORIES.offensive,
-          STAT_CATEGORIES.defensive,
-          STAT_CATEGORIES.utility,
-        ] as const,
-        required: true,
-        displayFormat: "select",
-      },
+      STAT_CATEGORY_FIELD_ATOM,
+      IS_ACTIVE_FIELD_ATOM,
+      ...ARCHIVE_FIELDS,
       ...AUDIT_FIELDS,
     ] as const;
+  }
+
+  protected override getNonColumnKeys(): readonly string[] {
+    return ["status_action", "status_reason"];
   }
 }
 

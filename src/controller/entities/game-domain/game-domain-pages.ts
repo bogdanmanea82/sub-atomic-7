@@ -41,6 +41,7 @@ export const GameDomainPages = new Elysia({ detail: { hide: true } })
     const paginationMeta = buildPaginationMeta(result.totalCount, pagination.page, pagination.pageSize);
     const view = GameDomainViewService.prepareListView(
       result.data as unknown as Record<string, unknown>[],
+      undefined,
       paginationMeta,
     );
     return listPage(view, BASE_PATH);

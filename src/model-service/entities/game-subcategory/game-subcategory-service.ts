@@ -3,6 +3,7 @@
 // Name uniqueness is scoped to the parent GameCategory.
 
 import type { GameSubcategory } from "@model/entities/game-subcategory/game-subcategory-model";
+import type { PaginationParams } from "@model/universal/sub-atoms/types/pagination-params";
 import { GameSubcategoryModel } from "@model/entities/game-subcategory/game-subcategory-model";
 import { GAME_SUBCATEGORY_CONFIG } from "@config/entities/game-subcategory";
 import { getConnection } from "../../sub-atoms/database";
@@ -22,7 +23,6 @@ import {
   selectManyPaginatedWorkflow,
   type SelectManyPaginatedResult,
 } from "../../molecules/workflows/select-many-paginated-workflow";
-import type { PaginationParams } from "@model/universal/sub-atoms/types/pagination-params";
 import {
   updateEntityWorkflow,
   type UpdateWorkflowResult,
@@ -31,14 +31,17 @@ import {
   deleteEntityWorkflow,
   type DeleteWorkflowResult,
 } from "../../molecules/workflows/delete-entity-workflow";
-import { checkNameUniqueness } from "../../atoms/uniqueness";
+import { checkNameUniqueness, checkFieldUniqueness } from "../../atoms/uniqueness";
+import { applyStatusAction } from "../../sub-atoms/apply-status-action";
 
 const NAME_ERROR = "A Game Subcategory with this name already exists in this category.";
+const MACHINE_NAME_ERROR = "A Game Subcategory with this machine_name already exists.";
 
 export const GameSubcategoryService = {
   async create(
     input: Record<string, unknown>,
   ): Promise<CreateWorkflowResult<GameSubcategory>> {
+    applyStatusAction(input);
     const db = getConnection();
 
     const name = input["name"];
@@ -47,6 +50,14 @@ export const GameSubcategoryService = {
       const check = await checkNameUniqueness(db, GameSubcategoryModel, name, NAME_ERROR, { game_category_id: gameCategoryId });
       if (!check.available) {
         return { success: false, stage: "validation", errors: { name: check.error } };
+      }
+    }
+
+    const machineName = input["machine_name"];
+    if (typeof machineName === "string" && machineName.trim() !== "") {
+      const check = await checkFieldUniqueness(db, GameSubcategoryModel, "machine_name", machineName, MACHINE_NAME_ERROR);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { machine_name: check.error } };
       }
     }
 
@@ -77,6 +88,7 @@ export const GameSubcategoryService = {
     id: string,
     data: Record<string, unknown>,
   ): Promise<UpdateWorkflowResult<GameSubcategory>> {
+    applyStatusAction(data);
     const db = getConnection();
 
     const name = data["name"];
@@ -88,7 +100,15 @@ export const GameSubcategoryService = {
       }
     }
 
-    return updateEntityWorkflow(db, GameSubcategoryModel, id, data);
+    const machineName = data["machine_name"];
+    if (typeof machineName === "string" && machineName.trim() !== "") {
+      const check = await checkFieldUniqueness(db, GameSubcategoryModel, "machine_name", machineName, MACHINE_NAME_ERROR, undefined, id);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { machine_name: check.error } };
+      }
+    }
+
+    return updateEntityWorkflow(db, GameSubcategoryModel, id, data, GAME_SUBCATEGORY_CONFIG.nonColumnKeys);
   },
 
   async delete(id: string): Promise<DeleteWorkflowResult> {
@@ -104,6 +124,16 @@ export const GameSubcategoryService = {
     if (name.trim() === "") return { available: false };
     const db = getConnection();
     const check = await checkNameUniqueness(db, GameSubcategoryModel, name, "", scope, excludeId);
+    return { available: check.available };
+  },
+
+  async checkMachineNameAvailable(
+    machineName: string,
+    excludeId?: string,
+  ): Promise<{ available: boolean }> {
+    if (machineName.trim() === "") return { available: false };
+    const db = getConnection();
+    const check = await checkFieldUniqueness(db, GameSubcategoryModel, "machine_name", machineName, "", undefined, excludeId);
     return { available: check.available };
   },
 };

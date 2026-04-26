@@ -31,14 +31,6 @@ psql "$DATABASE_URL" --quiet -c "
 
 FILES=(
   "01-helpers.sql"
-  "03-modifiers-weapons.sql"
-  "04-modifiers-body-armour.sql"
-  "05-modifiers-helmets.sql"
-  "06-modifiers-boots.sql"
-  "07-modifiers-gloves.sql"
-  "08-modifiers-belts.sql"
-  "09-modifiers-offhand.sql"
-  "10-modifiers-jewellery.sql"
   "15-modifiers-special.sql"
   "99-cleanup.sql"
 )

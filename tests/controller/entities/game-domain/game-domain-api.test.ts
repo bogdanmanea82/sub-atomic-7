@@ -18,9 +18,12 @@ const BASE = "http://localhost";
 const app = new Elysia().use(GameDomainController);
 
 let createdId = "";
+let payloadCounter = 0;
 
 function makePayload(overrides?: Record<string, unknown>): Record<string, unknown> {
+  payloadCounter++;
   return {
+    machine_name: "http_test_gd_" + Date.now() + "_" + payloadCounter,
     name: "http_test_gd_" + Date.now(),
     description: "Created by HTTP integration test",
     is_active: true,
@@ -151,6 +154,32 @@ describe("GET /api/game-domains/check-name", () => {
 
     const res = await app.handle(
       new Request(`${BASE}/api/game-domains/check-name?name=${encodeURIComponent(existingName)}`),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json() as { available: boolean };
+    expect(body.available).toBe(false);
+  });
+});
+
+// ── GET /api/game-domains/check-machine-name ──────────────────────────────
+describe("GET /api/game-domains/check-machine-name", () => {
+  it("returns available:true for a machine_name not in use", async () => {
+    const res = await app.handle(
+      new Request(`${BASE}/api/game-domains/check-machine-name?machineName=http_test_unused_${Date.now()}`),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json() as { available: boolean };
+    expect(body.available).toBe(true);
+  });
+
+  it("returns available:false for an existing machine_name", async () => {
+    const listRes = await app.handle(new Request(`${BASE}/api/game-domains`));
+    const listBody = await listRes.json() as { data: Array<{ machine_name: string }> };
+    const existingMachineName = listBody.data[0]?.machine_name;
+    if (!existingMachineName) throw new Error("No seeded domains found");
+
+    const res = await app.handle(
+      new Request(`${BASE}/api/game-domains/check-machine-name?machineName=${encodeURIComponent(existingMachineName)}`),
     );
     expect(res.status).toBe(200);
     const body = await res.json() as { available: boolean };

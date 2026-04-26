@@ -27,7 +27,7 @@ export type ItemModifier = {
   readonly game_subdomain_id: string;
   readonly game_category_id: string;
   readonly game_subcategory_id: string;
-  readonly code: string;
+  readonly machine_name: string;
   readonly name: string;
   readonly description: string | null;
   readonly affix_type: string;

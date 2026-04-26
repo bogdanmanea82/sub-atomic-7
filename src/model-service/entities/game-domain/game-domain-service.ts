@@ -2,6 +2,7 @@
 // Layer 2 organism — public API for all GameDomain database operations
 
 import type { GameDomain } from "@model/entities/game-domain/game-domain-model";
+import type { PaginationParams } from "@model/universal/sub-atoms/types/pagination-params";
 import { GameDomainModel } from "@model/entities/game-domain/game-domain-model";
 import { GAME_DOMAIN_CONFIG } from "@config/entities/game-domain";
 import { getConnection } from "../../sub-atoms/database";
@@ -21,7 +22,6 @@ import {
   selectManyPaginatedWorkflow,
   type SelectManyPaginatedResult,
 } from "../../molecules/workflows/select-many-paginated-workflow";
-import type { PaginationParams } from "@model/universal/sub-atoms/types/pagination-params";
 import {
   updateEntityWorkflow,
   type UpdateWorkflowResult,
@@ -30,14 +30,17 @@ import {
   deleteEntityWorkflow,
   type DeleteWorkflowResult,
 } from "../../molecules/workflows/delete-entity-workflow";
-import { checkNameUniqueness } from "../../atoms/uniqueness";
+import { checkNameUniqueness, checkFieldUniqueness } from "../../atoms/uniqueness";
+import { applyStatusAction } from "../../sub-atoms/apply-status-action";
 
 const NAME_ERROR = "A Game Domain with this name already exists.";
+const MACHINE_NAME_ERROR = "A Game Domain with this machine_name already exists.";
 
 export const GameDomainService = {
   async create(
     input: Record<string, unknown>,
   ): Promise<CreateWorkflowResult<GameDomain>> {
+    applyStatusAction(input);
     const db = getConnection();
 
     const name = input["name"];
@@ -45,6 +48,14 @@ export const GameDomainService = {
       const check = await checkNameUniqueness(db, GameDomainModel, name, NAME_ERROR);
       if (!check.available) {
         return { success: false, stage: "validation", errors: { name: check.error } };
+      }
+    }
+
+    const machineName = input["machine_name"];
+    if (typeof machineName === "string" && machineName.trim() !== "") {
+      const check = await checkFieldUniqueness(db, GameDomainModel, "machine_name", machineName, MACHINE_NAME_ERROR);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { machine_name: check.error } };
       }
     }
 
@@ -75,6 +86,7 @@ export const GameDomainService = {
     id: string,
     data: Record<string, unknown>,
   ): Promise<UpdateWorkflowResult<GameDomain>> {
+    applyStatusAction(data);
     const db = getConnection();
 
     const name = data["name"];
@@ -85,11 +97,20 @@ export const GameDomainService = {
       }
     }
 
+    const machineName = data["machine_name"];
+    if (typeof machineName === "string" && machineName.trim() !== "") {
+      const check = await checkFieldUniqueness(db, GameDomainModel, "machine_name", machineName, MACHINE_NAME_ERROR, undefined, id);
+      if (!check.available) {
+        return { success: false, stage: "validation", errors: { machine_name: check.error } };
+      }
+    }
+
     return updateEntityWorkflow(
       db,
       GameDomainModel,
       id,
       data,
+      GAME_DOMAIN_CONFIG.nonColumnKeys,
     );
   },
 
@@ -106,6 +127,16 @@ export const GameDomainService = {
     if (name.trim() === "") return { available: false };
     const db = getConnection();
     const check = await checkNameUniqueness(db, GameDomainModel, name, "", scope, excludeId);
+    return { available: check.available };
+  },
+
+  async checkMachineNameAvailable(
+    machineName: string,
+    excludeId?: string,
+  ): Promise<{ available: boolean }> {
+    if (machineName.trim() === "") return { available: false };
+    const db = getConnection();
+    const check = await checkFieldUniqueness(db, GameDomainModel, "machine_name", machineName, "", undefined, excludeId);
     return { available: check.available };
   },
 };

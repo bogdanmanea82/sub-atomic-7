@@ -136,6 +136,7 @@ describe("POST /stats (form create)", () => {
         value_max: 100,
         default_value: 10,
         category: "attribute",
+        status_action: "active",
       }),
     );
     expect(res.status).toBeGreaterThanOrEqual(300);
@@ -155,6 +156,7 @@ describe("POST /stats (form create)", () => {
         value_max: 500,
         default_value: 25,
         category: "defensive",
+        status_action: "active",
       }),
     );
     expect(createRes.status).toBeGreaterThanOrEqual(300);
@@ -248,6 +250,7 @@ describe("POST /stats/:id (form update)", () => {
         value_max: 100,
         default_value: 10,
         category: "attribute",
+        status_action: "active",
       }),
     );
     expect(createRes.status).toBeLessThan(400);
@@ -280,6 +283,7 @@ describe("POST /stats/:id/delete", () => {
         value_max: 100,
         default_value: 10,
         category: "attribute",
+        status_action: "active",
       }),
     );
     const location = createRes.headers.get("location") ?? "";

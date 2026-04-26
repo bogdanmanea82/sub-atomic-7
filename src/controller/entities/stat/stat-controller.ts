@@ -15,13 +15,25 @@ import { deriveBodySchema, paginationQuerySchema } from "../../sub-atoms/schema"
 import { StatPages } from "./stat-pages";
 
 const TAGS = ["Stats"];
-const bodySchema = deriveBodySchema(STAT_CONFIG.fields);
+const passthroughKeys = STAT_CONFIG.nonColumnKeys ?? [];
+const alwaysOptionalKeys = ["is_active"];
+const bodySchema = deriveBodySchema(STAT_CONFIG.fields, "create", passthroughKeys, alwaysOptionalKeys);
 
 const StatApi = new Elysia()
   .use(errorHandlerPlugin)
   .use(authenticatePlugin)
   .use(makeAuthorizeMiddleware(STAT_CONFIG.permissions))
   .use(validateRequestPlugin)
+  .get("/api/stats/check-name", async ({ query }) => {
+    const q = query as Record<string, string>;
+    return StatService.checkNameAvailable(
+      q["name"] ?? "",
+      q["excludeId"] || undefined,
+    );
+  }, {
+    query: t.Object({ name: t.String(), excludeId: t.Optional(t.String()) }),
+    detail: { tags: TAGS },
+  })
   .get("/api/stats/check-machine-name", async ({ query }) => {
     const q = query as Record<string, string>;
     return StatService.checkMachineNameAvailable(
@@ -34,7 +46,7 @@ const StatApi = new Elysia()
   })
   .use(createCrudRoutes("/api/stats", StatService, {
     createSchema: bodySchema,
-    updateSchema: deriveBodySchema(STAT_CONFIG.fields, "update"),
+    updateSchema: deriveBodySchema(STAT_CONFIG.fields, "update", passthroughKeys),
     querySchema: paginationQuerySchema,
     tags: TAGS,
   }));

@@ -23,8 +23,8 @@ describe("STAT_CONFIG", () => {
 
   // ── Field count ────────────────────────────────────────────────────────
 
-  it("has exactly 11 fields (id + machine_name + name + description + data_type + value_min + value_max + default_value + category + audit×2)", () => {
-    expect(STAT_CONFIG.fields).toHaveLength(11);
+  it("has exactly 14 fields (id + machine_name + name + description + data_type + value_min + value_max + default_value + category + is_active + archive×2 + audit×2)", () => {
+    expect(STAT_CONFIG.fields).toHaveLength(14);
   });
 
   // ── Field order and names ──────────────────────────────────────────────
@@ -41,6 +41,9 @@ describe("STAT_CONFIG", () => {
       "value_max",
       "default_value",
       "category",
+      "is_active",
+      "archived_at",
+      "archived_reason",
       "created_at",
       "updated_at",
     ]);
@@ -103,13 +106,13 @@ describe("STAT_CONFIG", () => {
 
   // ── default_value field ────────────────────────────────────────────────
 
-  it("default_value is a required integer with standard (non-negative) range", () => {
+  it("default_value is a required integer with signed range (allows negatives)", () => {
     const f = STAT_CONFIG.fields.find((f) => f.name === "default_value");
     expect(f).toBeDefined();
     expect(f!.type).toBe("integer");
     expect(f!.required).toBe(true);
     if (f!.type === "integer") {
-      expect(f!.min).toBe(0);
+      expect(f!.min).toBe(-2147483648);
       expect(f!.max).toBe(2147483647);
     }
   });

@@ -7,7 +7,7 @@ describe("validateEntity (GameDomain)", () => {
   // ── Valid input ─────────────────────────────────────────────────────────
 
   it("validates a complete valid input", () => {
-    const input = { name: "Fantasy World", description: "A fantasy setting", sort_order: 1000, is_active: true };
+    const input = { machine_name: "fantasy_world", name: "Fantasy World", description: "A fantasy setting", sort_order: 1000, is_active: true };
     const result = validateEntity(GAME_DOMAIN_CONFIG, input);
     expect(result["name"]).toBe("Fantasy World");
     expect(result["description"]).toBe("A fantasy setting");
@@ -15,44 +15,44 @@ describe("validateEntity (GameDomain)", () => {
   });
 
   it("accepts input with optional description omitted (null)", () => {
-    const input = { name: "Minimal Domain", description: null, sort_order: 1000, is_active: false };
+    const input = { machine_name: "minimal_domain", name: "Minimal Domain", description: null, sort_order: 1000, is_active: false };
     const result = validateEntity(GAME_DOMAIN_CONFIG, input);
     expect(result["name"]).toBe("Minimal Domain");
     expect(result["description"]).toBeNull();
   });
 
   it("accepts input with description undefined", () => {
-    const input = { name: "No Description", sort_order: 1000, is_active: true };
+    const input = { machine_name: "no_description", name: "No Description", sort_order: 1000, is_active: true };
     const result = validateEntity(GAME_DOMAIN_CONFIG, input);
     expect(result["name"]).toBe("No Description");
     expect(result["description"]).toBeUndefined();
   });
 
   it("normalizes boolean strings from form submissions", () => {
-    const input = { name: "Form Submit", description: null, sort_order: 1000, is_active: "true" };
+    const input = { machine_name: "form_submit", name: "Form Submit", description: null, sort_order: 1000, is_active: "true" };
     const result = validateEntity(GAME_DOMAIN_CONFIG, input);
     expect(result["is_active"]).toBe(true);
   });
 
   it("accepts name at minimum length (3 characters)", () => {
-    const input = { name: "abc", sort_order: 1000, is_active: true };
+    const input = { machine_name: "abc_mn", name: "abc", sort_order: 1000, is_active: true };
     expect(() => validateEntity(GAME_DOMAIN_CONFIG, input)).not.toThrow();
   });
 
   it("accepts name at maximum length (255 characters)", () => {
-    const input = { name: "a".repeat(255), sort_order: 1000, is_active: true };
+    const input = { machine_name: "long_name_mn", name: "a".repeat(255), sort_order: 1000, is_active: true };
     expect(() => validateEntity(GAME_DOMAIN_CONFIG, input)).not.toThrow();
   });
 
   // ── Skips auto-managed fields ──────────────────────────────────────────
 
   it("does not require id (auto-generated UUID)", () => {
-    const input = { name: "No ID Needed", sort_order: 1000, is_active: true };
+    const input = { machine_name: "no_id_needed", name: "No ID Needed", sort_order: 1000, is_active: true };
     expect(() => validateEntity(GAME_DOMAIN_CONFIG, input)).not.toThrow();
   });
 
   it("does not require created_at or updated_at (auto-set timestamps)", () => {
-    const input = { name: "No Timestamps", sort_order: 1000, is_active: true };
+    const input = { machine_name: "no_timestamps", name: "No Timestamps", sort_order: 1000, is_active: true };
     expect(() => validateEntity(GAME_DOMAIN_CONFIG, input)).not.toThrow();
   });
 

@@ -13,6 +13,8 @@ export interface EntityRouteConfig {
   readonly displayName: string;
   /** URL for check-name uniqueness API, if the entity supports it */
   readonly checkNameUrl?: string;
+  /** URL for check-machine-name uniqueness API, if the entity supports it */
+  readonly checkMachineNameUrl?: string;
   /** Cascade dropdown configs to attach on form pages */
   readonly cascades?: readonly CascadeDropdownOptions[];
   /** Extra form initialization hook (e.g. subcategory domain→category reset) */

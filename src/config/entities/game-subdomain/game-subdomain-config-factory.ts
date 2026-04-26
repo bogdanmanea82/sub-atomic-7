@@ -8,7 +8,7 @@ import {
   ID_FIELD_ATOM,
   GAME_DOMAIN_REF_FIELD_ATOM,
 } from "../../universal/atoms";
-import { STANDARD_PERMISSIONS, BASE_ENTITY_FIELDS, AUDIT_FIELDS } from "../../universal/molecules";
+import { STANDARD_PERMISSIONS, BASE_ENTITY_FIELDS, AUDIT_FIELDS, ARCHIVE_FIELDS } from "../../universal/molecules";
 
 export class GameSubdomainConfigFactory extends BaseEntityConfigFactory {
   protected getEntityName(): string {
@@ -32,8 +32,13 @@ export class GameSubdomainConfigFactory extends BaseEntityConfigFactory {
       ID_FIELD_ATOM,
       GAME_DOMAIN_REF_FIELD_ATOM,
       ...BASE_ENTITY_FIELDS,
+      ...ARCHIVE_FIELDS,
       ...AUDIT_FIELDS,
     ] as const;
+  }
+
+  protected override getNonColumnKeys(): readonly string[] {
+    return ["status_action", "status_reason"];
   }
 
   protected override getRelationships(): readonly RelationshipConfig[] {

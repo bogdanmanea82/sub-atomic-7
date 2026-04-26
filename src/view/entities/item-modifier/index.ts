@@ -9,13 +9,12 @@ import type { BindingDetailRow, AssignmentPanelData } from "@view-service/types"
 import { mainLayout } from "../../organisms/layouts";
 import { pageHeader, formSection, detailSection, dataTable, tabBar } from "../../molecules";
 import { tabPanel } from "../../atoms";
-import { link, deleteForm, filterSelect, ICON_EDIT, ICON_COPY } from "../../sub-atoms";
+import { link, deleteForm, filterSelect, ICON_EDIT, ICON_COPY, statusBadgeInline } from "../../sub-atoms";
 import { tierFormSection } from "./tier-form-section";
 import { tierDetailSection } from "./tier-detail-section";
 import { bindingDetailPanel } from "./binding-detail-panel";
 import { assignmentDetailPanel } from "./assignment-detail-panel";
 import { statusFormSection } from "./status-form-section";
-import { statusBadge } from "./status-badge";
 import { ITEM_MODIFIER_TABS } from "./item-modifier-tabs";
 
 type ModifierFormView = FormView & {
@@ -168,10 +167,11 @@ export function detailPage(
   const content = `
     ${pageHeader({
       title: view.title,
+      badge: statusBadgeInline(view.isActive, view.archivedAt),
       breadcrumbs: [{ label: "Modifiers", href: basePath }, { label: view.title }],
     })}
     ${tabBar(ITEM_MODIFIER_TABS)}
-    ${tabPanel("definition", `${detailSection({ ...view, fields: view.fields.filter((f) => !["is_active","archived_at","archived_reason"].includes(f.name)) })}${statusBadge(view.isActive, view.archivedAt, view.archivedReason)}${tierDetailSection(view.tierRows)}${definitionActions}`, true)}
+    ${tabPanel("definition", `${detailSection({ ...view, fields: view.fields.filter((f) => !["is_active","archived_at","archived_reason"].includes(f.name)) })}${tierDetailSection(view.tierRows)}${definitionActions}`, true)}
     ${tabPanel("bindings", bindingsHtml, false)}
     ${tabPanel("assignments", assignmentDetailPanel(view.assignments), false)}`;
   return mainLayout(content, view.title, basePath);

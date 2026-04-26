@@ -5,6 +5,23 @@
 import { escapeHtml } from "../../sub-atoms";
 
 /**
+ * Compact inline badge — dot + label only, no wrapper.
+ * Designed for injection into the page header title row.
+ */
+export function statusBadgeInline(
+  isActive: boolean,
+  archivedAt?: string,
+): string {
+  if (archivedAt) {
+    return `<span class="status-dot status-dot--archived"></span><span class="lifecycle-label lifecycle--archived">Archived</span>`;
+  }
+  if (!isActive) {
+    return `<span class="status-dot status-dot--inactive"></span><span class="lifecycle-label lifecycle--deactivated">Disabled</span>`;
+  }
+  return `<span class="status-dot status-dot--active"></span><span class="lifecycle-label lifecycle--active">Active</span>`;
+}
+
+/**
  * Renders a read-only status badge for the detail page.
  * Three states: archived (has archivedAt) → disabled (!isActive) → active.
  */

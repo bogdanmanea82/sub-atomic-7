@@ -27,6 +27,9 @@ export type Stat = {
   readonly value_max: number;
   readonly default_value: number;
   readonly category: string;
+  readonly is_active: boolean;
+  readonly archived_at: Date | null;
+  readonly archived_reason: string | null;
   readonly created_at: Date;
   readonly updated_at: Date;
 };

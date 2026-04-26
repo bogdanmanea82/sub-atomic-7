@@ -40,3 +40,6 @@ export { DISPLAY_TEMPLATE_FIELD_ATOM } from "./display-template-field-atom";
 
 export { CHARACTER_ID_FIELD_ATOM } from "./character-id-field-atom";
 export { STAT_ID_FIELD_ATOM } from "./stat-id-field-atom";
+
+export { STAT_CATEGORY_FIELD_ATOM } from "./stat-category-field-atom";
+export { AFFIX_TYPE_FIELD_ATOM } from "./affix-type-field-atom";

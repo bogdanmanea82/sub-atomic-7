@@ -54,6 +54,15 @@ export function initEntityRoutes(
           startDisabled: false,
         });
       }
+      if (config.checkMachineNameUrl) {
+        attachNameAvailabilityHandler(form, {
+          checkUrl: config.checkMachineNameUrl,
+          fieldName: "machine_name",
+          queryParam: "machineName",
+          originalName: "",
+          startDisabled: false,
+        });
+      }
     }
     return true;
   }
@@ -81,6 +90,16 @@ export function initEntityRoutes(
           startDisabled: true,
         });
       }
+      if (config.checkMachineNameUrl) {
+        const mnInput = form.querySelector<HTMLInputElement>('[name="machine_name"]');
+        attachNameAvailabilityHandler(form, {
+          checkUrl: config.checkMachineNameUrl,
+          fieldName: "machine_name",
+          queryParam: "machineName",
+          originalName: mnInput?.value ?? "",
+          startDisabled: true,
+        });
+      }
     }
     return true;
   }
@@ -105,6 +124,17 @@ export function initEntityRoutes(
         attachNameAvailabilityHandler(form, {
           checkUrl: config.checkNameUrl,
           originalName: nameInput?.value ?? "",
+          excludeId: id,
+          startDisabled: false,
+        });
+      }
+      if (config.checkMachineNameUrl) {
+        const mnInput = form.querySelector<HTMLInputElement>('[name="machine_name"]');
+        attachNameAvailabilityHandler(form, {
+          checkUrl: config.checkMachineNameUrl,
+          fieldName: "machine_name",
+          queryParam: "machineName",
+          originalName: mnInput?.value ?? "",
           excludeId: id,
           startDisabled: false,
         });

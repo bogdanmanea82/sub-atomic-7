@@ -43,6 +43,22 @@ export function attachFormSubmitHandler(
         continue;
       }
 
+      // Empty select values mean "no selection" — omit rather than send "" which
+      // TypeBox rejects against t.Union([t.Literal("x"), ...]) optional enum schemas.
+      const selectEl = form.querySelector<HTMLSelectElement>(`select[name="${key}"]`);
+      if (selectEl) {
+        if (value !== "") data[key] = value;
+        continue;
+      }
+
+      // Empty textarea values are omitted — t.Optional(t.String({ minLength: N }))
+      // still validates "" against minLength when the key is present.
+      const textareaEl = form.querySelector<HTMLTextAreaElement>(`textarea[name="${key}"]`);
+      if (textareaEl) {
+        if (value !== "") data[key] = value;
+        continue;
+      }
+
       data[key] = value;
     }
 

@@ -15,7 +15,9 @@ import { deriveBodySchema, paginationQuerySchema } from "../../sub-atoms/schema"
 import { GameSubcategoryPages } from "./game-subcategory-pages";
 
 const TAGS = ["Game Subcategories"];
-const bodySchema = deriveBodySchema(GAME_SUBCATEGORY_CONFIG.fields);
+const passthroughKeys = GAME_SUBCATEGORY_CONFIG.nonColumnKeys ?? [];
+const alwaysOptionalKeys = ["is_active"];
+const bodySchema = deriveBodySchema(GAME_SUBCATEGORY_CONFIG.fields, "create", passthroughKeys, alwaysOptionalKeys);
 
 const GameSubcategoryApi = new Elysia()
   .use(errorHandlerPlugin)
@@ -38,9 +40,19 @@ const GameSubcategoryApi = new Elysia()
     }),
     detail: { tags: TAGS },
   })
+  .get("/api/game-subcategories/check-machine-name", async ({ query }) => {
+    const q = query as Record<string, string>;
+    return GameSubcategoryService.checkMachineNameAvailable(
+      q["machineName"] ?? "",
+      q["excludeId"] || undefined,
+    );
+  }, {
+    query: t.Object({ machineName: t.String(), excludeId: t.Optional(t.String()) }),
+    detail: { tags: TAGS },
+  })
   .use(createCrudRoutes("/api/game-subcategories", GameSubcategoryService, {
     createSchema: bodySchema,
-    updateSchema: deriveBodySchema(GAME_SUBCATEGORY_CONFIG.fields, "update"),
+    updateSchema: deriveBodySchema(GAME_SUBCATEGORY_CONFIG.fields, "update", passthroughKeys),
     querySchema: paginationQuerySchema,
     tags: TAGS,
   }));

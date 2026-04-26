@@ -5,6 +5,7 @@ import { GAME_CATEGORY_CONFIG } from "@config/entities/game-category";
 import { GAME_DOMAIN_REF_FIELD_ATOM, GAME_SUBDOMAIN_REF_FIELD_ATOM } from "@config/universal/atoms";
 import type { ListView, DetailView, FormView, SelectOption, PaginationMeta, ReferenceLookup } from "../../types";
 import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig } from "../../molecules/views";
+import { deriveCurrentState } from "../../sub-atoms";
 
 /**
  * Pre-binds GAME_CATEGORY_CONFIG so callers never import config directly.
@@ -26,8 +27,9 @@ export const GameCategoryViewService = {
   prepareFilteredListView(
     entities: Record<string, unknown>[],
     pagination?: PaginationMeta,
+    referenceLookup?: ReferenceLookup,
   ): ListView {
-    const view = buildListView(entities, GAME_CATEGORY_CONFIG, undefined, pagination);
+    const view = buildListView(entities, GAME_CATEGORY_CONFIG, referenceLookup, pagination);
     return {
       ...view,
       columns: view.columns.filter((c) => !LIST_EXCLUDE_FIELDS.has(c.name)),
@@ -50,7 +52,8 @@ export const GameCategoryViewService = {
     values?: Record<string, unknown>,
     errors?: Record<string, string>,
   ): FormView {
-    return buildFormView(GAME_CATEGORY_CONFIG, values, errors, selectOptions);
+    const base = buildFormView(GAME_CATEGORY_CONFIG, values, errors, selectOptions);
+    return { ...base, currentState: deriveCurrentState(values), statusReason: String(values?.["archived_reason"] ?? "") || undefined };
   },
 
   prepareEditForm(
@@ -58,17 +61,19 @@ export const GameCategoryViewService = {
     currentValues: Record<string, unknown>,
     errors?: Record<string, string>,
   ): FormView {
-    return buildFormView(GAME_CATEGORY_CONFIG, currentValues, errors, selectOptions);
+    const base = buildFormView(GAME_CATEGORY_CONFIG, currentValues, errors, selectOptions);
+    return { ...base, currentState: deriveCurrentState(currentValues), statusReason: String(currentValues["archived_reason"] ?? "") || undefined };
   },
 
   prepareDuplicateForm(
     selectOptions: Record<string, readonly SelectOption[]>,
     sourceValues: Record<string, unknown>,
   ): FormView {
-    return buildFormView(
+    const base = buildFormView(
       GAME_CATEGORY_CONFIG, sourceValues, undefined, selectOptions,
       `Duplicate ${GAME_CATEGORY_CONFIG.displayName}`,
     );
+    return { ...base, currentState: "active" };
   },
 
   prepareBrowserFieldConfig(): string {

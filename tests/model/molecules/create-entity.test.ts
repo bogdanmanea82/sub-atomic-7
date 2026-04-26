@@ -10,6 +10,7 @@ describe("createEntity (full pipeline)", () => {
   it("produces a PreparedQuery for valid input", () => {
     const input = {
       id: "test-uuid",
+      machine_name: "fantasy_world",
       name: "Fantasy World",
       description: "A rich fantasy setting",
       sort_order: 1000,
@@ -25,6 +26,7 @@ describe("createEntity (full pipeline)", () => {
   it("includes the provided UUID in params", () => {
     const input = {
       id: "my-custom-uuid",
+      machine_name: "test_domain",
       name: "Test Domain",
       sort_order: 1000,
       is_active: true,
@@ -36,6 +38,7 @@ describe("createEntity (full pipeline)", () => {
   it("trims name whitespace before inserting", () => {
     const input = {
       id: "uuid",
+      machine_name: "trimmed_name",
       name: "  Trimmed Name  ",
       sort_order: 1000,
       is_active: true,
@@ -48,6 +51,7 @@ describe("createEntity (full pipeline)", () => {
   it("auto-generates timestamp strings for created_at and updated_at", () => {
     const input = {
       id: "uuid",
+      machine_name: "test_timestamps",
       name: "Test",
       sort_order: 1000,
       is_active: true,
@@ -64,6 +68,7 @@ describe("createEntity (full pipeline)", () => {
   it("includes null for optional description when omitted", () => {
     const input = {
       id: "uuid",
+      machine_name: "no_description",
       name: "No Description",
       sort_order: 1000,
       is_active: false,
@@ -132,7 +137,7 @@ describe("createEntity (full pipeline)", () => {
   // ── Description edge cases ─────────────────────────────────────────────
 
   it("accepts valid input without description", () => {
-    const input = { id: "uuid", name: "Valid", sort_order: 1000, is_active: true };
+    const input = { id: "uuid", machine_name: "valid_mn", name: "Valid", sort_order: 1000, is_active: true };
     expect(() => createEntity(GAME_DOMAIN_CONFIG, input)).not.toThrow();
   });
 
@@ -150,7 +155,7 @@ describe("createEntity (full pipeline)", () => {
   // ── SQL structure verification ─────────────────────────────────────────
 
   it("generates quoted column names in SQL", () => {
-    const input = { id: "uuid", name: "Test", sort_order: 1000, is_active: true };
+    const input = { id: "uuid", machine_name: "sql_cols_test", name: "Test", sort_order: 1000, is_active: true };
     const query = createEntity(GAME_DOMAIN_CONFIG, input);
     expect(query.sql).toContain('"name"');
     expect(query.sql).toContain('"is_active"');
@@ -159,14 +164,14 @@ describe("createEntity (full pipeline)", () => {
   });
 
   it("uses ? placeholders (not $n — Layer 2 converts later)", () => {
-    const input = { id: "uuid", name: "Test", sort_order: 1000, is_active: true };
+    const input = { id: "uuid", machine_name: "placeholder_test", name: "Test", sort_order: 1000, is_active: true };
     const query = createEntity(GAME_DOMAIN_CONFIG, input);
     expect(query.sql).toContain("?");
     expect(query.sql).not.toContain("$1");
   });
 
   it("has matching placeholder count and params count", () => {
-    const input = { id: "uuid", name: "Test", description: "Desc", sort_order: 1000, is_active: true };
+    const input = { id: "uuid", machine_name: "count_test", name: "Test", description: "Desc", sort_order: 1000, is_active: true };
     const query = createEntity(GAME_DOMAIN_CONFIG, input);
     const placeholderCount = (query.sql.match(/\?/g) ?? []).length;
     expect(placeholderCount).toBe(query.params.length);

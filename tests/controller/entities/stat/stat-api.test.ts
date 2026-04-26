@@ -14,17 +14,20 @@ const BASE = "http://localhost";
 const app = new Elysia().use(StatController);
 
 let createdId = "";
+let payloadCounter = 0;
 
 function makePayload(overrides?: Record<string, unknown>): Record<string, unknown> {
+  payloadCounter++;
   return {
-    machine_name: "http_test_" + Date.now(),
-    name: "HTTP Test Stat",
+    machine_name: "http_test_" + Date.now() + "_" + payloadCounter,
+    name: "HTTP Test Stat " + Date.now() + "_" + payloadCounter,
     description: "Created by HTTP integration test",
     data_type: "raw",
     value_min: 0,
     value_max: 9999,
     default_value: 10,
     category: "attribute",
+    status_action: "active",
     ...overrides,
   };
 }

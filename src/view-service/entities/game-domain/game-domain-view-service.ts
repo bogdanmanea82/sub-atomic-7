@@ -2,8 +2,9 @@
 // Layer 4 organism — complete view preparation interface for GameDomain
 
 import { GAME_DOMAIN_CONFIG } from "@config/entities/game-domain";
-import type { ListView, DetailView, FormView, PaginationMeta } from "../../types";
+import type { ListView, DetailView, FormView, PaginationMeta, ReferenceLookup } from "../../types";
 import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig } from "../../molecules/views";
+import { deriveCurrentState } from "../../sub-atoms";
 
 /**
  * Pre-binds GAME_DOMAIN_CONFIG so callers never import config directly.
@@ -12,34 +13,38 @@ import { buildListView, buildDetailView, buildFormView, buildBrowserFieldConfig 
 export const GameDomainViewService = {
   prepareListView(
     entities: Record<string, unknown>[],
+    referenceLookup?: ReferenceLookup,
     pagination?: PaginationMeta,
   ): ListView {
-    return buildListView(entities, GAME_DOMAIN_CONFIG, undefined, pagination);
+    return buildListView(entities, GAME_DOMAIN_CONFIG, referenceLookup, pagination);
   },
 
-  prepareDetailView(entity: Record<string, unknown>): DetailView {
-    return buildDetailView(entity, GAME_DOMAIN_CONFIG);
+  prepareDetailView(entity: Record<string, unknown>, referenceLookup?: ReferenceLookup): DetailView {
+    return buildDetailView(entity, GAME_DOMAIN_CONFIG, referenceLookup);
   },
 
   prepareCreateForm(
     values?: Record<string, unknown>,
     errors?: Record<string, string>,
   ): FormView {
-    return buildFormView(GAME_DOMAIN_CONFIG, values, errors);
+    const base = buildFormView(GAME_DOMAIN_CONFIG, values, errors);
+    return { ...base, currentState: deriveCurrentState(values), statusReason: String(values?.["archived_reason"] ?? "") || undefined };
   },
 
   prepareEditForm(
     currentValues: Record<string, unknown>,
     errors?: Record<string, string>,
   ): FormView {
-    return buildFormView(GAME_DOMAIN_CONFIG, currentValues, errors);
+    const base = buildFormView(GAME_DOMAIN_CONFIG, currentValues, errors);
+    return { ...base, currentState: deriveCurrentState(currentValues), statusReason: String(currentValues["archived_reason"] ?? "") || undefined };
   },
 
   prepareDuplicateForm(sourceValues: Record<string, unknown>): FormView {
-    return buildFormView(
+    const base = buildFormView(
       GAME_DOMAIN_CONFIG, sourceValues, undefined, undefined,
       `Duplicate ${GAME_DOMAIN_CONFIG.displayName}`,
     );
+    return { ...base, currentState: "active" };
   },
 
   prepareBrowserFieldConfig(): string {

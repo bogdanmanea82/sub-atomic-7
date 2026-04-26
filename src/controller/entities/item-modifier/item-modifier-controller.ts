@@ -44,18 +44,18 @@ const ModifierApi = new Elysia()
     }),
     detail: { tags: TAGS },
   })
-  .get("/api/modifiers/check-code", async ({ query }) => {
+  .get("/api/modifiers/check-machine-name", async ({ query }) => {
     const q = query as Record<string, string>;
     const scopeId = q["gameSubcategoryId"] ?? "";
     return ItemModifierService.checkFieldAvailable(
-      "code",
-      q["code"] ?? "",
+      "machine_name",
+      q["machineName"] ?? "",
       scopeId ? { game_subcategory_id: scopeId } : undefined,
       q["excludeId"] || undefined,
     );
   }, {
     query: t.Object({
-      code: t.String(),
+      machineName: t.String(),
       gameSubcategoryId: t.Optional(t.String()),
       excludeId: t.Optional(t.String()),
     }),

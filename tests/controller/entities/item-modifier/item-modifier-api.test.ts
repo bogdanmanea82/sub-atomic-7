@@ -31,7 +31,7 @@ function makePayload(overrides?: Record<string, unknown>): Record<string, unknow
     game_subdomain_id: gameSubdomainId,
     game_category_id: gameCategoryId,
     game_subcategory_id: gameSubcategoryId,
-    code: "HTTP_MOD_" + Date.now(),
+    machine_name: "HTTP_MOD_" + Date.now(),
     name: "http_test_mod_" + Date.now(),
     description: "Created by HTTP integration test",
     affix_type: "prefix",
@@ -116,7 +116,7 @@ describe("GET /api/modifiers", () => {
 describe("POST /api/modifiers", () => {
   it("returns 201 with created modifier on valid input", async () => {
     const payload = makePayload({
-      code: "HTTP_MOD_CREATE_" + Date.now(),
+      machine_name: "HTTP_MOD_CREATE_" + Date.now(),
       name: "http_test_mod_create_" + Date.now(),
     });
     const res = await app.handle(jsonReq("POST", "/api/modifiers", payload));
@@ -162,7 +162,7 @@ describe("POST /api/modifiers", () => {
   it("browser bug — rejects is_active:'true' (FormData boolean bug) with 422", async () => {
     const res = await app.handle(
       jsonReq("POST", "/api/modifiers", {
-        ...makePayload({ code: "HTTP_MOD_BOOL_" + Date.now(), name: "http_test_mod_bool_" + Date.now() }),
+        ...makePayload({ machine_name: "HTTP_MOD_BOOL_" + Date.now(), name: "http_test_mod_bool_" + Date.now() }),
         is_active: "true",
       }),
     );
@@ -172,7 +172,7 @@ describe("POST /api/modifiers", () => {
   it("browser bug — rejects value_min as string '1' (FormData integer bug) with 422", async () => {
     const res = await app.handle(
       jsonReq("POST", "/api/modifiers", {
-        ...makePayload({ code: "HTTP_MOD_INT_" + Date.now(), name: "http_test_mod_int_" + Date.now() }),
+        ...makePayload({ machine_name: "HTTP_MOD_INT_" + Date.now(), name: "http_test_mod_int_" + Date.now() }),
         value_min: "1",
         value_max: "10",
       }),
@@ -256,7 +256,7 @@ describe("PUT /api/modifiers/:id", () => {
 describe("DELETE /api/modifiers/:id", () => {
   it("returns 204 and modifier no longer exists after delete", async () => {
     const payload = makePayload({
-      code: "HTTP_MOD_DEL_" + Date.now(),
+      machine_name: "HTTP_MOD_DEL_" + Date.now(),
       name: "http_test_mod_del_" + Date.now(),
     });
     const createRes = await app.handle(jsonReq("POST", "/api/modifiers", payload));

@@ -18,6 +18,7 @@ import {
   ID_FIELD_ATOM,
   NAME_FIELD_ATOM,
   DESCRIPTION_FIELD_ATOM,
+  AFFIX_TYPE_FIELD_ATOM,
   TARGET_STAT_ID_FIELD_ATOM,
   COMBINATION_TYPE_FIELD_ATOM,
   ROLL_SHAPE_FIELD_ATOM,
@@ -29,7 +30,7 @@ import {
 import { STANDARD_PERMISSIONS, AUDIT_FIELDS } from "../../universal/molecules";
 import {
   MODIFIER_HIERARCHY_FIELDS,
-  MODIFIER_CODE_FIELD_ATOM,
+  MODIFIER_MACHINE_NAME_FIELD_ATOM,
   MODIFIER_STATUS_FIELDS,
   MODIFIER_ARCHIVE_FIELDS,
 } from "../../molecules/modifier";
@@ -57,15 +58,7 @@ export class ItemModifierConfigFactory extends BaseEntityConfigFactory {
    */
   protected getEntitySpecificFields(): readonly FieldConfig[] {
     return [
-      {
-        type: "enum",
-        name: "affix_type",
-        label: "Affix Type",
-        values: ["prefix", "suffix"],
-        required: true,
-        displayFormat: "select",
-        listOrder: 20,
-      },
+      AFFIX_TYPE_FIELD_ATOM,
       TARGET_STAT_ID_FIELD_ATOM,
       COMBINATION_TYPE_FIELD_ATOM,
       ROLL_SHAPE_FIELD_ATOM,
@@ -88,7 +81,7 @@ export class ItemModifierConfigFactory extends BaseEntityConfigFactory {
     return [
       ID_FIELD_ATOM,
       ...MODIFIER_HIERARCHY_FIELDS,
-      MODIFIER_CODE_FIELD_ATOM,
+      MODIFIER_MACHINE_NAME_FIELD_ATOM,
       NAME_FIELD_ATOM,
       DESCRIPTION_FIELD_ATOM,
       ...this.getEntitySpecificFields(),

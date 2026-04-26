@@ -3,6 +3,8 @@
 
 import type { ItemModifier } from "@model/entities/item-modifier/item-modifier-model";
 import type { ItemModifierTier } from "@model/entities/item-modifier-tier/item-modifier-tier-model";
+import type { HasTiers } from "../../sub-atoms/tiers";
+import type { PaginationParams } from "@model/universal/sub-atoms/types/pagination-params";
 import { ItemModifierModel } from "@model/entities/item-modifier/item-modifier-model";
 import { ItemModifierTierModel } from "@model/entities/item-modifier-tier/item-modifier-tier-model";
 import { ItemModifierBindingModel } from "@model/entities/item-modifier-binding/item-modifier-binding-model";
@@ -14,7 +16,6 @@ import {
   fetchTiers,
   createTierOrchestration,
 } from "../../sub-atoms/tiers";
-import type { HasTiers } from "../../sub-atoms/tiers";
 import {
   type CreateWorkflowResult,
 } from "../../molecules/workflows/create-entity-workflow";
@@ -30,7 +31,6 @@ import {
   selectManyPaginatedWorkflow,
   type SelectManyPaginatedResult,
 } from "../../molecules/workflows/select-many-paginated-workflow";
-import type { PaginationParams } from "@model/universal/sub-atoms/types/pagination-params";
 import {
   type UpdateWorkflowResult,
 } from "../../molecules/workflows/update-entity-workflow";
@@ -41,10 +41,12 @@ import {
 import { checkFieldUniqueness } from "../../atoms/uniqueness";
 import { insertRecord, selectMany } from "../../atoms/crud";
 import { validateTierSet, type TierInput } from "../../atoms/validation/validate-tier-set";
+import { applyStatusAction } from "../../sub-atoms/apply-status-action";
+import type { SQL } from "bun";
 
 
 const NAME_ERROR = "A ItemModifier with this name already exists in this subcategory.";
-const CODE_ERROR = "A ItemModifier with this code already exists in this subcategory.";
+const MACHINE_NAME_ERROR = "A ItemModifier with this machine_name already exists in this subcategory.";
 
 // Extended result types that include tiers
 export type ItemModifierWithTiers = ItemModifier & { readonly tiers: readonly ItemModifierTier[] };
@@ -53,7 +55,7 @@ type CreateModifierResult = CreateWorkflowResult<ItemModifier>;
 type UpdateModifierResult = UpdateWorkflowResult<ItemModifier>;
 
 /**
- * Runs both name and code uniqueness checks scoped to game_subcategory_id.
+ * Runs both name and machine_name uniqueness checks scoped to game_subcategory_id.
  */
 async function checkUniqueness(
   input: Record<string, unknown>,
@@ -61,7 +63,7 @@ async function checkUniqueness(
 ): Promise<Record<string, string> | null> {
   const db = getConnection();
   const name = input["name"];
-  const code = input["code"];
+  const machineName = input["machine_name"];
   const subcategoryId = input["game_subcategory_id"];
 
   if (typeof subcategoryId !== "string") return null;
@@ -74,29 +76,14 @@ async function checkUniqueness(
     if (!nameCheck.available) errors["name"] = nameCheck.error;
   }
 
-  if (typeof code === "string" && code.trim() !== "") {
-    const codeCheck = await checkFieldUniqueness(db, ItemModifierModel, "code", code, CODE_ERROR, scope, excludeId);
-    if (!codeCheck.available) errors["code"] = codeCheck.error;
+  if (typeof machineName === "string" && machineName.trim() !== "") {
+    const mnCheck = await checkFieldUniqueness(db, ItemModifierModel, "machine_name", machineName, MACHINE_NAME_ERROR, scope, excludeId);
+    if (!mnCheck.available) errors["machine_name"] = mnCheck.error;
   }
 
   return Object.keys(errors).length > 0 ? errors : null;
 }
 
-/**
- * Translates status_action radio value into entity field values.
- * Two states only: "active" and "disabled".
- * Archive lifecycle is deferred — it will link to the Observability layer.
- * Also clears archived_reason / archived_at so old archive data is not left stale.
- */
-function applyStatusAction(data: Record<string, unknown>): void {
-  if (data["status_action"] === "disabled") {
-    data["is_active"] = "false";
-  } else {
-    data["is_active"] = "true";
-  }
-  data["archived_reason"] = null;
-  data["archived_at"] = null;
-}
 
 /**
  * The shared 4-step validation preamble run before both create and update.
@@ -134,8 +121,6 @@ async function validateModifierInput(
 
   return { valid: true, tiers };
 }
-
-import type { SQL } from "bun";
 
 /**
  * Inserts a default binding for the modifier's own subcategory (or category as
@@ -307,6 +292,22 @@ const _core = {
    * Returns { available: false } immediately if value is blank or any required scope
    * value is missing, so callers never need to guard those cases themselves.
    */
+  async checkNameAvailable(
+    name: string,
+    scope?: Record<string, string>,
+    excludeId?: string,
+  ): Promise<{ available: boolean }> {
+    return _core.checkFieldAvailable("name", name, scope, excludeId);
+  },
+
+  async checkMachineNameAvailable(
+    machineName: string,
+    scope?: Record<string, string>,
+    excludeId?: string,
+  ): Promise<{ available: boolean }> {
+    return _core.checkFieldAvailable("machine_name", machineName, scope, excludeId);
+  },
+
   async checkFieldAvailable(
     fieldName: string,
     value: string,

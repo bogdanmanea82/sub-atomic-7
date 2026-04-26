@@ -24,8 +24,13 @@ export function buildDetailView(
   const title =
     typeof nameValue === "string" ? nameValue : config.displayName;
 
+  const isActive = typeof entity["is_active"] === "boolean" ? entity["is_active"] : undefined;
+  const archivedAt = typeof entity["archived_at"] === "string" ? entity["archived_at"] : undefined;
+
   return {
     title,
     fields: visibleFields.map((field) => prepareField(entity, field, referenceLookup)),
+    ...(isActive !== undefined ? { isActive } : {}),
+    ...(archivedAt !== undefined ? { archivedAt } : {}),
   };
 }

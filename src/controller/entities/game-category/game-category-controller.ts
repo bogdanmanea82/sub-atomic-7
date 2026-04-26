@@ -15,7 +15,9 @@ import { deriveBodySchema, paginationQuerySchema } from "../../sub-atoms/schema"
 import { GameCategoryPages } from "./game-category-pages";
 
 const TAGS = ["Game Categories"];
-const bodySchema = deriveBodySchema(GAME_CATEGORY_CONFIG.fields);
+const passthroughKeys = GAME_CATEGORY_CONFIG.nonColumnKeys ?? [];
+const alwaysOptionalKeys = ["is_active"];
+const bodySchema = deriveBodySchema(GAME_CATEGORY_CONFIG.fields, "create", passthroughKeys, alwaysOptionalKeys);
 
 const GameCategoryApi = new Elysia()
   .use(errorHandlerPlugin)
@@ -38,9 +40,19 @@ const GameCategoryApi = new Elysia()
     }),
     detail: { tags: TAGS },
   })
+  .get("/api/game-categories/check-machine-name", async ({ query }) => {
+    const q = query as Record<string, string>;
+    return GameCategoryService.checkMachineNameAvailable(
+      q["machineName"] ?? "",
+      q["excludeId"] || undefined,
+    );
+  }, {
+    query: t.Object({ machineName: t.String(), excludeId: t.Optional(t.String()) }),
+    detail: { tags: TAGS },
+  })
   .use(createCrudRoutes("/api/game-categories", GameCategoryService, {
     createSchema: bodySchema,
-    updateSchema: deriveBodySchema(GAME_CATEGORY_CONFIG.fields, "update"),
+    updateSchema: deriveBodySchema(GAME_CATEGORY_CONFIG.fields, "update", passthroughKeys),
     querySchema: paginationQuerySchema,
     tags: TAGS,
   }));
