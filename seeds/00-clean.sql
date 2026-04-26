@@ -10,6 +10,10 @@ DELETE FROM item_modifier_history;
 -- item_modifier (references stat via RESTRICT)
 DELETE FROM item_modifier;
 
+-- item children
+DELETE FROM item_stat_base;
+DELETE FROM item;
+
 -- game hierarchy (leaf → root)
 DELETE FROM game_subcategory;
 DELETE FROM game_category;

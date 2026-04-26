@@ -48,5 +48,13 @@ VALUES
 
   -- ── Utility ──────────────────────────────────────────────────────────────
   -- movement_speed: multiplier; 100 = 1.0x
-  (gen_random_uuid(), 'movement_speed',  'Movement Speed',  'multiplier', 10,   1000,   100, 'utility', now(), now()),
-  (gen_random_uuid(), 'stun_threshold',  'Stun Threshold',  'raw',        1,    100000, 50,  'utility', now(), now());
+  (gen_random_uuid(), 'movement_speed',          'Movement Speed',          'multiplier', 10,   1000,   100, 'utility', now(), now()),
+  (gen_random_uuid(), 'stun_threshold',          'Stun Threshold',          'raw',        1,    100000, 50,  'utility', now(), now()),
+
+  -- Equipment requirements: constraints applied to items worn by characters.
+  -- level_requirement: minimum character level to equip (1–100).
+  -- *_requirement: minimum attribute value to equip (0 = no requirement).
+  (gen_random_uuid(), 'level_requirement',        'Level Requirement',        'raw', 1,   100, 1, 'utility', now(), now()),
+  (gen_random_uuid(), 'strength_requirement',     'Strength Requirement',     'raw', 0,   999, 0, 'utility', now(), now()),
+  (gen_random_uuid(), 'dexterity_requirement',    'Dexterity Requirement',    'raw', 0,   999, 0, 'utility', now(), now()),
+  (gen_random_uuid(), 'intelligence_requirement', 'Intelligence Requirement', 'raw', 0,   999, 0, 'utility', now(), now());

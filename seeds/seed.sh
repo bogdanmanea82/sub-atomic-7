@@ -22,6 +22,8 @@ FILES=(
   "12-characters.sql"
   "13-character-stat-bases.sql"
   "14-formulas.sql"
+  "16-items.sql"
+  "17-item-stat-bases.sql"
   "99-cleanup.sql"
 )
 
@@ -43,7 +45,9 @@ psql "$DATABASE_URL" --quiet --tuples-only -c "
   UNION ALL SELECT 'item_modifier_tier:   ' || count(*) FROM item_modifier_tier
   UNION ALL SELECT 'character_class:      ' || count(*) FROM character_class
   UNION ALL SELECT 'character_stat_base:  ' || count(*) FROM character_stat_base
-  UNION ALL SELECT 'formula:              ' || count(*) FROM formula;
+  UNION ALL SELECT 'formula:              ' || count(*) FROM formula
+  UNION ALL SELECT 'item:                 ' || count(*) FROM item
+  UNION ALL SELECT 'item_stat_base:       ' || count(*) FROM item_stat_base;
 "
 
 echo "Done."
