@@ -35,3 +35,9 @@ export type {
   CharacterClassFormView,
   CharacterClassDetailView,
 } from "./character-class-view-models";
+
+export type {
+  ItemStatBaseViewRow,
+  ItemFormView,
+  ItemDetailView,
+} from "./item-view-models";
