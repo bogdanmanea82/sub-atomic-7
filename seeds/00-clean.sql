@@ -2,13 +2,13 @@
 -- Deletes all seed data in reverse FK order.
 -- Must clear child tables before parents (RESTRICT constraints require this).
 
--- item_modifier children (all CASCADE, but explicit for clarity)
-DELETE FROM item_modifier_tier;
+-- modifier children (all CASCADE, but explicit for clarity)
+DELETE FROM modifier_tier;
 DELETE FROM item_modifier_binding;
-DELETE FROM item_modifier_history;
+DELETE FROM modifier_history;
 
--- item_modifier (references stat via RESTRICT)
-DELETE FROM item_modifier;
+-- modifier (references stat via RESTRICT)
+DELETE FROM modifier;
 
 -- item children
 DELETE FROM item_stat_base;

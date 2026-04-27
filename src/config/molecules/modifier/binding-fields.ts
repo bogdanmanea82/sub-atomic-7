@@ -1,6 +1,6 @@
 // src/config/molecules/modifier/binding-fields.ts
 // Binding fields shared by all modifier binding sub-entities.
-// Every modifier type (ItemModifier, EnemyModifier, …) uses the same binding shape.
+// Every modifier type (Modifier, EnemyModifier, …) uses the same binding shape.
 // ModifierBindingConfigFactory spreads these after its own parent FK field.
 
 export const MODIFIER_BINDING_FIELDS = [

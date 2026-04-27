@@ -4,6 +4,6 @@ export { GameSubdomainController } from "./game-subdomain";
 export { GameCategoryController } from "./game-category";
 export { GameSubcategoryController } from "./game-subcategory";
 export { StatController } from "./stat";
-export { ItemModifierController } from "./item-modifier";
+export { ModifierController } from "./modifier";
 export { CharacterClassController } from "./character-class";
 export { ItemController } from "./item";

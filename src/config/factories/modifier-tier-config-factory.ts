@@ -1,7 +1,7 @@
 // src/config/factories/modifier-tier-config-factory.ts
 // Generic factory for modifier tier sub-entity configuration.
 // Parameterized by parent entity name and table — eliminates hardcoded FK references.
-// Usage: new ModifierTierConfigFactory("ItemModifier", "item_modifier").create()
+// Usage: new ModifierTierConfigFactory("Modifier", "modifier").create()
 
 import { BaseEntityConfigFactory } from "./base-entity-config-factory";
 import type { FieldConfig, PermissionConfig, ReferenceFieldConfig } from "../types";

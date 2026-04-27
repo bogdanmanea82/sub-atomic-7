@@ -131,7 +131,7 @@ BEGIN
     v_dom, v_armour, v_body, v_heavy_armour,
     'maximum_life', 'life_max', 'flat', 'scalar', 25, 350, 'Maximum Life'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  25,  80,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1,  80, 160, 20,  700, now(), now()),
     (gen_random_uuid(), v_mod, 2, 160, 250, 40,  400, now(), now()),
@@ -150,7 +150,7 @@ BEGIN
     v_dom, v_armour, v_body, v_heavy_armour,
     'chaos_resistance', 'chaos_resistance', 'increased', 'scalar', 4, 60, 'Chaos Resistance'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  4, 12,  1,  800, now(), now()),
     (gen_random_uuid(), v_mod, 1, 12, 25, 30,  400, now(), now()),
     (gen_random_uuid(), v_mod, 2, 25, 40, 50,  200, now(), now()),
@@ -171,7 +171,7 @@ BEGIN
     v_dom, v_wpn, v_1h, v_1h_sword,
     'added_strength', 'strength', 'flat', 'scalar', 3, 35, 'Added Strength'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  3, 10,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1, 10, 18, 25,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 18, 25, 45,  300, now(), now()),
@@ -189,7 +189,7 @@ BEGIN
     v_dom, v_armour, v_helm, v_es_helmet,
     'added_intelligence', 'intelligence', 'flat', 'scalar', 3, 35, 'Added Intelligence'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  3, 10,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1, 10, 18, 25,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 18, 25, 45,  300, now(), now()),
@@ -207,7 +207,7 @@ BEGIN
     v_dom, v_wpn, v_2h, v_staff,
     'mana_regeneration', 'mana_regen', 'increased', 'scalar', 8, 120, 'Mana Regeneration'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,   8,  25,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1,  25,  50, 30,  500, now(), now()),
     (gen_random_uuid(), v_mod, 2,  50,  80, 50,  250, now(), now()),
@@ -227,7 +227,7 @@ BEGIN
     v_dom, v_armour, v_boots, v_ev_boots,
     'movement_speed', 'movement_speed', 'increased', 'scalar', 5, 30, 'Increased Movement Speed'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  5, 10,  1,  800, now(), now()),
     (gen_random_uuid(), v_mod, 1, 10, 16, 25,  400, now(), now()),
     (gen_random_uuid(), v_mod, 2, 16, 22, 45,  200, now(), now()),
@@ -246,7 +246,7 @@ BEGIN
     v_dom, v_jewel, v_jewcat, v_ring,
     'maximum_mana', 'mana_max', 'flat', 'scalar', 8, 90, 'Maximum Mana'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  8, 20,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1, 20, 40, 20,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 40, 65, 40,  300, now(), now()),
@@ -264,7 +264,7 @@ BEGIN
     v_dom, v_jewel, v_jewcat, v_amulet,
     'life_regeneration', 'life_regen', 'flat', 'scalar', 2, 22, 'Life Regeneration'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  2,  5,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1,  5, 10, 20,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 10, 15, 40,  300, now(), now()),
@@ -282,7 +282,7 @@ BEGIN
     v_dom, v_wpn, v_1h, v_dagger,
     'critical_strike_chance', 'critical_strike_chance', 'increased', 'scalar', 10, 90, 'Critical Strike Chance'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0, 10, 25,  1,  800, now(), now()),
     (gen_random_uuid(), v_mod, 1, 25, 45, 25,  400, now(), now()),
     (gen_random_uuid(), v_mod, 2, 45, 65, 45,  200, now(), now()),
@@ -299,7 +299,7 @@ BEGIN
     v_dom, v_wpn, v_offh, v_focus,
     'cast_speed', 'cast_speed', 'increased', 'scalar', 8, 50, 'Cast Speed'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  8, 18,  1,  800, now(), now()),
     (gen_random_uuid(), v_mod, 1, 18, 28, 25,  400, now(), now()),
     (gen_random_uuid(), v_mod, 2, 28, 38, 45,  200, now(), now()),
@@ -316,7 +316,7 @@ BEGIN
     v_dom, v_wpn, v_2h, v_2h_sword,
     'accuracy_rating', 'accuracy_rating', 'flat', 'scalar', 15, 250, 'Added Accuracy Rating'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  15,  50,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1,  50, 100, 20,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 100, 175, 40,  300, now(), now()),
@@ -334,7 +334,7 @@ BEGIN
     v_dom, v_armour, v_gloves, v_ev_gloves,
     'evasion_rating', 'evasion_rating', 'flat', 'scalar', 15, 280, 'Evasion Rating'
   );
-  INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
+  INSERT INTO modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  15,  50,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1,  50, 100, 20,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 100, 180, 40,  300, now(), now()),

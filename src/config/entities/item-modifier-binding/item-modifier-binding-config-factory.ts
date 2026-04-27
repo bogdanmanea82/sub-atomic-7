@@ -8,7 +8,7 @@ import { AFFIX_TYPE_FIELD_ATOM } from "../../universal/atoms";
 
 export { ModifierBindingConfigFactory };
 export const ITEM_MODIFIER_BINDING_CONFIG = new ModifierBindingConfigFactory(
-  "ItemModifier",
-  "item_modifier",
+  "Modifier",
+  "modifier",
   [AFFIX_TYPE_FIELD_ATOM],
 ).create();

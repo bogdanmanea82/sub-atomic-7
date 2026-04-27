@@ -6,7 +6,7 @@ import {
   GameCategoryController,
   GameSubcategoryController,
   StatController,
-  ItemModifierController,
+  ModifierController,
   CharacterClassController,
   ItemController,
 } from "@controller/entities";
@@ -15,7 +15,7 @@ import { GameSubdomainService } from "@model-service/entities/game-subdomain";
 import { GameCategoryService } from "@model-service/entities/game-category";
 import { GameSubcategoryService } from "@model-service/entities/game-subcategory";
 import { StatService } from "@model-service/entities/stat";
-import { ItemModifierService } from "@model-service/entities/item-modifier";
+import { ModifierService } from "@model-service/entities/modifier";
 import { CharacterClassService } from "@model-service/entities/character-class";
 import { ItemService } from "@model-service/entities/item";
 import { homePage } from "@view/organisms/pages";
@@ -42,7 +42,7 @@ const app = new Elysia()
   .use(GameCategoryController)
   .use(GameSubcategoryController)
   .use(StatController)
-  .use(ItemModifierController)
+  .use(ModifierController)
   .use(CharacterClassController)
   .use(ItemController)
   // Serve the browser bundle as a static asset
@@ -58,7 +58,7 @@ const app = new Elysia()
       GameCategoryService.findMany(),
       GameSubcategoryService.findMany(),
       StatService.findMany(),
-      ItemModifierService.findMany(),
+      ModifierService.findMany(),
       CharacterClassService.findMany(),
       ItemService.findMany(),
     ]);

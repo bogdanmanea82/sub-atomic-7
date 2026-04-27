@@ -2,7 +2,7 @@
 // The four FK fields connecting any modifier type to the full game hierarchy.
 // Composed from existing universal ref-field atoms.
 //
-// Every modifier domain type (ItemModifier, EnemyModifier, ZoneModifier, etc.)
+// Every modifier domain type (Modifier, EnemyModifier, ZoneModifier, etc.)
 // spreads this molecule in its buildFields() — one import, four fields.
 
 import {

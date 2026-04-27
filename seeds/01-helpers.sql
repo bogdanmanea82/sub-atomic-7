@@ -32,7 +32,7 @@ DECLARE
 BEGIN
   SELECT id INTO v_stat_id FROM stat WHERE machine_name = p_stat_machine_name;
 
-  INSERT INTO item_modifier (
+  INSERT INTO modifier (
     id, game_domain_id, game_subdomain_id, game_category_id, game_subcategory_id,
     machine_name, target_stat_id, combination_type, roll_shape,
     value_min, value_max, modifier_group, display_template,
