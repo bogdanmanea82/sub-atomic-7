@@ -1,8 +1,8 @@
-# PDR-006: Asset System (Planned)
+# PDR-006: Asset System
 
-**Status:** Planned — not yet implemented  
-**Last updated:** 2026-04-23  
-**Dependency:** Requires Modifier system to be stable (complete — see PDR-005)
+**Status:** Active — Item entity complete; additional asset types planned  
+**Last updated:** 2026-04-27  
+**Dependency:** Modifier system stable (complete — see PDR-005)
 
 ---
 
@@ -34,23 +34,65 @@ pool that the binding system has declared eligible for its subcategory.
 
 ---
 
-## Planned Design
+## Current Implementation
 
-### AssetConfigFactory
+### Item (complete — all 7 layers)
 
-The Asset entity will use the same factory pattern as Modifier:
+The `Item` entity is the first concrete asset type and is fully implemented:
+
+- **Table:** `item` (created via migrations 013 + 014)
+- **Fields:** `id`, `game_domain_id`, `game_subdomain_id`, `game_category_id`,
+  `game_subcategory_id`, `machine_name`, `name`, `description`, `is_active`,
+  `archived_at`, `archived_reason`, `created_at`, `updated_at` (13 fields)
+- **Hierarchy:** scoped to the full 4-level taxonomy (same FK chain as Modifier)
+- **Stat sheet:** `item_stat_base` subordinate table — junction of item × stat with
+  `combination_type` and `base_value`; managed via delete-all-then-reinsert transaction
+  using a `stat_sheet_json` hidden form field
+- **Sparse stat sheet:** rows with `base_value = 0` are created for all stats on save
+  but only non-zero rows are displayed (contrast with CharacterClass where all stats
+  always show)
+- **All 7 layers:** L0 config → L1 model → L2 service → L3 controller → L4 view
+  service → L5 view → L6 browser, including archive lifecycle and form cascades
+
+### CharacterClass (complete — all 7 layers)
+
+`CharacterClass` is not a hierarchy asset (it has no taxonomy FK chain) but follows
+the same stat sheet pattern:
+
+- **Table:** `character_class` (originally `character`, renamed via migration 010)
+- **Fields:** `id`, `machine_name`, `name`, `description`, `is_active`, `archived_at`,
+  `archived_reason`, `created_at`, `updated_at` (9 fields)
+- **Stat sheet:** `character_stat_base` subordinate table — junction of character_class
+  × stat with `combination_type` and `base_value`; bulk-managed via `stat_sheet_json`
+- **Full stat sheet:** all stats always shown with their `default_value` pre-filled
+  (contrast with Item's sparse approach)
+
+### Stat (complete — all 7 layers)
+
+Stats are the shared attribute vocabulary for both assets. The `Stat` entity defines
+measurable game properties (strength, fire resistance, movement speed) that both
+CharacterClass stat sheets and Item stat sheets reference via FK.
+
+---
+
+## Planned Design (Remaining Work)
+
+### Additional Asset Types
+
+The `Item` entity establishes the factory and stat sheet pattern. Future asset types
+follow the same structure:
 
 ```
 BaseEntityConfigFactory
-  └── ItemAssetConfigFactory
-        ├── BASE_ENTITY_FIELDS      (universal — id, name, description, sortOrder)
-        ├── ASSET_HIERARCHY_FIELDS  (domain molecule — FK chain through taxonomy)
-        ├── AUDIT_FIELDS            (universal — createdAt, updatedAt)
-        └── asset-specific fields   (asset_class, rarity, base_stats, visual_id)
+  └── EnemyConfigFactory          (TBD — enemy asset type)
+        ├── BASE_ENTITY_FIELDS
+        ├── ASSET_HIERARCHY_FIELDS  (or enemy-specific hierarchy)
+        ├── AUDIT_FIELDS
+        └── enemy-specific fields   (ai_class, aggro_radius, loot_table_id, …)
 ```
 
-Asset-specific fields are still TBD — they depend on what the game engine needs to
-render and instantiate an asset at runtime.
+Asset-specific fields depend on what the game engine needs to render and instantiate
+each asset type at runtime.
 
 ### Asset-Modifier Eligibility
 
@@ -76,20 +118,25 @@ the data that makes generation possible.
 
 ---
 
-## Why Assets Must Wait
+## What Remains Deferred
 
-The asset system depends on the modifier system being stable because:
+The `Item` entity is complete. What remains deferred:
 
-1. The asset detail page's modifier-pool view reuses the binding resolution logic —
-   that logic must be proven correct in the modifier context first
-2. The `AssetConfigFactory` will compose domain molecules that may need to be extracted
-   from the `ModifierConfigFactory` — that extraction should happen after the modifier
-   factory is fully operational
-3. Adding assets before the modifier factory extension model (EnemyModifier full vertical) is
-   validated would mean building on an unproven abstraction
+1. **AssetTemplate pattern** — shared modifier pool declarations across asset classes.
+   Example: "All Bows use the same eligible modifier list." Individual asset records
+   reference a template rather than each declaring their own bindings. Deferred pending
+   validation that the direct item→binding model is sufficient for the game runtime.
 
-The correct sequencing is: `Modifier stable (done) → EnemyModifier full vertical (validates factory) →
-AssetFactory (uses proven pattern)`.
+2. **Non-item asset types** — Enemy assets, Spell assets, Zone assets. Each will follow
+   the `ItemConfigFactory` pattern (or a variant of it) once EnemyModifier validates
+   the factory extension model.
+
+3. **Modifier pool view on Asset detail** — showing eligible modifiers on an Item's detail
+   page reuses `prepareAssignmentPanel()` from the Modifier system. This connection has
+   not yet been wired in the L4/L5 view layer for Item.
+
+The correct sequencing was: `Modifier stable (done) → Item entity (done) → EnemyModifier
+full vertical (validates factory) → additional asset types`.
 
 ---
 
