@@ -18,7 +18,6 @@ import {
   ID_FIELD_ATOM,
   NAME_FIELD_ATOM,
   DESCRIPTION_FIELD_ATOM,
-  AFFIX_TYPE_FIELD_ATOM,
   TARGET_STAT_ID_FIELD_ATOM,
   COMBINATION_TYPE_FIELD_ATOM,
   ROLL_SHAPE_FIELD_ATOM,
@@ -58,7 +57,6 @@ export class ItemModifierConfigFactory extends BaseEntityConfigFactory {
    */
   protected getEntitySpecificFields(): readonly FieldConfig[] {
     return [
-      AFFIX_TYPE_FIELD_ATOM,
       TARGET_STAT_ID_FIELD_ATOM,
       COMBINATION_TYPE_FIELD_ATOM,
       ROLL_SHAPE_FIELD_ATOM,
