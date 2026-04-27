@@ -1,19 +1,23 @@
 -- seeds/01-helpers.sql
--- Helper function for inserting a bare item_modifier row.
+-- Helper function for inserting a bare modifier row.
 -- Dropped by 99-cleanup.sql after seeding completes.
 --
--- seed_insert_mod_raw: inserts modifier row only — NO tiers, NO binding.
+-- seed_insert_modifier_raw: inserts modifier row only — NO tiers, NO binding.
 -- Returns the modifier UUID so the caller inserts tiers and bindings manually.
 -- Used by 15-modifiers-special.sql and 18-modifiers-core.sql for all binding patterns (A–F).
 --
 -- affix_type is NOT a parameter here — it is item-specific and belongs on the binding row.
 -- Callers insert item_modifier_binding directly with affix_type in the VALUES list.
 --
--- Drop the old 12-arg signature (with p_affix_type) if it still exists from a
--- previous seed run before the affix_type refactor.
+-- Drop any pre-rename variants that may still exist in the DB from earlier seed runs:
+--   seed_insert_mod_raw (12-arg, pre-affix_type-refactor)
+--   seed_insert_mod_raw (11-arg, post-affix_type-refactor but pre-rename)
+--   seed_insert_modifier_raw (12-arg, in case of partial rename run)
 DROP FUNCTION IF EXISTS seed_insert_mod_raw(UUID, UUID, UUID, UUID, TEXT, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT);
+DROP FUNCTION IF EXISTS seed_insert_mod_raw(UUID, UUID, UUID, UUID, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT);
+DROP FUNCTION IF EXISTS seed_insert_modifier_raw(UUID, UUID, UUID, UUID, TEXT, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT);
 
-CREATE OR REPLACE FUNCTION seed_insert_mod_raw(
+CREATE OR REPLACE FUNCTION seed_insert_modifier_raw(
   p_domain_id         UUID,
   p_subdomain_id      UUID,
   p_category_id       UUID,
