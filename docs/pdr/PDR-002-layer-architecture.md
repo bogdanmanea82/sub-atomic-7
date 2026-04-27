@@ -1,7 +1,7 @@
 # PDR-002: Seven-Layer Architecture
 
 **Status:** Active  
-**Last updated:** 2026-04-23
+**Last updated:** 2026-04-27
 
 ---
 
@@ -60,12 +60,21 @@ BaseEntityConfigFactory (abstract)
   ├── GameSubdomainConfigFactory
   ├── GameCategoryConfigFactory
   ├── GameSubcategoryConfigFactory
+  ├── StatConfigFactory
+  ├── CharacterClassConfigFactory
+  ├── CharacterStatBaseConfigFactory   — subordinate to CharacterClass; bulk-managed via stat_sheet_json
+  ├── ItemConfigFactory
+  ├── ItemStatBaseConfigFactory        — subordinate to Item; bulk-managed via stat_sheet_json
+  ├── FormulaConfigFactory
   └── ModifierConfigFactory
         ├── Composes: universal atoms (id, name, description, timestamps)
         ├── Composes: universal molecules (AUDIT_FIELDS)
         ├── Composes: domain molecules (hierarchy-fields, machine-name-field, status-fields, archive-fields)
         └── Adds: modifier semantic fields (target_stat_id, combination_type, roll_shape, value_min/max, modifier_group, display_template)
-  └── ModifierBindingConfigFactory (generic — parameterized by parentEntityName, additionalFields, bindingEntityName)
+
+Generic factories (parameterized — produce config for a named parent entity):
+  ├── ModifierTierConfigFactory        — parameterized by (parentEntityName, parentTableName)
+  └── ModifierBindingConfigFactory     — parameterized by (parentEntityName, additionalFields, bindingEntityName)
         ├── ItemModifierBinding — adds affix_type
         └── EnemyModifierBinding — no additional fields (lean start)
 ```
