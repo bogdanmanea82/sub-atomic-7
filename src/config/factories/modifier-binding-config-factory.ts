@@ -1,7 +1,8 @@
 // src/config/factories/modifier-binding-config-factory.ts
 // Generic factory for modifier binding sub-entity configuration.
-// Parameterized by parent entity name and table — eliminates hardcoded FK references.
-// Usage: new ModifierBindingConfigFactory("ItemModifier", "item_modifier").create()
+// Parameterized by parent entity name, table, and optional asset-type-specific fields.
+// The third parameter lets each asset-type binding add its own fields without subclassing.
+// Usage: new ModifierBindingConfigFactory("Modifier", "modifier", [AFFIX_TYPE_FIELD_ATOM]).create()
 
 import { BaseEntityConfigFactory } from "./base-entity-config-factory";
 import type { FieldConfig, PermissionConfig, ReferenceFieldConfig } from "../types";
@@ -13,6 +14,7 @@ export class ModifierBindingConfigFactory extends BaseEntityConfigFactory {
   constructor(
     private readonly parentEntityName: string,
     private readonly parentTableName: string,
+    private readonly additionalFields: readonly FieldConfig[] = [],
   ) {
     super();
   }
@@ -44,6 +46,6 @@ export class ModifierBindingConfigFactory extends BaseEntityConfigFactory {
       required: true,
       displayFormat: "hidden",
     };
-    return [ID_FIELD_ATOM, fkField, ...MODIFIER_BINDING_FIELDS, ...AUDIT_FIELDS];
+    return [ID_FIELD_ATOM, fkField, ...MODIFIER_BINDING_FIELDS, ...this.additionalFields, ...AUDIT_FIELDS];
   }
 }
