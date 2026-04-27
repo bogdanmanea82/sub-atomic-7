@@ -3,6 +3,9 @@
 -- Each modifier has manually defined tiers (custom level_req, weights) and one or
 -- more explicit item_modifier_binding rows (include/exclude, category/subcategory).
 --
+-- affix_type is stored on item_modifier_binding (not on item_modifier).
+-- Each binding row carries 'prefix' or 'suffix' explicitly.
+--
 -- PATTERN REFERENCE:
 --   A. Multiple category inclusions          — mod appears across several slots
 --   B. Category include + subcategory exclude — "all X except Y"
@@ -126,17 +129,17 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_body, v_heavy_armour,
-    'maximum_life', 'prefix', 'life_max', 'flat', 'scalar', 25, 350, 'Maximum Life'
+    'maximum_life', 'life_max', 'flat', 'scalar', 25, 350, 'Maximum Life'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  25,  80,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1,  80, 160, 20,  700, now(), now()),
     (gen_random_uuid(), v_mod, 2, 160, 250, 40,  400, now(), now()),
     (gen_random_uuid(), v_mod, 3, 250, 350, 60,  150, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category', v_body,  true, true, now(), now()),
-    (gen_random_uuid(), v_mod, 'category', v_helm,  true, true, now(), now()),
-    (gen_random_uuid(), v_mod, 'category', v_belts, true, true, now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'category', v_body,  'prefix', true, true, now(), now()),
+    (gen_random_uuid(), v_mod, 'category', v_helm,  'prefix', true, true, now(), now()),
+    (gen_random_uuid(), v_mod, 'category', v_belts, 'prefix', true, true, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
   -- 2. CHAOS RESISTANCE — increased chaos_resistance, suffix
@@ -145,19 +148,19 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_body, v_heavy_armour,
-    'chaos_resistance', 'suffix', 'chaos_resistance', 'increased', 'scalar', 4, 60, 'Chaos Resistance'
+    'chaos_resistance', 'chaos_resistance', 'increased', 'scalar', 4, 60, 'Chaos Resistance'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  4, 12,  1,  800, now(), now()),
     (gen_random_uuid(), v_mod, 1, 12, 25, 30,  400, now(), now()),
     (gen_random_uuid(), v_mod, 2, 25, 40, 50,  200, now(), now()),
     (gen_random_uuid(), v_mod, 3, 40, 60, 70,   50, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category', v_body,   true, true, now(), now()),
-    (gen_random_uuid(), v_mod, 'category', v_helm,   true, true, now(), now()),
-    (gen_random_uuid(), v_mod, 'category', v_boots,  true, true, now(), now()),
-    (gen_random_uuid(), v_mod, 'category', v_gloves, true, true, now(), now()),
-    (gen_random_uuid(), v_mod, 'category', v_belts,  true, true, now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'category', v_body,   'suffix', true, true, now(), now()),
+    (gen_random_uuid(), v_mod, 'category', v_helm,   'suffix', true, true, now(), now()),
+    (gen_random_uuid(), v_mod, 'category', v_boots,  'suffix', true, true, now(), now()),
+    (gen_random_uuid(), v_mod, 'category', v_gloves, 'suffix', true, true, now(), now()),
+    (gen_random_uuid(), v_mod, 'category', v_belts,  'suffix', true, true, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
   -- 3. ADDED STRENGTH — flat strength, suffix
@@ -166,16 +169,16 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_1h, v_1h_sword,
-    'added_strength', 'suffix', 'strength', 'flat', 'scalar', 3, 35, 'Added Strength'
+    'added_strength', 'strength', 'flat', 'scalar', 3, 35, 'Added Strength'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  3, 10,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1, 10, 18, 25,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 18, 25, 45,  300, now(), now()),
     (gen_random_uuid(), v_mod, 3, 25, 35, 65,  100, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category',    v_1h,   true, true,  now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_wand, true, false, now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'category',    v_1h,   'suffix', true, true,  now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_wand, 'suffix', true, false, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
   -- 4. ADDED INTELLIGENCE — flat intelligence, suffix
@@ -184,16 +187,16 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_helm, v_es_helmet,
-    'added_intelligence', 'suffix', 'intelligence', 'flat', 'scalar', 3, 35, 'Added Intelligence'
+    'added_intelligence', 'intelligence', 'flat', 'scalar', 3, 35, 'Added Intelligence'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  3, 10,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1, 10, 18, 25,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 18, 25, 45,  300, now(), now()),
     (gen_random_uuid(), v_mod, 3, 25, 35, 65,  100, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category',    v_helm,         true, true,  now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_heavy_helmet, true, false, now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'category',    v_helm,         'suffix', true, true,  now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_heavy_helmet, 'suffix', true, false, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
   -- 5. MANA REGENERATION — increased mana_regen, suffix
@@ -202,18 +205,18 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_2h, v_staff,
-    'mana_regeneration', 'suffix', 'mana_regen', 'increased', 'scalar', 8, 120, 'Mana Regeneration'
+    'mana_regeneration', 'mana_regen', 'increased', 'scalar', 8, 120, 'Mana Regeneration'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,   8,  25,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1,  25,  50, 30,  500, now(), now()),
     (gen_random_uuid(), v_mod, 2,  50,  80, 50,  250, now(), now()),
     (gen_random_uuid(), v_mod, 3,  80, 120, 70,   80, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category',    v_2h,       true, true,  now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_2h_sword, true, false, now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_2h_axe,   true, false, now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_2h_mace,  true, false, now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'category',    v_2h,       'suffix', true, true,  now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_2h_sword, 'suffix', true, false, now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_2h_axe,   'suffix', true, false, now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_2h_mace,  'suffix', true, false, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
   -- 6. INCREASED MOVEMENT SPEED — increased movement_speed, prefix
@@ -222,16 +225,16 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_boots, v_ev_boots,
-    'movement_speed', 'prefix', 'movement_speed', 'increased', 'scalar', 5, 30, 'Increased Movement Speed'
+    'movement_speed', 'movement_speed', 'increased', 'scalar', 5, 30, 'Increased Movement Speed'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  5, 10,  1,  800, now(), now()),
     (gen_random_uuid(), v_mod, 1, 10, 16, 25,  400, now(), now()),
     (gen_random_uuid(), v_mod, 2, 16, 22, 45,  200, now(), now()),
     (gen_random_uuid(), v_mod, 3, 22, 30, 65,   60, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category',    v_boots,       true, true,  now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_heavy_boots, true, false, now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'category',    v_boots,       'prefix', true, true,  now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_heavy_boots, 'prefix', true, false, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
   -- 7. MAXIMUM MANA — flat mana_max, prefix
@@ -241,16 +244,16 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_jewel, v_jewcat, v_ring,
-    'maximum_mana', 'prefix', 'mana_max', 'flat', 'scalar', 8, 90, 'Maximum Mana'
+    'maximum_mana', 'mana_max', 'flat', 'scalar', 8, 90, 'Maximum Mana'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  8, 20,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1, 20, 40, 20,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 40, 65, 40,  300, now(), now()),
     (gen_random_uuid(), v_mod, 3, 65, 90, 60,  100, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category',    v_jewcat, true, false, now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_ring,   true, true,  now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'category',    v_jewcat, 'prefix', true, false, now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_ring,   'prefix', true, true,  now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
   -- 8. LIFE REGENERATION — flat life_regen, suffix
@@ -259,16 +262,16 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_jewel, v_jewcat, v_amulet,
-    'life_regeneration', 'suffix', 'life_regen', 'flat', 'scalar', 2, 22, 'Life Regeneration'
+    'life_regeneration', 'life_regen', 'flat', 'scalar', 2, 22, 'Life Regeneration'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  2,  5,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1,  5, 10, 20,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 10, 15, 40,  300, now(), now()),
     (gen_random_uuid(), v_mod, 3, 15, 22, 60,  100, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category',    v_jewcat, true, false, now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_amulet, true, true,  now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'category',    v_jewcat, 'suffix', true, false, now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_amulet, 'suffix', true, true,  now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
   -- 9. CRITICAL STRIKE CHANCE — increased critical_strike_chance, suffix
@@ -277,15 +280,15 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_1h, v_dagger,
-    'critical_strike_chance', 'suffix', 'critical_strike_chance', 'increased', 'scalar', 10, 90, 'Critical Strike Chance'
+    'critical_strike_chance', 'critical_strike_chance', 'increased', 'scalar', 10, 90, 'Critical Strike Chance'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0, 10, 25,  1,  800, now(), now()),
     (gen_random_uuid(), v_mod, 1, 25, 45, 25,  400, now(), now()),
     (gen_random_uuid(), v_mod, 2, 45, 65, 45,  200, now(), now()),
     (gen_random_uuid(), v_mod, 3, 65, 90, 65,   60, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'subcategory', v_dagger, true, true, now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'subcategory', v_dagger, 'suffix', true, true, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
   -- 10. CAST SPEED — increased cast_speed, prefix
@@ -294,15 +297,15 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_offh, v_focus,
-    'cast_speed', 'prefix', 'cast_speed', 'increased', 'scalar', 8, 50, 'Cast Speed'
+    'cast_speed', 'cast_speed', 'increased', 'scalar', 8, 50, 'Cast Speed'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  8, 18,  1,  800, now(), now()),
     (gen_random_uuid(), v_mod, 1, 18, 28, 25,  400, now(), now()),
     (gen_random_uuid(), v_mod, 2, 28, 38, 45,  200, now(), now()),
     (gen_random_uuid(), v_mod, 3, 38, 50, 65,   60, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'subcategory', v_focus, true, true, now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'subcategory', v_focus, 'prefix', true, true, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
   -- 11. ADDED ACCURACY RATING — flat accuracy_rating, prefix
@@ -311,16 +314,16 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_wpn, v_2h, v_2h_sword,
-    'accuracy_rating', 'prefix', 'accuracy_rating', 'flat', 'scalar', 15, 250, 'Added Accuracy Rating'
+    'accuracy_rating', 'accuracy_rating', 'flat', 'scalar', 15, 250, 'Added Accuracy Rating'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  15,  50,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1,  50, 100, 20,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 100, 175, 40,  300, now(), now()),
     (gen_random_uuid(), v_mod, 3, 175, 250, 60,  100, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category',    v_2h,     true, true, now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_quiver, true, true, now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'category',    v_2h,     'prefix', true, true, now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_quiver, 'prefix', true, true, now(), now());
 
   -- ══════════════════════════════════════════════════════════════════════════
   -- 12. EVASION RATING — flat evasion_rating, prefix
@@ -329,18 +332,18 @@ BEGIN
   -- ══════════════════════════════════════════════════════════════════════════
   v_mod := seed_insert_mod_raw(
     v_dom, v_armour, v_gloves, v_ev_gloves,
-    'evasion_rating', 'prefix', 'evasion_rating', 'flat', 'scalar', 15, 280, 'Evasion Rating'
+    'evasion_rating', 'evasion_rating', 'flat', 'scalar', 15, 280, 'Evasion Rating'
   );
   INSERT INTO item_modifier_tier (id, modifier_id, tier_index, min_value, max_value, level_req, spawn_weight, created_at, updated_at) VALUES
     (gen_random_uuid(), v_mod, 0,  15,  50,  1, 1000, now(), now()),
     (gen_random_uuid(), v_mod, 1,  50, 100, 20,  600, now(), now()),
     (gen_random_uuid(), v_mod, 2, 100, 180, 40,  300, now(), now()),
     (gen_random_uuid(), v_mod, 3, 180, 280, 60,  100, now(), now());
-  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, is_active, is_included, created_at, updated_at) VALUES
-    (gen_random_uuid(), v_mod, 'category',    v_gloves,       true, true,  now(), now()),
-    (gen_random_uuid(), v_mod, 'category',    v_boots,        true, true,  now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_heavy_gloves, true, false, now(), now()),
-    (gen_random_uuid(), v_mod, 'subcategory', v_heavy_boots,  true, false, now(), now());
+  INSERT INTO item_modifier_binding (id, modifier_id, target_type, target_id, affix_type, is_active, is_included, created_at, updated_at) VALUES
+    (gen_random_uuid(), v_mod, 'category',    v_gloves,       'prefix', true, true,  now(), now()),
+    (gen_random_uuid(), v_mod, 'category',    v_boots,        'prefix', true, true,  now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_heavy_gloves, 'prefix', true, false, now(), now()),
+    (gen_random_uuid(), v_mod, 'subcategory', v_heavy_boots,  'prefix', true, false, now(), now());
 
 END;
 $$;
