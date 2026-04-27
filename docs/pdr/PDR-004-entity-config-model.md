@@ -1,7 +1,7 @@
 # PDR-004: Entity & Configuration Model
 
 **Status:** Active  
-**Last updated:** 2026-04-23
+**Last updated:** 2026-04-27
 
 ---
 
@@ -47,17 +47,34 @@ An atom is a complete `FieldConfig` object for a single named field. Atoms compo
 
 ```
 src/config/universal/atoms/
-  id-field-atom.ts                   — uuid, autoGenerate: true
-  name-field-atom.ts                 — string, required, NAME constraints
-  description-field-atom.ts          — string, optional, DESCRIPTION constraints
-  is-active-field-atom.ts            — boolean, required
-  sort-order-field-atom.ts           — integer, optional
+  affix-type-field-atom.ts           — enum, "prefix" | "suffix"; ItemModifierBinding slot
+  character-id-field-atom.ts         — reference to CharacterClass; FK on CharacterStatBase
+  combination-type-field-atom.ts     — enum, flat | increased | more; PoE-style math bucket
   created-at-field-atom.ts           — timestamp, autoSet: 'create'
-  updated-at-field-atom.ts           — timestamp, autoSet: 'update'
-  game-domain-ref-field-atom.ts      — reference to GameDomain
-  game-subdomain-ref-field-atom.ts   — reference to GameSubdomain
+  description-field-atom.ts          — string, optional, DESCRIPTION constraints
+  display-template-field-atom.ts     — string, modifier human-readable text template
   game-category-ref-field-atom.ts    — reference to GameCategory
+  game-domain-ref-field-atom.ts      — reference to GameDomain
   game-subcategory-ref-field-atom.ts — reference to GameSubcategory
+  game-subdomain-ref-field-atom.ts   — reference to GameSubdomain
+  id-field-atom.ts                   — uuid, autoGenerate: true
+  is-active-field-atom.ts            — boolean, required
+  item-id-field-atom.ts              — reference to Item; FK on ItemStatBase; hidden display format
+  machine-name-field-atom.ts         — string, universal unique slug; pattern ^[a-z][a-z0-9_]*$
+  modifier-group-field-atom.ts       — string, modifier grouping key for mutual-exclusion
+  modifier-value-max-field-atom.ts   — integer, modifier upper roll bound
+  modifier-value-min-field-atom.ts   — integer, modifier lower roll bound
+  name-field-atom.ts                 — string, required, NAME constraints
+  roll-shape-field-atom.ts           — enum, scalar | range
+  sort-order-field-atom.ts           — integer, optional
+  stat-category-field-atom.ts        — enum, attribute | resource | offensive | defensive | utility
+  stat-data-type-field-atom.ts       — enum, raw | percentage | multiplier
+  stat-default-value-field-atom.ts   — integer, signed (allows negatives — e.g. resistances)
+  stat-id-field-atom.ts              — reference to Stat; FK on CharacterStatBase and ItemStatBase
+  stat-value-max-field-atom.ts       — integer, stat maximum value
+  stat-value-min-field-atom.ts       — integer, stat minimum value
+  target-stat-id-field-atom.ts       — reference to Stat; the stat a modifier affects
+  updated-at-field-atom.ts           — timestamp, autoSet: 'update'
 ```
 
 ### 3. Molecules — named field groups
@@ -66,15 +83,22 @@ A molecule is an array of atoms that belong together conceptually.
 
 ```
 src/config/universal/molecules/
-  base-entity-fields.ts   — [id, name, description, sortOrder]
-  audit-fields.ts         — [createdAt, updatedAt]
+  archive-fields.ts       — [archived_at, archived_reason]; taxonomy and stat entities
+  audit-fields.ts         — [created_at, updated_at]; all entities
+  base-entity-fields.ts   — [machine_name, name, description, is_active]; taxonomy entities
+  standard-permissions.ts — default CRUD permissions: create/update/delete = admin; read = public
 
 src/config/molecules/modifier/
-  hierarchy-fields.ts     — [gameDomainRef, gameSubdomainRef, gameCategoryRef, gameSubcategoryRef]
-  code-field.ts           — [code]  (unique slug)
-  status-fields.ts        — [isActive]
-  archive-fields.ts       — [archivedReason, archivedAt]
-  lifecycle-fields.ts     — [status-fields + archive-fields]
+  archive-fields.ts       — [archived_at, archived_reason]; modifier-specific archive fields
+  binding-fields.ts       — 8 binding scope fields (target_type, target_id, is_included,
+                            weight_override, min_tier_index, max_tier_index, level_req_override, is_active)
+  code-field.ts           — MODIFIER_MACHINE_NAME_FIELD_ATOM; modifier slug (3–100 chars, ^[a-z0-9_]+$)
+  hierarchy-fields.ts     — [game_domain_id, game_subdomain_id, game_category_id, game_subcategory_id]
+  lifecycle-fields.ts     — ⚠ TOMBSTONE — retired; split into status-fields + archive-fields;
+                            exports nothing; do not import
+  status-fields.ts        — [is_active]; modifier live/disabled toggle
+  tiers-fields.ts         — 5 tier progression fields (tier_index, level_req, min_value,
+                            max_value, spawn_weight)
 ```
 
 Universal molecules belong to all entities. Domain molecules (`modifier/`) belong only to
@@ -89,11 +113,15 @@ An entity factory assembles molecules (and any entity-specific fields) into a fu
 ```typescript
 // src/config/factories/base-entity-config-factory.ts
 abstract class BaseEntityConfigFactory {
-  abstract getTableName(): string
-  abstract getEntityName(): string
+  abstract getEntityName(): string          // PascalCase — e.g. "CharacterClass"
+  abstract getDisplayName(): string         // human singular — e.g. "Character Class"
+  abstract getPluralDisplayName(): string   // human plural — e.g. "Character Classes"
+  abstract getPermissions(): PermissionConfig
   abstract buildFields(): FieldConfig[]
 
-  getNonColumnKeys(): string[] { return [] }  // hook — override when needed
+  getTableName(): string { ... }            // derived: PascalCase → snake_case (not abstract)
+  getRelationships(): RelationshipConfig[] { return [] }   // hook — override for FK relationships
+  getNonColumnKeys(): string[] { return [] }               // hook — override for virtual form fields
 
   create(): EntityConfig {
     return {
