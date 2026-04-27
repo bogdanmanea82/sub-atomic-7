@@ -72,6 +72,14 @@ src/view/
     ├── game-category/              — custom listPage with 2-filter bar
     ├── game-subcategory/           — custom listPage with 3-filter bar
     ├── stat/                       — re-exports generic organisms unchanged
+    ├── character-class/
+    │   ├── stat-sheet-detail-section.ts — read-only stat sheet table grouped by category
+    │   ├── stat-sheet-form-section.ts   — editable stat sheet + hidden stat_sheet_json input
+    │   └── index.ts                — custom detail/form pages passing statSheet to L4 + L5
+    ├── item/
+    │   ├── stat-sheet-detail-section.ts — read-only stat sheet with combination_type column
+    │   ├── stat-sheet-form-section.ts   — editable stat sheet with combination_type select column
+    │   └── index.ts                — custom detail/form pages with 4-level cascade + stat sheet
     └── modifier/
         ├── index.ts                — all 5 page functions: custom multi-tab layout
         ├── modifier-tabs.ts        — MODIFIER_TABS constant (3-tab definition)
@@ -235,14 +243,47 @@ export interface NavItemConfig {
   readonly href: string
 }
 
+export interface NavChildItem {
+  readonly label: string;
+  readonly href: string;
+}
+
+export interface NavItemConfig {
+  readonly label: string;
+  readonly href?: string;
+  readonly children?: readonly NavChildItem[];
+}
+
 export const NAV_ITEMS: readonly NavItemConfig[] = [
-  { label: "Home",              href: "/" },
-  { label: "Game Domains",      href: "/game-domains" },
-  { label: "Game Subdomains",   href: "/game-subdomains" },
-  { label: "Game Categories",   href: "/game-categories" },
-  { label: "Game Subcategories",href: "/game-subcategories" },
-  { label: "Stats",             href: "/stats" },
-  { label: "Modifiers",         href: "/modifiers" },
+  { label: "Home", href: "/" },
+  {
+    label: "Hierarchy",
+    children: [
+      { label: "Domains",       href: "/game-domains" },
+      { label: "Subdomains",    href: "/game-subdomains" },
+      { label: "Categories",    href: "/game-categories" },
+      { label: "Subcategories", href: "/game-subcategories" },
+    ],
+  },
+  { label: "Stats", href: "/stats" },
+  {
+    label: "Character",
+    children: [
+      { label: "Character Classes", href: "/character-classes" },
+    ],
+  },
+  {
+    label: "Modifiers",
+    children: [
+      { label: "Item Modifiers", href: "/modifiers" },
+    ],
+  },
+  {
+    label: "Assets",
+    children: [
+      { label: "Base Items", href: "/items" },
+    ],
+  },
 ]
 ```
 
@@ -611,6 +652,70 @@ Two-filter listPage (domain + subdomain). Same thin-wrapper pattern.
 ### `game-subcategory/index.ts`
 
 Three-filter listPage (domain + subdomain + category). Same thin-wrapper pattern.
+
+---
+
+## Entities: CharacterClass (Stat Sheet)
+
+CharacterClass uses generic organisms for list/create/duplicate/detail/edit pages but adds
+an inline stat sheet table to detail and form pages.
+
+### `stat-sheet-detail-section.ts`
+
+```typescript
+export function statSheetDetailSection(
+  statSheet: readonly StatSheetViewRow[],
+): string
+```
+
+Read-only table grouped by `stat_category`. Each row shows: stat name, data type (%, ×, or
+blank for raw), value range (min–max), default value, and the character class's `base_value`.
+Rendered inside the `detailPage` as a section below the main `detailSection`.
+
+### `stat-sheet-form-section.ts`
+
+```typescript
+export function statSheetFormSection(
+  statSheet: readonly StatSheetViewRow[],
+): string
+```
+
+Editable table with one `<input type="number">` per stat row for `base_value`. Grouped by
+category. At form submit, L6 serializes the filled values into
+`<input type="hidden" name="stat_sheet_json">`. The hidden field is in
+`CHARACTER_CLASS_CONFIG.nonColumnKeys` so it reaches the service layer intact.
+
+---
+
+## Entities: Item (Stat Sheet + Hierarchy)
+
+Item combines the hierarchical cascade pattern (4-level filter) with a stat sheet, and adds
+a `combination_type` column to every stat row.
+
+### `stat-sheet-detail-section.ts`
+
+```typescript
+export function statSheetDetailSection(
+  statSheet: readonly ItemStatBaseViewRow[],
+): string
+```
+
+Same structure as CharacterClass stat sheet detail but adds a **Combination Type** column
+(flat/increased/more) to each row. Only rows with `base_value !== 0` exist — items have
+sparse stat bases.
+
+### `stat-sheet-form-section.ts`
+
+```typescript
+export function statSheetFormSection(
+  statSheet: readonly ItemStatBaseViewRow[],
+): string
+```
+
+Editable table with two inputs per row: a `<select>` for `combination_type` and a
+`<input type="number">` for `base_value`. Rows where both are at their zero defaults can be
+left blank. Serialized to `stat_sheet_json` by L6 before form submit — zero-value rows are
+filtered out in the service layer.
 
 ---
 
