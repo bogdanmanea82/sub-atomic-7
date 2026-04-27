@@ -19,6 +19,7 @@ FILES=(
   "11-stats.sql"
   "02-hierarchy.sql"
   "15-modifiers-special.sql"
+  "18-modifiers-core.sql"
   "12-characters.sql"
   "13-character-stat-bases.sql"
   "14-formulas.sql"
