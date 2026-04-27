@@ -1,7 +1,7 @@
 # LAYER-002: Layer 2 — Model Service Reference
 
 **Status:** Active  
-**Last updated:** 2026-04-26
+**Last updated:** 2026-04-27
 
 ---
 
@@ -88,9 +88,10 @@ src/model-service/
     ├── game-category/
     ├── game-subcategory/
     ├── stat/
-    └── item-modifier/      — complex entity: owns tiers + bindings + transactions
-        ├── item-modifier-service.ts
-        └── item-modifier-binding-service.ts
+    └── modifier/           — complex entity: owns tiers + bindings + transactions
+        ├── modifier-service.ts
+        ├── modifier-binding-service.ts          — item modifier bindings (ItemModifierBindingService)
+        └── enemy-modifier-binding-service.ts    — enemy modifier bindings (EnemyModifierBindingService)
 ```
 
 ---
@@ -179,7 +180,7 @@ to know it's inside a transaction.
 // All three operations succeed together or all rollback
 await withTransaction(db, async (txDb) => {
   await insertRecord(txDb, modifierQuery)
-  await insertTiers(txDb, ItemModifierTierModel, modifierId, tiers)
+  await insertTiers(txDb, ModifierTierModel, modifierId, tiers)
   await insertAutoBinding(txDb, modifierId, input)
 })
 ```
@@ -229,7 +230,7 @@ export function parseTiersFromInput(
 
 Extracts the `tiers_json` hidden form field and parses it from a JSON string into a
 `TierInput[]`. Returns `null` if the field is absent, blank, or fails JSON parsing. Used
-by ItemModifierService before tier validation.
+by ModifierService before tier validation.
 
 **Why `tiers_json` is a string:** HTML forms cannot submit nested arrays. The browser
 serializes the tier table to a JSON string in a hidden `<input>`. This sub-atom reverses
@@ -318,8 +319,8 @@ Factory that returns four tier mutation methods. All four operations ultimately 
 
 **Lazy closure pattern:** `findById` is passed in as a parameter. This allows the factory
 to be called before the parent service is fully constructed — the closure captures the
-reference and resolves it at call time. `ItemModifierService` passes its own `findById`
-after being fully assembled: `createTierOrchestration(ItemModifierTierModel, (id) => _core.findById(id))`.
+reference and resolves it at call time. `ModifierService` passes its own `findById`
+after being fully assembled: `createTierOrchestration(ModifierTierModel, (id) => _core.findById(id))`.
 
 **Self-reference pattern:** The returned object holds a `self` reference so `addTier`,
 `updateTier`, and `deleteTier` can call `self.replaceTiers` without circular import issues.
@@ -435,7 +436,7 @@ three distinct behaviors:
 |---|---|
 | `undefined` | Global name check (no scope) — used by GameDomain, Stat |
 | `false` | Skip name check entirely — used when parent FK may be absent |
-| `Record<string, unknown>` | Scoped name check — used by GameSubdomain, GameCategory, GameSubcategory, ItemModifier |
+| `Record<string, unknown>` | Scoped name check — used by GameSubdomain, GameCategory, GameSubcategory, Modifier |
 
 `machine_name` is **always checked globally** regardless of `nameScope`.
 
@@ -650,26 +651,26 @@ exposes the same 8 methods with the same signatures. The only variation is scope
 | `GameCategory` | Scoped to `game_subdomain_id` | Global |
 | `GameSubcategory` | Scoped to `game_category_id` | Global |
 | `Stat` | Global (no scope) | Global |
-| `ItemModifier` | Scoped to `game_subcategory_id` | Global |
+| `Modifier` | Scoped to `game_subcategory_id` | Global |
 
 **Invariant:** `machine_name` is always globally unique. `name` can be scoped — two
 different subcategories can each have a modifier named "Fire Damage".
 
 ---
 
-### ItemModifierService — Complex Organism
+### ModifierService — Complex Organism
 
-`ItemModifierService` does not delegate create/update to the universal workflows. It has
+`ModifierService` does not delegate create/update to the universal workflows. It has
 its own transactional orchestration because modifier creation/update is a multi-entity
 operation (modifier + tiers + binding in one transaction).
 
 **Extended return type:**
 ```typescript
-type ItemModifierWithTiers = ItemModifier & {
-  readonly tiers: readonly ItemModifierTier[]
+type ModifierWithTiers = Modifier & {
+  readonly tiers: readonly ModifierTier[]
 }
 ```
-`findById` returns this extended type. All other methods return `ItemModifier` (without
+`findById` returns this extended type. All other methods return `Modifier` (without
 tiers) for performance — tier loading is lazy.
 
 **Internal `validateModifierInput` preamble (4 steps):**
@@ -684,13 +685,13 @@ tiers) for performance — tier loading is lazy.
 ```
 validateModifierInput()
   → generate UUID
-  → ItemModifierModel.prepareCreate()          (L1: validate + serialize + INSERT query)
+  → ModifierModel.prepareCreate()              (L1: validate + serialize + INSERT query)
   → withTransaction(db, async (txDb) => {
       insertRecord(txDb, modifierQuery)         (insert modifier row)
-      insertTiers(txDb, ItemModifierTierModel, id, tiers)  (batch insert tiers)
-      insertAutoBinding(txDb, id, input)        (silently create default binding)
+      insertTiers(txDb, ModifierTierModel, id, tiers)  (batch insert tiers)
+      insertAutoBinding(txDb, id, input)        (silently create default item binding)
     })
-  → ItemModifierModel.prepareSelect({ id })
+  → ModifierModel.prepareSelect({ id })
   → selectMany → deserialize → success
 ```
 
@@ -698,20 +699,20 @@ validateModifierInput()
 ```
 validateModifierInput()
   → strip nonColumnKeys from data
-  → ItemModifierModel.prepareUpdate()          (L1: validate + serialize + UPDATE query)
+  → ModifierModel.prepareUpdate()              (L1: validate + serialize + UPDATE query)
   → withTransaction(db, async (txDb) => {
       executeWrite(txDb, updateQuery)           (update modifier row)
-      executeWrite(txDb, ItemModifierTierModel.prepareDelete({ modifier_id: id }))  (delete all tiers)
-      insertTiers(txDb, ItemModifierTierModel, id, newTiers)  (insert replacement tiers)
+      executeWrite(txDb, ModifierTierModel.prepareDelete({ modifier_id: id }))  (delete all tiers)
+      insertTiers(txDb, ModifierTierModel, id, newTiers)  (insert replacement tiers)
     })
-  → ItemModifierModel.prepareSelect({ id })
+  → ModifierModel.prepareSelect({ id })
   → selectMany → deserialize → success
 ```
 
 **`findById` flow (tier eager-loading):**
 ```
-selectEntityWorkflow()        → ItemModifier
-fetchTiers(db, ItemModifierTierModel, id)   → ItemModifierTier[] sorted by tier_index
+selectEntityWorkflow()        → Modifier
+fetchTiers(db, ModifierTierModel, id)   → ModifierTier[] sorted by tier_index
 return { ...modifier, tiers }
 ```
 
@@ -725,10 +726,10 @@ return { ...modifier, tiers }
 ```typescript
 const _core = { create, findById, findMany, ... }
 const _tierOrchestration = createTierOrchestration(
-  ItemModifierTierModel,
+  ModifierTierModel,
   (id) => _core.findById(id),  // lazy closure — resolves after _core is defined
 )
-export const ItemModifierService = { ..._core, ..._tierOrchestration }
+export const ModifierService = { ..._core, ..._tierOrchestration }
 ```
 
 Tier methods on the service: `replaceTiers`, `addTier`, `updateTier`, `deleteTier`
@@ -737,7 +738,7 @@ Tier methods on the service: `replaceTiers`, `addTier`, `updateTier`, `deleteTie
 
 ### ItemModifierBindingService
 
-Manages the binding sub-entity (modifier ↔ target scope relationship). Does not use
+Manages item modifier bindings (modifier ↔ item subcategory/category scope). Does not use
 universal workflows — uses atoms directly for fine-grained control.
 
 **Exported methods:**
@@ -763,6 +764,27 @@ violated. Not cross-row — a single binding's internal consistency check.
 
 ---
 
+### EnemyModifierBindingService
+
+Manages enemy modifier bindings (modifier ↔ enemy category/subcategory scope). Parallel
+structure to `ItemModifierBindingService` — same 3-method surface, same atom usage, same
+uniqueness and tier-range validation.
+
+**Exported methods:**
+
+| Method | Signature | Key operations |
+|---|---|---|
+| `findByModifier(modifierId)` | `Promise<{ category: EnemyModifierBinding[]; subcategory: EnemyModifierBinding[] }>` | `selectMany` → deserialize → group by `target_type` |
+| `create(modifierId, input)` | `Promise<CreateWorkflowResult<EnemyModifierBinding>>` | verify parent → validate tier range → composite uniqueness → insert → fetch |
+| `update(modifierId, bindingId, data)` | `Promise<UpdateWorkflowResult<EnemyModifierBinding>>` | verify parent → validate tier range → composite uniqueness → update → fetch |
+| `remove(modifierId, bindingId)` | `Promise<DeleteWorkflowResult>` | scoped fetch (verify ownership) → delete |
+
+**Target hierarchy:** Enemy categories and subcategories in the `enemies` game domain (seeded
+in `seeds/19-enemies-hierarchy.sql`). The binding does not validate that `target_id` is in
+the enemies domain — that constraint is enforced by the UI and conventions, not the DB FK.
+
+---
+
 ## Cross-Layer Dependency Map
 
 ```
@@ -776,11 +798,11 @@ L1 Model (src/model/)
         │  PreparedQuery            — output of all L1 query builders → input to L2 executors
         │  PaginationParams         — pagination input type
         │  Entity model methods     — prepareCreate, prepareSelect, prepareUpdate, prepareDelete, deserialize
-        │  Entity types             — GameDomain, Stat, ItemModifier, etc.
+        │  Entity types             — GameDomain, Stat, Modifier, etc.
         ▼
 L2 Model Service (src/model-service/)
         │
-        │  Service objects          — GameDomainService, StatService, ItemModifierService, etc.
+        │  Service objects          — GameDomainService, StatService, ModifierService, etc.
         │  Service result unions    — CreateWorkflowResult, SelectWorkflowResult, etc.
         │  PaginationParams         — passed through from L3 caller
         ▼
@@ -884,17 +906,18 @@ A "simple" entity is one without owned sub-entities (no tiers, no bindings).
 
 ### Feature Development: Adding a New Modifier Domain (e.g., EnemyModifier)
 
-EnemyModifier follows the ItemModifier pattern with tier orchestration.
+A new modifier domain (e.g., SpellModifier) follows the Modifier pattern with tier
+orchestration. Because both SpellModifier and the universal Modifier share the same FK
+parent concept, the service is essentially a copy with different config/model references.
 
-1. **L0** — Create `EnemyModifierConfigFactory` + `ModifierTierConfigFactory("EnemyModifier", "enemy_modifier")`
-2. **L1** — Create `EnemyModifierModel` + `EnemyModifierTierModel`
-3. **L2** — Create `enemy-modifier-service.ts`:
-   - Copy `item-modifier-service.ts` structure
-   - Replace `ITEM_MODIFIER_CONFIG` → `ENEMY_MODIFIER_CONFIG`
-   - Replace `ItemModifierModel` → `EnemyModifierModel`
-   - Replace `ItemModifierTierModel` → `EnemyModifierTierModel`
-   - Pass `fkFieldName: "enemy_modifier_id"` to `insertTiers`, `fetchTiers`,
-     `createTierOrchestration` if the FK column differs from default `"modifier_id"`
+1. **L0** — Create `SpellModifierConfigFactory` extending `BaseEntityConfigFactory`
+   (no new tier/binding factories needed if sharing the universal `modifier` table is acceptable)
+2. **L1** — Create `SpellModifierModel`
+3. **L2** — Create `spell-modifier-service.ts`:
+   - Copy `modifier-service.ts` structure
+   - Replace `MODIFIER_CONFIG` → `SPELL_MODIFIER_CONFIG`
+   - Replace `ModifierModel` → `SpellModifierModel`
+   - Replace `ModifierTierModel` → `SpellModifierTierModel` (if separate tier table)
 4. The tier sub-atoms (`insertTiers`, `fetchTiers`, `createTierOrchestration`) are already
    generic — no changes needed to those files
 5. The universal workflows are already generic — no changes needed
@@ -940,7 +963,7 @@ SYMPTOM: Update silently succeeds but changes don't persist
 
 SYMPTOM: Transaction rolled back — partial data saved
 → L2 withTransaction: Are ALL operations inside the callback (txDb)?
-→ Check ItemModifierService create/update: insertTiers must receive txDb, not db
+→ Check ModifierService create/update: insertTiers must receive txDb, not db
 
 SYMPTOM: Service returns not_found immediately after a create
 → L2 createEntityWorkflow: The INSERT succeeded but the SELECT found nothing
@@ -1046,7 +1069,7 @@ feat(service): add execute-select-one sub-atom for single-row guarantees
 feat(service): add check-machine-name-uniqueness atom for modifier domain scoping
 
 # Bug fix
-fix(service): pass txDb (not db) to insertTiers in ItemModifier create transaction
+fix(service): pass txDb (not db) to insertTiers in Modifier create transaction
 
 # Refactor
 refactor(service): extract validateModifierInput preamble into shared atom
@@ -1076,4 +1099,4 @@ Before pushing a branch with L2 modifications:
 - [LAYER-001: Model Reference](LAYER-001-model-reference.md) — L1 PreparedQuery and entity models that L2 executes
 - [PDR-002: Layer Architecture](PDR-002-layer-architecture.md) — where L2 sits in the full stack
 - [PDR-003: Database Design](PDR-003-database-design.md) — PostgreSQL schema that L2 queries target
-- [PDR-005: Modifier System](PDR-005-modifier-system.md) — ItemModifier tier/binding lifecycle that L2 orchestrates
+- [PDR-005: Modifier System](PDR-005-modifier-system.md) — Modifier tier/binding lifecycle that L2 orchestrates

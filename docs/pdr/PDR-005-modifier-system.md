@@ -1,7 +1,7 @@
 # PDR-005: Modifier System
 
 **Status:** Active  
-**Last updated:** 2026-04-23
+**Last updated:** 2026-04-27
 
 ---
 
@@ -16,37 +16,56 @@ with it. A 1-Handed Sword is a named container; the modifiers it can roll are wh
 interesting. This is why Modifier is modelled as a first-class citizen rather than a
 subordinate attribute.
 
-The current implementation is `ItemModifier` — the first concrete instance of what will
-become a family of modifier types (EnemyModifier, ZoneModifier, SpellModifier). The
-`ItemModifier` entity is the reference implementation that proves the factory pattern works.
+The implementation is the universal `Modifier` entity — a single table (`modifier`) that
+carries no asset-specific semantics. Asset specificity lives on binding sub-entities:
+`ItemModifierBinding` for items, `EnemyModifierBinding` for enemies, and so on for future
+asset types. This keeps the modifier definition clean while allowing each asset domain to
+carry its own binding fields (e.g., `affix_type` on item bindings only).
 
 ---
 
-## ItemModifier Field Structure
-
-### Classification Fields
-
-| Field | Type | Purpose |
-|---|---|---|
-| `affix_type` | enum | `prefix` or `suffix` — where the modifier name appears on an item |
-| `semantic_cat` | enum | Broad gameplay category (damage, defense, utility, etc.) |
-| `value_type` | enum | What the value represents (flat, percent, override) |
-| `calc_method` | enum | How values combine (additive, multiplicative, percentage, override) |
-
-These four enums define the **vocabulary** of modifier semantics. They allow a game engine
-to process modifiers programmatically without needing to parse modifier names.
+## Modifier Field Structure
 
 ### Identity & Hierarchy Fields
 
-Provided by universal molecules (`BASE_ENTITY_FIELDS`, `MODIFIER_HIERARCHY_FIELDS`):
-`id`, `name`, `code` (unique slug), `description`, `sortOrder`,
-`gameDomainId`, `gameSubdomainId`, `gameCategoryId`, `gameSubcategoryId`.
+Provided by domain molecules (`MODIFIER_HIERARCHY_FIELDS`) and universal atoms:
+`id`, `machine_name`, `name`, `description`,
+`game_domain_id`, `game_subdomain_id`, `game_category_id`, `game_subcategory_id`.
 
-The full hierarchy FK chain scopes each modifier to exactly one subcategory context.
+The full four-level hierarchy FK chain scopes each modifier to exactly one subcategory
+context. `machine_name` is the stable programmatic identifier (e.g., `fire_res`, `str_req`).
+
+### Core Semantic Fields
+
+These fields define the **vocabulary** of modifier math. They allow a game engine to
+process modifiers programmatically without needing to parse display strings.
+
+| Field | Type | Purpose |
+|---|---|---|
+| `target_stat_id` | reference | FK to the stat this modifier affects |
+| `combination_type` | enum | `flat` / `increased` / `more` — PoE-style math bucket |
+| `roll_shape` | enum | `scalar` / `range` — frozen single value or live min–max range |
+| `value_min` | integer | Lower bound of the roll range |
+| `value_max` | integer | Upper bound of the roll range |
+| `modifier_group` | string | Groups related modifiers for mutual-exclusion logic |
+| `display_template` | string | Human-readable text template (e.g., `"+{value}% increased Fire Damage"`) |
 
 ### Lifecycle Fields
 
-`isActive`, `archivedReason`, `archivedAt` — managed by the lifecycle system (see below).
+Managed by the lifecycle system (see below):
+- `is_active` — live/disabled runtime toggle (from `MODIFIER_STATUS_FIELDS` molecule)
+- `archived_at`, `archived_reason` — soft-delete (from `MODIFIER_ARCHIVE_FIELDS` molecule)
+
+### Asset-Specific Fields
+
+Fields that differ per asset type live on the **binding sub-entities**, not on `modifier`:
+
+| Field | On entity | Purpose |
+|---|---|---|
+| `affix_type` (prefix/suffix) | `ItemModifierBinding` | Item slot — irrelevant to enemies and other asset types |
+
+This separation means the `modifier` table is stable across all asset domains. Adding a new
+asset type creates a new binding table without touching `modifier`.
 
 ---
 
@@ -87,7 +106,7 @@ The simpler write path reduces the surface area for subtle bugs in tier ordering
 The tier add/update/delete operations are encapsulated in the `createTierOrchestration`
 factory (`src/model-service/sub-atoms/tiers/`). This factory takes the core service's
 `findById` and the tier model as dependencies and returns the three tier operations.
-`ItemModifierService` spreads the result onto `_core` to produce the full service surface.
+`ModifierService` spreads the result onto `_core` to produce the full service surface.
 
 ---
 
@@ -148,7 +167,7 @@ The panel shows:
 ### Lifecycle as Event Log
 
 The lifecycle state is **derived from the history log**, not stored as a column. The
-`deriveLifecycleStatus()` L4 function scans the `item_modifier_history` table for the
+`deriveLifecycleStatus()` L4 function scans the `modifier_history` table for the
 most recent status-bearing event and returns the current state.
 
 This means the full lifecycle history is always available — you can see that a modifier
@@ -165,47 +184,93 @@ In the list view and detail pages:
 
 ---
 
+## Binding Architecture
+
+The Modifier entity is universal. Asset-specific behaviour is encapsulated in binding
+sub-entities. Each binding type is a separate table with its own L0 config, L1 model, and
+L2 service.
+
+### Current Binding Sub-Entities
+
+| Binding entity | Table | Target hierarchy | Asset-specific fields |
+|---|---|---|---|
+| `ItemModifierBinding` | `item_modifier_binding` | Items hierarchy (game_subcategory) | `affix_type` (prefix/suffix) |
+| `EnemyModifierBinding` | `enemy_modifier_binding` | Enemies hierarchy (enemy categories/subcategories) | none (lean start) |
+
+Both use `ModifierBindingConfigFactory` — a generic factory parameterized by
+`(parentEntityName, parentTableName, additionalFields, bindingEntityName)`. The 4th
+parameter decouples the binding entity's table name from the parent entity name, which is
+necessary now that both binding types share the same `modifier` FK parent:
+
+```typescript
+// Item binding — adds affix_type, uses "ItemModifierBinding" → table: item_modifier_binding
+new ModifierBindingConfigFactory("Modifier", "modifier", [AFFIX_TYPE_FIELD_ATOM], "ItemModifierBinding")
+
+// Enemy binding — no additional fields, uses "EnemyModifierBinding" → table: enemy_modifier_binding
+new ModifierBindingConfigFactory("Modifier", "modifier", [], "EnemyModifierBinding")
+```
+
+### Adding a New Binding Type
+
+When a new asset domain needs modifier bindings:
+
+1. Create `src/config/entities/{asset}-modifier-binding/{asset}-modifier-binding-config-factory.ts`
+2. Call `new ModifierBindingConfigFactory("Modifier", "modifier", [...assetFields], "{Asset}ModifierBinding")`
+3. Create L1 model in `src/model/entities/{asset}-modifier-binding/`
+4. Create L2 service in `src/model-service/entities/modifier/{asset}-modifier-binding-service.ts`
+5. Add nested API routes to L3 modifier controller
+6. Create migration for the new table
+
+No changes to `modifier`, `ModifierService`, or any existing binding entities.
+
+---
+
 ## Factory Extension Model
 
-The ItemModifier is the first instance of a modifier factory. The pattern is:
+The `Modifier` entity uses the modifier domain molecules. The composition pattern is:
 
 ```
 BaseEntityConfigFactory
-  └── ItemModifierConfigFactory
-        ├── BASE_ENTITY_FIELDS (universal)
-        ├── MODIFIER_HIERARCHY_FIELDS (domain molecule)
-        ├── CODE_FIELD (domain molecule)
-        ├── MODIFIER_LIFECYCLE_FIELDS (domain molecule)
-        ├── AUDIT_FIELDS (universal)
-        └── item-specific enums (affix_type, semantic_cat, value_type, calc_method)
+  └── ModifierConfigFactory
+        ├── MODIFIER_HIERARCHY_FIELDS (domain molecule — 4 FK refs)
+        ├── MODIFIER_MACHINE_NAME_FIELD_ATOM (domain molecule)
+        ├── NAME_FIELD_ATOM, DESCRIPTION_FIELD_ATOM (universal atoms)
+        ├── [semantic fields: target_stat_id, combination_type, roll_shape, value_min,
+        │   value_max, modifier_group, display_template]
+        ├── MODIFIER_STATUS_FIELDS (domain molecule — is_active)
+        ├── MODIFIER_ARCHIVE_FIELDS (domain molecule — archived_at, archived_reason)
+        └── AUDIT_FIELDS (universal — created_at, updated_at)
 ```
 
-Adding `EnemyModifier` follows the same pattern:
+**Note on `MODIFIER_LIFECYCLE_FIELDS`:** This molecule was retired and split into
+`MODIFIER_STATUS_FIELDS` + `MODIFIER_ARCHIVE_FIELDS`. The file `lifecycle-fields.ts`
+exists as a tombstone but exports nothing. Do not import it.
+
+When a future modifier domain is needed (e.g., SpellModifier):
 
 ```
 BaseEntityConfigFactory
-  └── EnemyModifierConfigFactory
-        ├── BASE_ENTITY_FIELDS (universal — reused unchanged)
-        ├── MODIFIER_HIERARCHY_FIELDS (domain molecule — reused unchanged)
-        ├── CODE_FIELD (domain molecule — reused unchanged)
-        ├── MODIFIER_LIFECYCLE_FIELDS (domain molecule — reused unchanged)
-        ├── AUDIT_FIELDS (universal — reused unchanged)
-        └── enemy-specific fields (damage_type, ai_behavior, etc.)
+  └── SpellModifierConfigFactory
+        ├── MODIFIER_HIERARCHY_FIELDS (reused unchanged)
+        ├── MODIFIER_MACHINE_NAME_FIELD_ATOM (reused unchanged)
+        ├── NAME_FIELD_ATOM, DESCRIPTION_FIELD_ATOM (reused unchanged)
+        ├── [spell-specific fields inline]
+        ├── MODIFIER_STATUS_FIELDS (reused unchanged)
+        ├── MODIFIER_ARCHIVE_FIELDS (reused unchanged)
+        └── AUDIT_FIELDS (reused unchanged)
 ```
 
-A new `enemy_modifiers` table is created. A new L1/L2/L3 stack is built following the
-ItemModifier patterns. No existing entity code is modified.
-
-The tier system is **optional** per modifier type — not all domains need progression-based
-value scaling. EnemyModifier may not compose the tier molecules at all.
+A new `spell_modifier` table is created. A new L1/L2/L3 stack is built. No existing code
+is modified. The tier system is **optional** per modifier type — not all domains need
+progression-based value scaling.
 
 ---
 
 ## Deferred: Unified Entity History
 
-Currently `item_modifier_history` is modifier-specific. The planned generalization is a
+Currently `modifier_history` is modifier-specific. The planned generalization is a
 single `entity_history` table with `entity_type` + `entity_id` as the composite scope key.
-This allows all five CMS entities (GameDomain, GameSubdomain, etc.) to share the same
+This allows all CMS entities (GameDomain, GameSubdomain, etc.) to share the same
 audit log infrastructure. Deferred pending query optimization work for polymorphic
 `entity_type + entity_id` lookups.
 

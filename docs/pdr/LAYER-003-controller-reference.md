@@ -1,7 +1,7 @@
 # LAYER-003: Controller Reference
 
 **Status:** Active  
-**Last updated:** 2026-04-26
+**Last updated:** 2026-04-27
 
 ---
 
@@ -91,11 +91,12 @@ src/controller/
     │   ├── stat-controller.ts          — JSON API: CRUD + check-name + check-machine-name
     │   ├── stat-pages.ts               — HTML pages: no hierarchy filters
     │   └── index.ts
-    ├── item-modifier/
-    │   ├── item-modifier-controller.ts — JSON API: CRUD + check-name + nested tier/binding APIs
-    │   ├── item-modifier-pages.ts      — HTML pages: 4-level cascade + tier rows + assignments
-    │   ├── item-modifier-binding-api.ts — nested CRUD: /api/modifiers/:id/bindings
-    │   ├── item-modifier-tier-api.ts   — nested CRUD: /api/modifiers/:id/tiers/:index
+    ├── modifier/
+    │   ├── modifier-controller.ts       — JSON API: CRUD + check-name + nested tier/binding APIs
+    │   ├── modifier-pages.ts            — HTML pages: 4-level cascade + tier rows + assignments
+    │   ├── modifier-binding-api.ts      — nested CRUD: /api/modifiers/:id/bindings (item bindings)
+    │   ├── enemy-modifier-binding-api.ts — nested CRUD: /api/modifiers/:id/enemy-bindings
+    │   ├── modifier-tier-api.ts         — nested CRUD: /api/modifiers/:id/tiers/:index
     │   └── index.ts
     └── index.ts
 ```
@@ -658,48 +659,59 @@ const { domainOptions, subdomainOptions, categoryOptions } =
   await buildCascadingOptions({ domainId, subdomainId })
 ```
 
-### Complex Entity (ItemModifier)
+### Complex Entity (Modifier)
 
 Extends hierarchical pattern with:
 
 1. **Scoped uniqueness checks:** `checkFieldAvailable(fieldName, value, scope, excludeId)` — name/machine_name unique within subcategory scope
-2. **Nested tier API:** `ItemModifierTierApi` (add/update/delete by index)
-3. **Nested binding API:** `ItemModifierBindingApi` (full CRUD)
-4. **Assignments panel:** Detail/edit pages fetch bindings + all categories/subcategories for read-only computed view
-5. **Tier form state:** On validation failure, parse `tiers_json` from submitted body to restore tier rows
+2. **Nested tier API:** `ModifierTierApi` (add/update/delete by index)
+3. **Nested item binding API:** `ModifierBindingApi` (full CRUD on item bindings)
+4. **Nested enemy binding API:** `EnemyModifierBindingApi` (full CRUD on enemy bindings)
+5. **Assignments panel:** Detail/edit pages fetch bindings + all categories/subcategories for read-only computed view
+6. **Tier form state:** On validation failure, parse `tiers_json` from submitted body to restore tier rows
 
-**Controller composition (ItemModifier):**
+**Controller composition (Modifier):**
 ```typescript
 const ModifierApi = new Elysia()
   .use(errorHandlerPlugin)
   .use(authenticatePlugin)
-  .use(makeAuthorizeMiddleware(ITEM_MODIFIER_CONFIG.permissions))
+  .use(makeAuthorizeMiddleware(MODIFIER_CONFIG.permissions))
   .use(validateRequestPlugin)
   .get("/api/modifiers/check-name", ...)
   .get("/api/modifiers/check-machine-name", ...)
-  .use(createCrudRoutes("/api/modifiers", ItemModifierService, { ... }))
-  .use(ItemModifierBindingApi)   // nested binding CRUD
-  .use(ItemModifierTierApi)      // nested tier CRUD
+  .use(createCrudRoutes("/api/modifiers", ModifierService, { ... }))
+  .use(ModifierBindingApi)        // nested item binding CRUD
+  .use(EnemyModifierBindingApi)   // nested enemy binding CRUD
+  .use(ModifierTierApi)           // nested tier CRUD
 
-export const ItemModifierController = new Elysia()
+export const ModifierController = new Elysia()
   .use(ModifierApi)
-  .use(ItemModifierPages)
+  .use(ModifierPages)
 ```
 
 ### Nested APIs (Tiers and Bindings)
 
 Each nested API is its own file — not embedded in the parent controller.
 
-**`item-modifier-binding-api.ts`** routes:
+**`modifier-binding-api.ts`** routes (item modifier bindings):
 
 | Route | Method | Status | Notes |
 |---|---|---|---|
-| `/api/modifiers/:id/bindings` | GET | 200 | list all bindings |
-| `/api/modifiers/:id/bindings` | POST | 201/400/500 | create binding |
-| `/api/modifiers/:id/bindings/:bindingId` | PUT | 200/400/404/500 | update binding |
-| `/api/modifiers/:id/bindings/:bindingId` | DELETE | 204/404/500 | remove binding |
+| `/api/modifiers/:id/bindings` | GET | 200 | list all item bindings |
+| `/api/modifiers/:id/bindings` | POST | 201/400/500 | create item binding |
+| `/api/modifiers/:id/bindings/:bindingId` | PUT | 200/400/404/500 | update item binding |
+| `/api/modifiers/:id/bindings/:bindingId` | DELETE | 204/404/500 | remove item binding |
 
-**`item-modifier-tier-api.ts`** routes:
+**`enemy-modifier-binding-api.ts`** routes (enemy modifier bindings):
+
+| Route | Method | Status | Notes |
+|---|---|---|---|
+| `/api/modifiers/:id/enemy-bindings` | GET | 200 | list all enemy bindings (grouped by category/subcategory) |
+| `/api/modifiers/:id/enemy-bindings` | POST | 201/400/500 | create enemy binding |
+| `/api/modifiers/:id/enemy-bindings/:bindingId` | PUT | 200/400/404/500 | update enemy binding |
+| `/api/modifiers/:id/enemy-bindings/:bindingId` | DELETE | 204/404/500 | remove enemy binding |
+
+**`modifier-tier-api.ts`** routes:
 
 | Route | Method | Status | Notes |
 |---|---|---|---|
@@ -722,7 +734,7 @@ const app = new Elysia()
   .use(GameCategoryController)
   .use(GameSubcategoryController)
   .use(StatController)
-  .use(ItemModifierController)
+  .use(ModifierController)
   .get("/public/main.js", () => Bun.file("public/main.js"))
   .get("/", async ({ set }) => { ... })   // home page with live counts
   .get("/health", () => ({ status: "healthy", timestamp: ... }))

@@ -1,7 +1,7 @@
 # LAYER-004: View Service Reference
 
 **Status:** Active  
-**Last updated:** 2026-04-26
+**Last updated:** 2026-04-27
 
 ---
 
@@ -75,12 +75,12 @@ src/view-service/
     ├── stat/
     │   ├── stat-view-service.ts
     │   └── index.ts
-    ├── item-modifier/
-    │   ├── item-modifier-view-service.ts
-    │   ├── item-modifier-binding-view-service.ts
-    │   ├── item-modifier-assignment-view-service.ts
+    ├── modifier/
+    │   ├── modifier-view-service.ts
+    │   ├── modifier-binding-view-service.ts
+    │   ├── modifier-assignment-view-service.ts
     │   └── index.ts
-    └── index.ts                    — exports 5 of 6 entity services (ItemModifier not re-exported here)
+    └── index.ts                    — exports 5 of 6 entity services (Modifier not re-exported here)
 ```
 
 ---
@@ -503,7 +503,7 @@ the current codebase — follow the existing signature when adding new entities.
 
 ---
 
-### Complex Pattern: `ItemModifierViewService`
+### Complex Pattern: `ModifierViewService`
 
 Extends the hierarchical pattern with tier data and extended return types.
 
@@ -557,7 +557,7 @@ must re-render with the user's tier data intact.
 **Browser config extras:**
 
 ```typescript
-prepareBrowserFieldConfig(): string   // JSON of ITEM_MODIFIER_CONFIG fields
+prepareBrowserFieldConfig(): string   // JSON of MODIFIER_CONFIG fields
 prepareTierFieldConfig(): string      // JSON of MODIFIER_TIER_FORM_META
 ```
 
@@ -565,10 +565,10 @@ Both returned as JSON strings for embedding in HTML.
 
 ---
 
-### Binding View Service: `ItemModifierBindingViewService`
+### Binding View Service: `ModifierBindingViewService`
 
 ```typescript
-const ItemModifierBindingViewService = {
+const ModifierBindingViewService = {
   preparePanel(
     bindings: Record<string, unknown>[],
     categoryLookup: Record<string, string>,
@@ -583,10 +583,10 @@ at once). Determines lookup via `binding.target_type` field. Formats overrides v
 
 ---
 
-### Assignment View Service: `ItemModifierAssignmentViewService`
+### Assignment View Service: `ModifierAssignmentViewService`
 
 ```typescript
-const ItemModifierAssignmentViewService = {
+const ModifierAssignmentViewService = {
   preparePanel(
     categoryBindings: Record<string, unknown>[],
     subcategoryBindings: Record<string, unknown>[],
@@ -802,12 +802,12 @@ SYMPTOM: Status toggle showing wrong state on edit form
 
 ---
 
-### Workflow E: Debugging Tier Re-render (ItemModifier)
+### Workflow E: Debugging Tier Re-render (Modifier)
 
 ```
 SYMPTOM: Tier rows lost after validation failure
 → Check L3 pages: parseTiersJsonForRerender(input) called before prepareCreateForm?
-→ Check: tiers_json is in ITEM_MODIFIER_CONFIG.nonColumnKeys (passthroughKeys in L3)?
+→ Check: tiers_json is in MODIFIER_CONFIG.nonColumnKeys (passthroughKeys in L3)?
   If missing, Elysia's Value.Clean() strips it from the body before reaching the service
 
 SYMPTOM: parseTiersJsonForRerender returns empty array
@@ -884,7 +884,7 @@ feat(view-service): add EquipmentSlotView type to tier-view-models
 fix(view-service): exclude archived_reason from filtered list view columns
 
 # Extend existing view model
-feat(view-service): add tierRows to ItemModifier prepareDetailView return type
+feat(view-service): add tierRows to Modifier prepareDetailView return type
 ```
 
 **Rule:** L4-only changes use `view-service` scope. Multi-layer feature changes commit by

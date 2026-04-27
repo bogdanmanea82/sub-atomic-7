@@ -1,7 +1,7 @@
 # LAYER-000: Layer 0 — Configuration Reference
 
 **Status:** Active  
-**Last updated:** 2026-04-26
+**Last updated:** 2026-04-27
 
 ---
 
@@ -57,15 +57,17 @@ src/config/
     ├── character/
     ├── formula/
     ├── character-stat-base/
-    ├── item-modifier/
-    ├── item-modifier-tier/
-    └── item-modifier-binding/
+    ├── modifier/
+    ├── modifier-tier/
+    ├── item-modifier-binding/
+    └── enemy-modifier-binding/
 ```
 
 **Distinction between `universal/molecules/` and `molecules/modifier/`:**
 Universal molecules belong to every entity (all entities have audit fields, all entities have
 standard permissions). Domain molecules (`modifier/`) belong only to entities in that domain
-— ItemModifier uses them now; EnemyModifier, ZoneModifier will reuse them unchanged.
+— Modifier, ItemModifierBinding, and EnemyModifierBinding use them now; future modifier
+domains (SpellModifier, ZoneModifier) will reuse them unchanged.
 
 ---
 
@@ -270,20 +272,20 @@ spread directly into a `buildFields()` return array.
 | `game-domain-ref-field-atom.ts` | `game_domain_id` | reference | true | true | FK → GameDomain, select | MODIFIER_HIERARCHY_FIELDS, hierarchy entities |
 | `game-subdomain-ref-field-atom.ts` | `game_subdomain_id` | reference | true | false | FK → GameSubdomain, select | MODIFIER_HIERARCHY_FIELDS, hierarchy entities |
 | `game-category-ref-field-atom.ts` | `game_category_id` | reference | true | false | FK → GameCategory, select | MODIFIER_HIERARCHY_FIELDS, hierarchy entities |
-| `game-subcategory-ref-field-atom.ts` | `game_subcategory_id` | reference | true | false | FK → GameSubcategory, select | MODIFIER_HIERARCHY_FIELDS, item-modifier |
+| `game-subcategory-ref-field-atom.ts` | `game_subcategory_id` | reference | true | false | FK → GameSubcategory, select | MODIFIER_HIERARCHY_FIELDS, Modifier config |
 | `stat-value-min-field-atom.ts` | `value_min` | integer | true | false | signed (−2B to +2B) | Stat config |
 | `stat-value-max-field-atom.ts` | `value_max` | integer | true | false | signed (−2B to +2B) | Stat config |
 | `stat-default-value-field-atom.ts` | `default_value` | integer | true | false | signed (−2B to +2B) | Stat config |
 | `stat-data-type-field-atom.ts` | `data_type` | enum | true | true | values: raw/percentage/multiplier | Stat config |
 | `stat-category-field-atom.ts` | `category` | enum | true | true | values: attribute/resource/offensive/defensive/utility | Stat config |
-| `target-stat-id-field-atom.ts` | `target_stat_id` | reference | true | true | FK → Stat, select | ItemModifier config |
-| `combination-type-field-atom.ts` | `combination_type` | enum | true | false | values: flat/increased/more | ItemModifier config |
-| `roll-shape-field-atom.ts` | `roll_shape` | enum | true | false | values: scalar/range | ItemModifier config |
-| `modifier-value-min-field-atom.ts` | `modifier_value_min` | integer | true | false | signed (−2B to +2B) | ItemModifier config |
-| `modifier-value-max-field-atom.ts` | `modifier_value_max` | integer | true | false | signed (−2B to +2B) | ItemModifier config |
-| `modifier-group-field-atom.ts` | `modifier_group` | string | true | false | short (3–50) | ItemModifier config |
-| `display-template-field-atom.ts` | `display_template` | string | true | false | long (3–5000), textarea | ItemModifier config |
-| `affix-type-field-atom.ts` | `affix_type` | enum | true | true | values: prefix/suffix, listOrder 20 | ItemModifier config |
+| `target-stat-id-field-atom.ts` | `target_stat_id` | reference | true | true | FK → Stat, select | Modifier config |
+| `combination-type-field-atom.ts` | `combination_type` | enum | true | false | values: flat/increased/more | Modifier config |
+| `roll-shape-field-atom.ts` | `roll_shape` | enum | true | false | values: scalar/range | Modifier config |
+| `modifier-value-min-field-atom.ts` | `value_min` | integer | true | false | signed (−2B to +2B) | Modifier config |
+| `modifier-value-max-field-atom.ts` | `value_max` | integer | true | false | signed (−2B to +2B) | Modifier config |
+| `modifier-group-field-atom.ts` | `modifier_group` | string | true | false | short (3–50) | Modifier config |
+| `display-template-field-atom.ts` | `display_template` | string | true | false | long (3–5000), textarea | Modifier config |
+| `affix-type-field-atom.ts` | `affix_type` | enum | true | true | values: prefix/suffix, listOrder 20 | ItemModifierBinding config |
 | `character-id-field-atom.ts` | `character_id` | reference | true | false | FK → Character, hidden | CharacterStatBase config |
 | `stat-id-field-atom.ts` | `stat_id` | reference | true | false | FK → Stat, hidden | CharacterStatBase config |
 
@@ -366,8 +368,9 @@ Barrel re-export of all four molecule files.
 
 ## Domain Molecules — `src/config/molecules/modifier/`
 
-Domain molecules belong only to modifier-type entities. The pattern is: ItemModifier uses
-them today; future modifier domains (EnemyModifier, ZoneModifier) reuse them unchanged.
+Domain molecules belong only to modifier-type entities. The pattern is: Modifier and its
+binding sub-entities (ItemModifierBinding, EnemyModifierBinding) use them today; future
+modifier domains (SpellModifier, ZoneModifier) will reuse them unchanged.
 This is the **open for extension** principle at the config layer.
 
 ### `code-field.ts`
@@ -505,30 +508,44 @@ Generic factory parameterized by parent entity. Used once per modifier domain.
 
 ```typescript
 // Usage pattern:
-export const ITEM_MODIFIER_TIER_CONFIG =
-  new ModifierTierConfigFactory("ItemModifier", "item_modifier").create()
+export const MODIFIER_TIER_CONFIG =
+  new ModifierTierConfigFactory("Modifier", "modifier").create()
 
 // Produces fields:
 [ID, modifier_id (FK hidden), ...MODIFIER_TIERS_FIELDS, ...AUDIT_FIELDS]
 // = 9 fields total
 ```
 
-The two string parameters wire the FK column name and referenced table automatically.
-When EnemyModifier adds tiers: `new ModifierTierConfigFactory("EnemyModifier", "enemy_modifier").create()`.
+The two string parameters wire the FK column label and referenced table automatically.
 
 ### `modifier-binding-config-factory.ts`
 
-Generic factory for modifier binding sub-entity configuration. Same parameterization pattern.
+Generic factory for modifier binding sub-entity configuration. Takes 4 parameters:
 
 ```typescript
-// Usage pattern:
-export const ITEM_MODIFIER_BINDING_CONFIG =
-  new ModifierBindingConfigFactory("ItemModifier", "item_modifier").create()
-
-// Produces fields:
-[ID, modifier_id (FK hidden), ...MODIFIER_BINDING_FIELDS, ...AUDIT_FIELDS]
-// = 12 fields total
+new ModifierBindingConfigFactory(
+  parentEntityName: string,    // FK label (e.g. "Modifier")
+  parentTableName: string,     // FK referenced table (e.g. "modifier")
+  additionalFields: FieldConfig[] = [],  // asset-specific fields (e.g. [AFFIX_TYPE_FIELD_ATOM])
+  bindingEntityName?: string,  // binding entity name — decouples table name from parent name
+)
 ```
+
+The 4th `bindingEntityName` parameter is critical when multiple binding types share the
+same parent entity. Without it, both `ItemModifierBinding` and `EnemyModifierBinding` would
+derive the same table name from "Modifier" → "modifier_binding" (wrong). With it:
+
+```typescript
+// Item binding — table: item_modifier_binding, adds affix_type
+new ModifierBindingConfigFactory("Modifier", "modifier", [AFFIX_TYPE_FIELD_ATOM], "ItemModifierBinding")
+// → entityName: "ItemModifierBinding", tableName: "item_modifier_binding", 13 fields
+
+// Enemy binding — table: enemy_modifier_binding, no additional fields
+new ModifierBindingConfigFactory("Modifier", "modifier", [], "EnemyModifierBinding")
+// → entityName: "EnemyModifierBinding", tableName: "enemy_modifier_binding", 12 fields
+```
+
+Base produces: `[ID, modifier_id (FK hidden), ...MODIFIER_BINDING_FIELDS, ...additionalFields, ...AUDIT_FIELDS]`
 
 ### `index.ts`
 
@@ -551,9 +568,10 @@ export is what all upstream layers import.
 | `Character` | `CHARACTER_CONFIG` | ID + machine_name + name + desc + is_active + AUDIT = **7** | none | none |
 | `Formula` | `FORMULA_CONFIG` | ID + name + output_stat_id + expression + desc + AUDIT = **7** | Stat (output) | none |
 | `CharacterStatBase` | `CHARACTER_STAT_BASE_CONFIG` | ID + character_id + stat_id + base_value + AUDIT = **6** | Character, Stat | none |
-| `ItemModifier` | `ITEM_MODIFIER_CONFIG` | ID + MODIFIER_HIERARCHY(4) + machine_name + name + desc + affix_type + target_stat_id + combination_type + roll_shape + modifier_value_min + modifier_value_max + modifier_group + display_template + is_active + MODIFIER_ARCHIVE(2) + AUDIT(2) = **21** | GameDomain, GameSubdomain, GameCategory, GameSubcategory | `tiers_json`, `tiers`, `status_action`, `status_reason` |
-| `ItemModifierTier` | `ITEM_MODIFIER_TIER_CONFIG` | → delegates to `ModifierTierConfigFactory` = **9** | ItemModifier | (generic factory handles) |
-| `ItemModifierBinding` | `ITEM_MODIFIER_BINDING_CONFIG` | → delegates to `ModifierBindingConfigFactory` = **12** | ItemModifier | (generic factory handles) |
+| `Modifier` | `MODIFIER_CONFIG` | ID + MODIFIER_HIERARCHY(4) + machine_name + name + desc + target_stat_id + combination_type + roll_shape + value_min + value_max + modifier_group + display_template + is_active + MODIFIER_ARCHIVE(2) + AUDIT(2) = **20** | GameDomain, GameSubdomain, GameCategory, GameSubcategory | `tiers_json`, `tiers`, `status_action`, `status_reason` |
+| `ModifierTier` | `MODIFIER_TIER_CONFIG` | → delegates to `ModifierTierConfigFactory("Modifier", "modifier")` = **9** | Modifier | (generic factory handles) |
+| `ItemModifierBinding` | `ITEM_MODIFIER_BINDING_CONFIG` | → delegates to `ModifierBindingConfigFactory` + `AFFIX_TYPE_FIELD_ATOM` = **13** | Modifier | (generic factory handles) |
+| `EnemyModifierBinding` | `ENEMY_MODIFIER_BINDING_CONFIG` | → delegates to `ModifierBindingConfigFactory` (no additional fields) = **12** | Modifier | (generic factory handles) |
 
 **Field order convention** (enforced by `buildFields()` implementations):
 ```
@@ -705,8 +723,8 @@ lifecycle, tiers, and bindings for free.
    }
    ```
 
-2. Create tier config: `new ModifierTierConfigFactory("EnemyModifier", "enemy_modifier").create()`
-3. Create binding config: `new ModifierBindingConfigFactory("EnemyModifier", "enemy_modifier").create()`
+2. Create tier config: `new ModifierTierConfigFactory("Modifier", "modifier").create()` (shared parent)
+3. Create binding config: `new ModifierBindingConfigFactory("Modifier", "modifier", [...fields], "EnemyModifierBinding").create()`
 4. Export all three singletons, add to entity barrel
 
 The generic factories handle all subordinate entity structure. No changes to existing code.
@@ -765,7 +783,7 @@ SYMPTOM: Browser validation not enforcing a constraint
 
 ```bash
 # Find all files importing a specific entity config singleton
-grep -r "ITEM_MODIFIER_CONFIG" src/ --include="*.ts"
+grep -r "MODIFIER_CONFIG" src/ --include="*.ts"
 
 # Find all files using universal atoms (to assess impact of an atom change)
 grep -r "from.*universal/atoms" src/ --include="*.ts"
@@ -867,7 +885,7 @@ feat(config): add enemy-damage-type-field-atom to universal atoms
 feat(config): add ENEMY_STATUS_FIELDS molecule to modifier domain
 
 # New field on existing entity
-feat(config): add target_stat_id field to ItemModifier config
+feat(config): add target_stat_id field to Modifier config
 
 # Constraint correction
 fix(config): correct INTEGER_CONSTRAINTS_SIGNED min to -2147483648

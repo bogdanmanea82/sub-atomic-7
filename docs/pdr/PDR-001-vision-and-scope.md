@@ -75,7 +75,8 @@ The prototype does not need to:
 | Player-facing runtime API | Game runtime entities (Zone, Enemy, Ability) don't exist yet; GraphQL addition is deferred (see PDR-007) |
 | Authentication hardening | Current auth is placeholder; production auth is a separate phase |
 | Asset system | Dependent on modifier system stability; planned but not yet built (see PDR-006) |
-| Enemy, Zone, Spell, Map modifier types | Extension of the factory pattern; deferred until ItemModifier is proven |
+| Full EnemyModifier vertical (L1–L6) | EnemyModifierBinding infra is complete; full EnemyModifier entity (brainstorm needed first) |
+| Zone, Spell, Map modifier types | Extension of the proven factory pattern; deferred after EnemyModifier |
 | Deployment pipeline / CI | Outside prototype scope |
 
 ---

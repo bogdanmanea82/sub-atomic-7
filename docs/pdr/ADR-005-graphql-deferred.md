@@ -25,8 +25,8 @@ game runtime entities exist?
 
 ## Rationale
 
-**There are no game runtime entities yet.** The five current entities (GameDomain,
-GameSubdomain, GameCategory, GameSubcategory, ItemModifier) are CMS authoring entities.
+**There are no game runtime entities yet.** The current entities (GameDomain,
+GameSubdomain, GameCategory, GameSubcategory, Stat, Modifier) are CMS authoring entities.
 A game engine never fetches a list of game domains directly — it fetches zones, enemies,
 and loot tables that *reference* the taxonomy hierarchy. Those entities don't exist yet.
 

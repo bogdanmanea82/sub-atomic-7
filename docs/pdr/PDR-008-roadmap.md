@@ -1,7 +1,7 @@
 # PDR-008: Roadmap
 
 **Status:** Active  
-**Last updated:** 2026-04-23
+**Last updated:** 2026-04-27
 
 No deadlines. Milestones are sequenced by dependency, not by date.
 
@@ -9,25 +9,39 @@ No deadlines. Milestones are sequenced by dependency, not by date.
 
 ## Current State
 
-All seven layers are complete for the five core entities:
-`GameDomain`, `GameSubdomain`, `GameCategory`, `GameSubcategory`, `ItemModifier`.
+All seven layers are complete for six entities:
+`GameDomain`, `GameSubdomain`, `GameCategory`, `GameSubcategory`, `Stat`, `Modifier`.
 
-The ItemModifier entity is fully featured:
-- Tiers (value scaling by progression level)
-- Bindings (eligibility scoping via data)
+The `Modifier` entity is the universal modifier table (table: `modifier`). The rename from
+`ItemModifier` / `item_modifiers` was completed via migrations 015–017. The entity now
+carries no asset-specific semantics — those live on binding sub-entities.
+
+The Modifier entity is fully featured:
+- Tiers (value scaling by progression level) — `modifier_tier` table
+- Item bindings (eligibility scoping for items) — `item_modifier_binding` table, includes `affix_type`
+- Enemy bindings (eligibility scoping for enemies) — `enemy_modifier_binding` table
 - Assignment panel (computed eligibility view, zero L6 code)
-- Lifecycle management (active/deactivated/archived with full event history)
+- Lifecycle management (active/deactivated/archived with full event history) — `modifier_history`
 - 4-color signal system in list and detail views
+
+The Enemies hierarchy is seeded (migration 018 + `seeds/19-enemies-hierarchy.sql`):
+- 1 domain: Enemies
+- 5 subdomains: Beasts, Humanoids, Undead, Constructs, Aberrations
+- 19 categories (mammals, reptiles, birds, insects, aquatic, bandits, cultists, …)
+- 58 subcategories (wolf, bear, boar, …)
 
 The API layer is documented:
 - OpenAPI at `GET /openapi` (Scalar UI)
 - All routes carry TypeBox schemas for validation and documentation
 - HTML page routes excluded from the API spec
 
-The factory pattern is established:
+The factory pattern is established and proven across multiple binding types:
 - `BaseEntityConfigFactory` abstract template
-- `ItemModifierConfigFactory` as the reference implementation
-- All five entities use the factory pattern
+- `ModifierConfigFactory` as the reference implementation
+- `ModifierBindingConfigFactory` generic factory — parameterized by 4 args including optional
+  `bindingEntityName` to support multiple binding types sharing the same `modifier` FK parent
+- `ModifierTierConfigFactory` generic factory
+- All six entities use the factory pattern
 
 ---
 
@@ -36,7 +50,7 @@ The factory pattern is established:
 **Goal:** Make the current system bulletproof and generalise patterns that are currently modifier-specific.
 
 Tasks (no particular order):
-- **Unified entity history table** — generalise `item_modifier_history` into `entity_history`
+- **Unified entity history table** — generalise `modifier_history` into `entity_history`
   with `entity_type + entity_id` scoping. Add status sections and history tabs to
   GameDomain, GameSubdomain, GameCategory, GameSubcategory detail pages.
   Requires: optimised query builders for polymorphic `entity_type + entity_id` lookups.
@@ -45,26 +59,34 @@ Tasks (no particular order):
 - **Phase 6.6: Decompose name-availability-handler** — currently bundles condition building
   and conflict detection inside the handler factory; extract to L2 service methods.
 - **Unit tests for config factories** — `BaseEntityConfigFactory` template method and
-  `ItemModifierConfigFactory` `nonColumnKeys` hook.
+  `ModifierConfigFactory` `nonColumnKeys` hook.
 - **Unit tests for tier orchestration** — `createTierOrchestration` error paths (no DB needed).
 - **Integration tests for tier CRUD** — `addTier`, `updateTier`, `deleteTier` with reindex
   verification against a live PostgreSQL instance.
 
 ---
 
-## Milestone 2: EnemyModifier
+## Milestone 2: EnemyModifier Full Stack
 
-**Goal:** Prove the factory extension model works by building the second modifier type.
+**Goal:** Build the full L1–L6 vertical for EnemyModifier — the L0 config and L3 binding
+API are already in place; the remaining work is the EnemyModifier entity itself.
 
-The `EnemyModifier` will:
-- Use the same `BaseEntityConfigFactory` and domain molecules as `ItemModifier`
-- Have its own `enemy_modifiers` table with enemy-specific fields
-- Have its own full L1/L2/L3 stack — no code shared at the file level, only at the config level
-- Validate that adding a new modifier type requires zero changes to existing entity code
+**Already complete (from universal Modifier refactor):**
+- L0: `ENEMY_MODIFIER_BINDING_CONFIG` — `enemy-modifier-binding-config-factory.ts`
+- L1: `EnemyModifierBindingModel` — `enemy-modifier-binding-model.ts`
+- L2: `EnemyModifierBindingService` — `enemy-modifier-binding-service.ts`
+- L3: `EnemyModifierBindingApi` — `/api/modifiers/:id/enemy-bindings` routes
+- DB: `enemy_modifier_binding` table (migration 018), Enemies hierarchy seeded
 
-Success criteria: `EnemyModifier` is fully operational (CRUD, lifecycle, bindings) and
-no file outside `src/config/entities/enemy-modifier/` and `src/*/entities/enemy-modifier/`
-was modified.
+**Still required:**
+- A dedicated `EnemyModifier` entity that scopes modifiers specifically to the Enemies domain
+  (e.g., filters the modifier list to the `enemies` game domain, possibly adds enemy-specific
+  fields). This is distinct from just using the universal `Modifier` with enemy bindings.
+- Full brainstorm session needed first to determine if a separate EnemyModifier entity is
+  truly necessary vs. the universal Modifier + enemy bindings being sufficient.
+
+Success criteria: Enemy-scoped modifier authoring is fully operational (CRUD, lifecycle, bindings)
+without modifying any existing entity code outside the `enemy-modifier/` directories.
 
 This milestone gates the asset system — assets cannot be built before the factory is proven.
 

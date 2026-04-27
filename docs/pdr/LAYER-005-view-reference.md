@@ -1,7 +1,7 @@
 # LAYER-005: View Reference
 
 **Status:** Active  
-**Last updated:** 2026-04-26
+**Last updated:** 2026-04-27
 
 ---
 
@@ -72,9 +72,9 @@ src/view/
     ├── game-category/              — custom listPage with 2-filter bar
     ├── game-subcategory/           — custom listPage with 3-filter bar
     ├── stat/                       — re-exports generic organisms unchanged
-    └── item-modifier/
+    └── modifier/
         ├── index.ts                — all 5 page functions: custom multi-tab layout
-        ├── item-modifier-tabs.ts   — ITEM_MODIFIER_TABS constant (3-tab definition)
+        ├── modifier-tabs.ts        — MODIFIER_TABS constant (3-tab definition)
         ├── tier-form-section.ts    — tierFormSection() → editable tier table with JS hooks
         ├── tier-detail-section.ts  — tierDetailSection() → read-only tier table + inline edit UI
         ├── binding-detail-panel.ts — bindingDetailPanel() → category + subcategory binding tables
@@ -223,7 +223,7 @@ Key CSS classes used by other functions:
 | `.detail-list`, `.detail-list--two-col`, `.detail-list__row` | `detailSection()` |
 | `.status-dot--active/inactive/archived` | `badge()`, `statusBadgeInline()` |
 | `.tab-bar`, `.tab-bar__tab`, `.tab-bar__tab--active`, `.tab-panel` | `tabBar()`, `tabPanel()` |
-| `.tier-table`, `.binding-table`, `.assignment-table`, `.assignment-summary` | item-modifier entities |
+| `.tier-table`, `.binding-table`, `.assignment-table`, `.assignment-summary` | Modifier entity (tiers, bindings, assignments panels) |
 | `.pagination`, `.pagination__link`, `.pagination__link--active` | `paginationControls()` |
 | `.status-section--form` | `statusFormSection()` |
 
@@ -614,15 +614,15 @@ Three-filter listPage (domain + subdomain + category). Same thin-wrapper pattern
 
 ---
 
-## Entities: ItemModifier (Complex Multi-Tab)
+## Entities: Modifier (Complex Multi-Tab)
 
-ItemModifier views use a 3-tab layout for detail and edit pages. Each tab is a separate
+Modifier views use a 3-tab layout for detail and edit pages. Each tab is a separate
 `tabPanel` toggled by L6 browser JS.
 
-### Tab Definitions (`item-modifier-tabs.ts`)
+### Tab Definitions (`modifier-tabs.ts`)
 
 ```typescript
-export const ITEM_MODIFIER_TABS: readonly TabDefinition[] = [
+export const MODIFIER_TABS: readonly TabDefinition[] = [
   { id: "definition", label: "Definition & Tiers", active: true  },
   { id: "bindings",   label: "Bindings",            active: false },
   { id: "assignments",label: "Assignments",          active: false },
@@ -637,7 +637,7 @@ The first tab is active by default. L6 switches to other tabs on click.
 export function listPage(
   view: ListView,
   basePath: string,
-  filterOptions: ItemModifierFilterOptions,
+  filterOptions: ModifierFilterOptions,
   filterValues: Record<string, string | undefined>,
 ): string
 ```
@@ -713,7 +713,7 @@ At the bottom:
 - `<input type="hidden" name="tiers_json">` — L6 serializes the table to JSON before submit
 - `<script id="tier-field-config" type="application/json">` — tier column meta for L6
 
-The hidden `tiers_json` field is in `ITEM_MODIFIER_CONFIG.nonColumnKeys` (`passthroughKeys`
+The hidden `tiers_json` field is in `MODIFIER_CONFIG.nonColumnKeys` (`passthroughKeys`
 in L3), so it survives TypeBox `Value.Clean()` and reaches the service layer.
 
 ### `tier-detail-section.ts`
@@ -758,7 +758,7 @@ Structure:
 Subcategory rows show: name, status badge (included/excluded/none), source badge
 (explicit/category-inherited/none), weight override, tier range, level req override.
 
-Data is computed by `ItemModifierAssignmentViewService.preparePanel()` in L4 — L5 only
+Data is computed by `ModifierAssignmentViewService.preparePanel()` in L4 — L5 only
 renders what it receives.
 
 ---
@@ -770,8 +770,8 @@ L4 View Service
   ListView → listPage, filteredListPage, dataTable
   DetailView → detailPage, detailSection
   FormView → createPage, editPage, duplicatePage, formSection
-  FormView + tierRows + tierFieldMeta → ItemModifier createPage/editPage
-  DetailView + tierRows + bindings + assignments → ItemModifier detailPage
+  FormView + tierRows + tierFieldMeta → Modifier createPage/editPage
+  DetailView + tierRows + bindings + assignments → Modifier detailPage
   PaginationMeta → paginationControls, buildPaginationMeta (computed in L3)
   BrowserFieldConfig[] (JSON stringified) → formSection <script> tag → L6
 
@@ -877,13 +877,13 @@ and `displayFormat` settings:
 
 ### Workflow D: Adding a New Tab to a Multi-Tab Page
 
-Example: adding a "History" tab to ItemModifier.
+Example: adding a "History" tab to Modifier.
 
-1. Add tab definition to `item-modifier-tabs.ts`:
+1. Add tab definition to `modifier-tabs.ts`:
    ```typescript
    { id: "history", label: "History", active: false }
    ```
-2. Create `history-panel.ts` in `src/view/entities/item-modifier/`:
+2. Create `history-panel.ts` in `src/view/entities/modifier/`:
    ```typescript
    export function historyPanel(entries: readonly HistoryRow[]): string { ... }
    ```
@@ -925,7 +925,7 @@ SYMPTOM: Field config JSON not reaching browser (L6 can't validate)
 SYMPTOM: Tab panel not switching
 → Check panel IDs: panel-{id} must match tab data-tab="{id}"
 → Check L6 tab-switcher code is loaded (main.js present, no console errors)
-→ Check ITEM_MODIFIER_TABS: new tab has id matching panel?
+→ Check MODIFIER_TABS: new tab has id matching panel?
 
 SYMPTOM: Status reason textarea not appearing when Disabled selected
 → Check global-styles.ts: CSS :has() selectors present?

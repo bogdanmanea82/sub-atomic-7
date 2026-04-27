@@ -1,7 +1,7 @@
 # LAYER-006: Browser Reference
 
 **Status:** Active  
-**Last updated:** 2026-04-26
+**Last updated:** 2026-04-27
 
 ---
 
@@ -152,7 +152,7 @@ Six entries, one per entity. Each defines the URLs, API paths, and optional casc
 | GameCategory | `/game-categories` | `/api/game-categories` | none | `onListInit`: filter cascade domain→subdomain |
 | GameSubcategory | `/game-subcategories` | `/api/game-subcategories` | domain→sub→cat | `onListInit`: 2 filter cascades; `onFormInit`: reset category on domain change |
 | Stat | `/stats` | `/api/stats` | none | — |
-| ItemModifier | `/modifiers` | `/api/modifiers` | domain→sub→cat→subcat | `onListInit`: 3 filter cascades; `onDetailInit`: tabs+tiers+bindings; `onFormInit`: cascades+tiers+tabs+bindings |
+| Modifier | `/modifiers` | `/api/modifiers` | domain→sub→cat→subcat | `onListInit`: 3 filter cascades; `onDetailInit`: tabs+tiers+bindings; `onFormInit`: cascades+tiers+tabs+bindings |
 
 **Form cascades** (name-attribute selectors):
 
@@ -477,7 +477,7 @@ Reads all rows, builds JSON array, writes to `#tiers-json-input`.
 ```
 
 Values are strings (as read from inputs) — L2 `parseTiersFromInput` coerces them.
-`#tiers-json-input` has name `tiers_json` — listed in `ITEM_MODIFIER_CONFIG.nonColumnKeys`
+`#tiers-json-input` has name `tiers_json` — listed in `MODIFIER_CONFIG.nonColumnKeys`
 (passthroughKeys in L3) so it survives TypeBox `Value.Clean()`.
 
 ### `tier-detail-handler.ts` (detail/edit pages — JSON CRUD)

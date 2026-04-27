@@ -1,7 +1,7 @@
 # PDR-003: Database Design & Hierarchy
 
 **Status:** Active  
-**Last updated:** 2026-04-23
+**Last updated:** 2026-04-27
 
 ---
 
@@ -10,11 +10,11 @@
 The database is structured as a strict five-level parent-child hierarchy:
 
 ```
-game_domains
-  └── game_subdomains        (FK: game_domain_id → game_domains.id)
-        └── game_categories  (FK: game_subdomain_id → game_subdomains.id)
-              └── game_subcategories (FK: game_category_id → game_categories.id)
-                    └── item_modifiers (FK: game_subcategory_id → game_subcategories.id)
+game_domain
+  └── game_subdomain        (FK: game_domain_id → game_domain.id)
+        └── game_category   (FK: game_subdomain_id → game_subdomain.id)
+              └── game_subcategory (FK: game_category_id → game_category.id)
+                    └── modifier (FK: game_subcategory_id → game_subcategory.id)
 ```
 
 Each level carries a foreign key to exactly one parent. An entity at level N cannot exist
@@ -43,7 +43,7 @@ that are irrelevant to all other types.
 **Why separate tables win:**
 - `NOT NULL` constraints mean exactly what they say for each specific entity type
 - Each table evolves independently; adding an enemy-modifier-specific column doesn't
-  touch the item-modifier table at all
+  touch the modifier table at all
 - Fits the atomic principle: each entity is its own organism with well-defined boundaries
 - Query performance: full-table scans on individual entity tables, not filtered scans
   on a monolithic shared table
@@ -93,21 +93,21 @@ to be declared at higher levels and inherited downward.
 
 ## Modifier Subordinate Tables
 
-The `item_modifiers` table is extended by three subordinate tables:
+The `modifier` table is extended by four subordinate tables:
 
-### item_modifier_tiers
+### modifier_tier
 
 Tiers represent value scaling by character progression level. A modifier at tier 0 might
 add +5 STR; the same modifier at tier 3 might add +15 STR.
 
 ```
-item_modifier_tiers
-  item_modifier_id  FK → item_modifiers.id (CASCADE DELETE)
-  tier_index        INTEGER — 0-based, must be gapless within a modifier
-  level_req         INTEGER — character level required to access this tier
-  min_value         NUMERIC — minimum roll value at this tier
-  max_value         NUMERIC — maximum roll value at this tier
-  spawn_weight      NUMERIC — relative likelihood of this tier appearing
+modifier_tier
+  modifier_id   FK → modifier.id (CASCADE DELETE)
+  tier_index    INTEGER — 0-based, must be gapless within a modifier
+  level_req     INTEGER — character level required to access this tier
+  min_value     NUMERIC — minimum roll value at this tier
+  max_value     NUMERIC — maximum roll value at this tier
+  spawn_weight  NUMERIC — relative likelihood of this tier appearing
 ```
 
 Cross-row validation enforces structural integrity of the tier set:
@@ -120,22 +120,64 @@ Persistence uses delete-all-then-reinsert within a transaction. No diffing or UP
 This simplifies the write path at the cost of slightly higher write volume — acceptable
 for a CMS authoring flow where writes are infrequent.
 
-### item_modifier_bindings
+### item_modifier_binding
 
-Junction table connecting modifiers to subcategory eligibility contexts. See the binding
-system description above.
+Junction table connecting modifiers to **item** subcategory eligibility contexts. Carries
+`affix_type` (prefix | suffix) — an item-specific field that belongs here rather than on
+the universal `modifier` table, because enemy and other asset bindings do not have affix slots.
 
-### item_modifier_history
+```
+item_modifier_binding
+  modifier_id      FK → modifier.id (CASCADE DELETE)
+  target_type      VARCHAR — "category" | "subcategory" — scope level of the binding
+  target_id        UUID — references the category or subcategory row
+  affix_type       VARCHAR — "prefix" | "suffix" — item slot
+  is_included      BOOLEAN — included vs. excluded from this scope
+  weight_override  INTEGER — overrides spawn weight for this scope
+  min_tier_index   SMALLINT — minimum eligible tier in this scope
+  max_tier_index   SMALLINT — maximum eligible tier in this scope
+  level_req_override SMALLINT — overrides level requirement for this scope
+  is_active        BOOLEAN
+  UNIQUE (modifier_id, target_type, target_id)
+```
+
+### enemy_modifier_binding
+
+Junction table connecting modifiers to **enemy** eligibility contexts in the Enemies
+hierarchy. Targets categories and subcategories of the `enemies` game domain.
+
+```
+enemy_modifier_binding
+  modifier_id      FK → modifier.id (CASCADE DELETE)
+  target_type      VARCHAR — "category" | "subcategory"
+  target_id        UUID — references an enemy category or subcategory row
+  is_included      BOOLEAN
+  weight_override  INTEGER
+  min_tier_index   SMALLINT
+  max_tier_index   SMALLINT
+  level_req_override SMALLINT
+  is_active        BOOLEAN
+  UNIQUE (modifier_id, target_type, target_id)
+```
+
+**Why separate binding tables per asset type?**
+
+Each asset type may carry binding fields that are specific to its domain (e.g., `affix_type`
+on item bindings, future `is_boss_only` on enemy bindings). A single polymorphic binding
+table would accumulate nullable columns for every asset type. Separate tables keep each
+binding schema minimal and strongly typed.
+
+### modifier_history
 
 Append-only audit log recording every state transition for a modifier.
 
 ```
-item_modifier_history
-  item_modifier_id  FK → item_modifiers.id (CASCADE DELETE)
-  event_type        VARCHAR — one of: created, updated, deactivated, reactivated,
-                              archived, deleted, renamed
-  event_data        JSONB   — snapshot of changed fields at time of event
-  created_at        TIMESTAMPTZ
+modifier_history
+  modifier_id   FK → modifier.id (CASCADE DELETE)
+  event_type    VARCHAR — one of: created, updated, deactivated, reactivated,
+                          archived, deleted, renamed
+  event_data    JSONB   — snapshot of changed fields at time of event
+  created_at    TIMESTAMPTZ
 ```
 
 **Why event types, not a status column?**
@@ -180,11 +222,23 @@ schemas. The universal validator at L1 also skips them. The config declaration
 
 | Migration | Description |
 |---|---|
-| `001_initial_schema.sql` | game_domains, game_subdomains, game_categories, game_subcategories |
-| `002_create_item_modifier.sql` | item_modifiers table |
-| `003_create_modifier_binding.sql` | item_modifier_bindings junction table |
-| `004_create_modifier_history.sql` | item_modifier_history audit log |
-| `005_rename_modifier_tables.sql` | Renamed legacy `modifiers` → `item_modifiers` etc. |
+| `001_create_modifier_tier.sql` | modifier_tier subordinate table |
+| `002_add_sort_order_and_modifier_enums.sql` | sort_order, enum columns on taxonomy tables |
+| `003_create_modifier_binding.sql` | item_modifier_binding junction table (initial) |
+| `005_rename_modifier_tables.sql` | Renamed legacy `modifiers` → `item_modifiers` (pre-universal rename) |
+| `006_stats_modifier_refactor_character_formula.sql` | stat, character, formula tables; modifier column refactor |
+| `007_rename_modifier_code_to_machine_name.sql` | `code` column renamed to `machine_name` on modifier |
+| `008_add_archive_fields.sql` | `archived_at`, `archived_reason` on modifier and taxonomy |
+| `009_add_machine_name_to_taxonomy.sql` | `machine_name` added to all 4 taxonomy tables |
+| `010_rename_character_to_character_class.sql` | `character` table renamed to `character_class` |
+| `011_add_archive_fields_to_character_class.sql` | archive lifecycle on character_class |
+| `012_add_combination_type_to_character_stat_base.sql` | `combination_type` on character_stat_base |
+| `013_create_item_and_item_stat_base.sql` | `item` and `item_stat_base` tables |
+| `014_add_archive_fields_to_item.sql` | archive lifecycle on item |
+| `015_move_affix_type_to_binding.sql` | `affix_type` migrated from `modifier` to `item_modifier_binding` |
+| `016_drop_affix_type_from_modifier.sql` | `affix_type` column dropped from `modifier` table |
+| `017_rename_item_modifier_to_modifier.sql` | `item_modifiers` table renamed to `modifier` (universal rename) |
+| `018_create_enemy_modifier_binding.sql` | `enemy_modifier_binding` junction table |
 
 ---
 

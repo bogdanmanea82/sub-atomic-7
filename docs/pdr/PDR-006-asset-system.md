@@ -2,7 +2,7 @@
 
 **Status:** Planned — not yet implemented  
 **Last updated:** 2026-04-23  
-**Dependency:** Requires ItemModifier to be stable
+**Dependency:** Requires Modifier system to be stable (complete — see PDR-005)
 
 ---
 
@@ -38,7 +38,7 @@ pool that the binding system has declared eligible for its subcategory.
 
 ### AssetConfigFactory
 
-The Asset entity will use the same factory pattern as ItemModifier:
+The Asset entity will use the same factory pattern as Modifier:
 
 ```
 BaseEntityConfigFactory
@@ -83,12 +83,12 @@ The asset system depends on the modifier system being stable because:
 1. The asset detail page's modifier-pool view reuses the binding resolution logic —
    that logic must be proven correct in the modifier context first
 2. The `AssetConfigFactory` will compose domain molecules that may need to be extracted
-   from the `ItemModifierConfigFactory` — that extraction should happen after the modifier
+   from the `ModifierConfigFactory` — that extraction should happen after the modifier
    factory is fully operational
-3. Adding assets before the modifier factory extension model (EnemyModifier) is validated
-   would mean building on an unproven abstraction
+3. Adding assets before the modifier factory extension model (EnemyModifier full vertical) is
+   validated would mean building on an unproven abstraction
 
-The correct sequencing is: `ItemModifier stable → EnemyModifier (validates factory) →
+The correct sequencing is: `Modifier stable (done) → EnemyModifier full vertical (validates factory) →
 AssetFactory (uses proven pattern)`.
 
 ---

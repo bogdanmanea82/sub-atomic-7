@@ -1,7 +1,7 @@
 # LAYER-001: Layer 1 — Model Reference
 
 **Status:** Active  
-**Last updated:** 2026-04-26
+**Last updated:** 2026-04-27
 
 ---
 
@@ -51,9 +51,10 @@ src/model/
     ├── game-category/
     ├── game-subcategory/
     ├── stat/
-    ├── item-modifier/
-    ├── item-modifier-tier/
-    └── item-modifier-binding/
+    ├── modifier/
+    ├── modifier-tier/
+    ├── item-modifier-binding/
+    └── enemy-modifier-binding/
 ```
 
 **Why `universal/` and `entities/` are separated:**
@@ -413,7 +414,7 @@ L2 never calls validate/serialize/build separately for create operations.
 Each organism pre-binds one entity config to the universal atoms. L2 imports the model
 and calls named methods — it never imports atoms or molecules directly.
 
-**Standard method set** (9 methods — all hierarchy entities + stat + item-modifier):
+**Standard method set** (9 methods — all hierarchy entities + stat + modifier):
 
 | Method | Delegates to | Returns |
 |---|---|---|
@@ -427,12 +428,13 @@ and calls named methods — it never imports atoms or molecules directly.
 | `prepareUpdate(data, conditions)` | `buildUpdateQuery(CONFIG, data, conditions)` | `PreparedQuery` |
 | `prepareDelete(conditions)` | `buildDeleteQuery(CONFIG, conditions)` | `PreparedQuery` |
 
-**ItemModifierTier** has a reduced method set (6 methods — no pagination, no update):
-Tiers are managed in bulk (delete-all-then-reinsert) by the parent ItemModifier service in L2.
+**ModifierTier** has a reduced method set (6 methods — no pagination, no update):
+Tiers are managed in bulk (delete-all-then-reinsert) by the parent Modifier service in L2.
 Individual tier updates and pagination are not needed.
 
-**ItemModifierBinding** has 7 methods (no pagination, but includes update):
-Bindings support individual CRUD via fetchJson in L6. They need `prepareUpdate` but not pagination.
+**ItemModifierBinding** and **EnemyModifierBinding** each have 7 methods (no pagination,
+but includes update): Bindings support individual CRUD via fetchJson in L6. They need
+`prepareUpdate` but not pagination.
 
 ### Entity Type Exports
 
@@ -446,9 +448,10 @@ These types flow into L2 service return values and L4 view service inputs.
 | `GameCategory` | `GameCategory` | 11 | + `game_domain_id`, `game_subdomain_id` |
 | `GameSubcategory` | `GameSubcategory` | 12 | + `game_domain_id`, `game_subdomain_id`, `game_category_id` |
 | `Stat` | `Stat` | 14 | `data_type: string`, `value_min/max/default_value: number`, `category: string` |
-| `ItemModifier` | `ItemModifier` | 21 | 4 hierarchy FKs, `target_stat_id: string \| null`, `combination_type`, `roll_shape`, `modifier_value_min/max`, `modifier_group`, `display_template` |
-| `ItemModifierTier` | `ItemModifierTier` | 9 | `modifier_id: string`, `tier_index: number`, `min_value/max_value: number` (deserialized from NUMERIC string) |
-| `ItemModifierBinding` | `ItemModifierBinding` | 11 | `target_type: "category" \| "subcategory"`, `is_included: boolean`, nullable overrides |
+| `Modifier` | `Modifier` | 20 | 4 hierarchy FKs, `target_stat_id: string \| null`, `combination_type`, `roll_shape`, `value_min/max: number`, `modifier_group`, `display_template` |
+| `ModifierTier` | `ModifierTier` | 9 | `modifier_id: string`, `tier_index: number`, `min_value/max_value: number` (deserialized from NUMERIC string) |
+| `ItemModifierBinding` | `ItemModifierBinding` | 12 | `modifier_id`, `target_type: "category" \| "subcategory"`, `is_included: boolean`, nullable overrides; note: `affix_type` is in the L0 config but not yet in the TypeScript type |
+| `EnemyModifierBinding` | `EnemyModifierBinding` | 12 | `modifier_id`, `target_type: "category" \| "subcategory"`, `is_included: boolean`, nullable overrides |
 
 All fields are `readonly` — entities from L1 are immutable value objects.
 
@@ -466,8 +469,8 @@ L1 Model (src/model/)
         │
         │  PreparedQuery                   — handoff type: every query builder returns this
         │  PaginationParams, DEFAULT_PAGE_SIZE — pagination contract
-        │  Entity model singletons         — GameDomainModel, StatModel, ItemModifierModel, etc.
-        │  Entity types                    — GameDomain, Stat, ItemModifier, etc.
+        │  Entity model singletons         — GameDomainModel, StatModel, ModifierModel, etc.
+        │  Entity types                    — GameDomain, Stat, Modifier, etc.
         ▼
 L2 Model Service (src/model-service/)
   • Imports entity models → calls model.prepareCreate(), model.prepareSelect(), etc.
@@ -528,7 +531,7 @@ L1 is the most thoroughly tested layer in the codebase — 225+ test cases acros
 | Suite | File | Cases | What is tested |
 |---|---|---|---|
 | Stat model | `stat-model.test.ts` | 42+ | Enum validation (data_type, category), negative value_min for resistances, full CRUD query shapes |
-| Modifier tier model | `item-modifier-tier-model.test.ts` | 21 | Decimal serialization/deserialization for tier values, tier_index/level_req/spawn_weight bounds |
+| Modifier tier model | `modifier-tier-model.test.ts` | 21 | Decimal serialization/deserialization for tier values, tier_index/level_req/spawn_weight bounds |
 
 Run all L1 tests:
 ```bash

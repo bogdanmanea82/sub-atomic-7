@@ -60,11 +60,14 @@ BaseEntityConfigFactory (abstract)
   ├── GameSubdomainConfigFactory
   ├── GameCategoryConfigFactory
   ├── GameSubcategoryConfigFactory
-  └── ItemModifierConfigFactory
+  └── ModifierConfigFactory
         ├── Composes: universal atoms (id, name, description, timestamps)
-        ├── Composes: universal molecules (BASE_ENTITY_FIELDS, AUDIT_FIELDS)
-        ├── Composes: domain molecules (hierarchy-fields, code-field, lifecycle-fields)
-        └── Adds: item-specific enums (affix_type, semantic_cat, value_type, calc_method)
+        ├── Composes: universal molecules (AUDIT_FIELDS)
+        ├── Composes: domain molecules (hierarchy-fields, machine-name-field, status-fields, archive-fields)
+        └── Adds: modifier semantic fields (target_stat_id, combination_type, roll_shape, value_min/max, modifier_group, display_template)
+  └── ModifierBindingConfigFactory (generic — parameterized by parentEntityName, additionalFields, bindingEntityName)
+        ├── ItemModifierBinding — adds affix_type
+        └── EnemyModifierBinding — no additional fields (lean start)
 ```
 
 Key files:

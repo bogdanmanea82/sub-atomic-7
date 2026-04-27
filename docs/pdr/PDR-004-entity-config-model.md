@@ -110,22 +110,27 @@ abstract class BaseEntityConfigFactory {
 A concrete factory overrides `buildFields()` to compose the molecules it needs:
 
 ```typescript
-// src/config/entities/item-modifier/item-modifier-config-factory.ts
-class ItemModifierConfigFactory extends BaseEntityConfigFactory {
-  getTableName() { return "item_modifiers" }
-  getEntityName() { return "ItemModifier" }
+// src/config/entities/modifier/modifier-config-factory.ts
+class ModifierConfigFactory extends BaseEntityConfigFactory {
+  getEntityName() { return "Modifier" }  // → getTableName() derives "modifier"
 
   buildFields(): FieldConfig[] {
     return [
-      ...BASE_ENTITY_FIELDS,       // universal molecule
-      ...MODIFIER_HIERARCHY_FIELDS, // domain molecule
-      CODE_FIELD,                  // domain molecule (single field)
-      ...MODIFIER_LIFECYCLE_FIELDS, // domain molecule
-      ...AUDIT_FIELDS,             // universal molecule
-      affixTypeField,              // item-specific enum
-      semanticCatField,            // item-specific enum
-      valueTypeField,              // item-specific enum
-      calcMethodField,             // item-specific enum
+      ID_FIELD_ATOM,
+      ...MODIFIER_HIERARCHY_FIELDS,  // domain molecule — 4 FK refs
+      MODIFIER_MACHINE_NAME_FIELD_ATOM, // domain molecule
+      NAME_FIELD_ATOM,               // universal atom
+      DESCRIPTION_FIELD_ATOM,        // universal atom
+      TARGET_STAT_ID_FIELD_ATOM,     // universal atom
+      COMBINATION_TYPE_FIELD_ATOM,   // universal atom
+      ROLL_SHAPE_FIELD_ATOM,         // universal atom
+      MODIFIER_VALUE_MIN_FIELD_ATOM, // universal atom
+      MODIFIER_VALUE_MAX_FIELD_ATOM, // universal atom
+      MODIFIER_GROUP_FIELD_ATOM,     // universal atom
+      DISPLAY_TEMPLATE_FIELD_ATOM,   // universal atom
+      ...MODIFIER_STATUS_FIELDS,     // domain molecule — is_active
+      ...MODIFIER_ARCHIVE_FIELDS,    // domain molecule — archived_at, archived_reason
+      ...AUDIT_FIELDS,               // universal molecule
     ]
   }
 
@@ -134,7 +139,7 @@ class ItemModifierConfigFactory extends BaseEntityConfigFactory {
   }
 }
 
-export const ITEM_MODIFIER_CONFIG = new ItemModifierConfigFactory().create()
+export const MODIFIER_CONFIG = new ModifierConfigFactory().create()
 ```
 
 The `nonColumnKeys` hook declares virtual form fields that exist in the HTML form but are
@@ -159,16 +164,23 @@ read from `EntityConfig` — zero code changes required in those layers.
 
 ## How to Add a New Modifier Type
 
-A new modifier type (e.g., `EnemyModifier`) follows the same factory pattern:
+A new modifier domain follows the same factory pattern. For asset-type-specific bindings,
+use `ModifierBindingConfigFactory` with a 4th `bindingEntityName` parameter:
 
-1. Create `src/config/entities/enemy-modifier/enemy-modifier-config-factory.ts`
-2. Compose: `BASE_ENTITY_FIELDS`, `MODIFIER_HIERARCHY_FIELDS`, `CODE_FIELD`,
-   `MODIFIER_LIFECYCLE_FIELDS`, `AUDIT_FIELDS`
-3. Add enemy-specific fields (damage_type enum, ai_behavior, etc.)
-4. The domain molecules (`MODIFIER_HIERARCHY_FIELDS`, `MODIFIER_LIFECYCLE_FIELDS`) are
-   **reused unchanged** — EnemyModifier gets the hierarchy and lifecycle system for free
+```typescript
+// New binding for Spell assets — table: spell_modifier_binding
+new ModifierBindingConfigFactory(
+  "Modifier",              // parent FK entity
+  "modifier",              // parent FK table
+  [SPELL_SLOT_FIELD_ATOM], // spell-specific fields
+  "SpellModifierBinding",  // → tableName: spell_modifier_binding
+)
+```
 
-The L1/L2/L3 stack for EnemyModifier is built following the same patterns as ItemModifier.
+The domain molecules (`MODIFIER_HIERARCHY_FIELDS`, `MODIFIER_STATUS_FIELDS`,
+`MODIFIER_ARCHIVE_FIELDS`) are **reused unchanged** — any new modifier binding type gets
+the hierarchy and lifecycle system for free.
+
 No existing entity code is modified. This validates the **open for extension, closed for
 modification** principle at the configuration layer.
 
@@ -198,5 +210,5 @@ OpenAPI documentation generation.
 ## Related Documents
 
 - [PDR-002: Layer Architecture](PDR-002-layer-architecture.md) — where L0 fits in the full stack
-- [PDR-005: Modifier System](PDR-005-modifier-system.md) — ItemModifierConfigFactory in context
+- [PDR-005: Modifier System](PDR-005-modifier-system.md) — ModifierConfigFactory in context; binding architecture
 - [PDR-007: API & Transport Layer](PDR-007-api-transport-layer.md) — how FieldConfig drives OpenAPI

@@ -17,7 +17,7 @@ validate request format → call L2 service → return response
 Nothing more. Business logic (uniqueness checks, cross-field validation, tier validation)
 lives in L1 and L2. Controllers are deliberately thin.
 
-This design choice means L2 services are **transport-agnostic**. The same `ItemModifierService`
+This design choice means L2 services are **transport-agnostic**. The same `ModifierService`
 methods that REST handlers call are exactly what GraphQL resolvers will call when the game
 runtime API is added. Zero duplication, zero migration cost.
 
