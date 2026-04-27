@@ -35,7 +35,7 @@ src/browser/
 ├── sub-atoms/
 │   ├── routing/
 │   │   ├── route-config.ts            — EntityRouteConfig type definition
-│   │   ├── entity-routes.ts           — ENTITY_ROUTES: readonly config array for all 6 entities
+│   │   ├── entity-routes.ts           — ENTITY_ROUTES: readonly config array for all 8 entities
 │   │   └── index.ts
 │   ├── validation/
 │   │   ├── validate-required.ts       — validateRequired: empty/whitespace check
@@ -143,7 +143,7 @@ interface EntityRouteConfig {
 
 ### `entity-routes.ts` — `ENTITY_ROUTES` array
 
-Six entries, one per entity. Each defines the URLs, API paths, and optional cascade/init hooks.
+Eight entries, one per entity. Each defines the URLs, API paths, and optional cascade/init hooks.
 
 | Entity | `basePath` | `apiBasePath` | Cascades on form | Special hooks |
 |---|---|---|---|---|
@@ -152,6 +152,8 @@ Six entries, one per entity. Each defines the URLs, API paths, and optional casc
 | GameCategory | `/game-categories` | `/api/game-categories` | none | `onListInit`: filter cascade domain→subdomain |
 | GameSubcategory | `/game-subcategories` | `/api/game-subcategories` | domain→sub→cat | `onListInit`: 2 filter cascades; `onFormInit`: reset category on domain change |
 | Stat | `/stats` | `/api/stats` | none | — |
+| CharacterClass | `/character-classes` | `/api/character-classes` | none | `onFormInit`: stat sheet init (serialize `stat_sheet_json` on submit) |
+| Item | `/items` | `/api/items` | domain→sub→cat→subcat | `onListInit`: 3 filter cascades; `onFormInit`: cascades + stat sheet init (serialize `stat_sheet_json` on submit) |
 | Modifier | `/modifiers` | `/api/modifiers` | domain→sub→cat→subcat | `onListInit`: 3 filter cascades; `onDetailInit`: tabs+tiers+bindings; `onFormInit`: cascades+tiers+tabs+bindings |
 
 **Form cascades** (name-attribute selectors):
