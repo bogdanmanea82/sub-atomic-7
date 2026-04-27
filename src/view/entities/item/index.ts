@@ -1,5 +1,5 @@
 // src/view/entities/item/index.ts
-// Custom Item pages — list page has hierarchy filter bar (like ItemModifier).
+// Custom Item pages — list page has hierarchy filter bar (like Modifier).
 // Create/edit/duplicate pages include the stat sheet (like CharacterClass).
 
 import type { ListView, SelectOption } from "@view-service/types";

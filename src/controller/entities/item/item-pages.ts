@@ -1,6 +1,6 @@
 // src/controller/entities/item/item-pages.ts
 // HTML page routes for Item — server-rendered views for the browser.
-// Item has both hierarchy cascade dropdowns (like ItemModifier) and
+// Item has both hierarchy cascade dropdowns (like Modifier) and
 // a stat sheet (like CharacterClass). All stats are shown; zeros are
 // filtered by the service before insert.
 

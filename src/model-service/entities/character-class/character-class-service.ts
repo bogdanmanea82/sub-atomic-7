@@ -4,7 +4,7 @@
 // CharacterClass owns a stat sheet (character_stat_base rows). Every create/update
 // carries stat_sheet_json: a serialized array of { stat_id, base_value } pairs.
 // The stat sheet is persisted in the same transaction as the parent row using the
-// delete-all-then-reinsert pattern (matches ItemModifier tiers).
+// delete-all-then-reinsert pattern (matches Modifier tiers).
 
 import type { SQL } from "bun";
 import type { CharacterClass } from "@model/entities/character-class/character-class-model";

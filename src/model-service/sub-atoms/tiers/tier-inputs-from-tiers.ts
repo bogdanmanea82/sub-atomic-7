@@ -3,7 +3,7 @@
 // leaving just the five progression fields needed for validation and re-insertion.
 //
 // Generic over any tier record type — any struct with the five fields qualifies,
-// so ItemModifierTier, EnemyModifierTier etc. all satisfy HasTierFields without
+// so ModifierTier (and any future tier sub-types) satisfy HasTierFields without
 // explicit implementation.
 
 import type { TierInput } from "../../atoms/validation/validate-tier-set";
