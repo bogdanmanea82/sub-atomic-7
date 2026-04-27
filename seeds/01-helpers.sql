@@ -8,6 +8,10 @@
 --
 -- affix_type is NOT a parameter here — it is item-specific and belongs on the binding row.
 -- Callers insert item_modifier_binding directly with affix_type in the VALUES list.
+--
+-- Drop the old 12-arg signature (with p_affix_type) if it still exists from a
+-- previous seed run before the affix_type refactor.
+DROP FUNCTION IF EXISTS seed_insert_mod_raw(UUID, UUID, UUID, UUID, TEXT, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT);
 
 CREATE OR REPLACE FUNCTION seed_insert_mod_raw(
   p_domain_id         UUID,
