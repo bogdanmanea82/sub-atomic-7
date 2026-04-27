@@ -9,8 +9,23 @@ No deadlines. Milestones are sequenced by dependency, not by date.
 
 ## Current State
 
-All seven layers are complete for six entities:
-`GameDomain`, `GameSubdomain`, `GameCategory`, `GameSubcategory`, `Stat`, `Modifier`.
+All seven layers are complete for eight primary entities:
+`GameDomain`, `GameSubdomain`, `GameCategory`, `GameSubcategory`, `Stat`,
+`CharacterClass`, `Item`, `Modifier`.
+
+**CharacterClass** — player archetype entity with archive lifecycle and a stat sheet
+subordinate table (`character_stat_base`). Stat sheets are bulk-managed via
+`stat_sheet_json` hidden form field using delete-all-then-reinsert transactions.
+All stats are shown pre-filled with their `default_value`.
+
+**Item** — game object entity scoped to the full 4-level taxonomy hierarchy (same FK
+chain as Modifier). Owns a `item_stat_base` stat sheet (sparse — only non-zero rows
+displayed). Carries archive lifecycle and full form cascade support.
+
+**Supporting models (no standalone controller/routes):**
+- `CharacterStatBase` — junction of CharacterClass × Stat; 7 fields including `combination_type`
+- `ItemStatBase` — junction of Item × Stat; 7 fields including `combination_type`
+- `Formula` — L0 config + L1 model only
 
 The `Modifier` entity is the universal modifier table (table: `modifier`). The rename from
 `ItemModifier` / `item_modifiers` was completed via migrations 015–017. The entity now
@@ -35,13 +50,13 @@ The API layer is documented:
 - All routes carry TypeBox schemas for validation and documentation
 - HTML page routes excluded from the API spec
 
-The factory pattern is established and proven across multiple binding types:
+The factory pattern is established and proven across multiple entity and binding types:
 - `BaseEntityConfigFactory` abstract template
 - `ModifierConfigFactory` as the reference implementation
 - `ModifierBindingConfigFactory` generic factory — parameterized by 4 args including optional
   `bindingEntityName` to support multiple binding types sharing the same `modifier` FK parent
 - `ModifierTierConfigFactory` generic factory
-- All six entities use the factory pattern
+- All eight primary entities use the factory pattern
 
 ---
 
@@ -92,19 +107,22 @@ This milestone gates the asset system — assets cannot be built before the fact
 
 ---
 
-## Milestone 3: Asset System
+## Milestone 3: Asset System ✓ (Item complete)
 
-**Goal:** Build the `ItemAsset` entity as the first concrete asset type.
+**Goal:** Build the first concrete asset type — complete.
 
-The asset system introduces a new entity class: game objects that can carry modifiers.
-The `ItemAsset` entity will:
-- Use the same factory pattern — `ItemAssetConfigFactory extends BaseEntityConfigFactory`
-- Have its own `item_assets` table
-- Show eligible modifiers on the asset detail page using the binding resolution logic
-  already proven in the modifier assignment panel
-- Serve as the second proof point for the factory extension model
+The `Item` entity (all 7 layers) is the concrete deliverable of this milestone:
+- Factory pattern — `ItemConfigFactory extends BaseEntityConfigFactory` ✓
+- Own table — `item` (migrations 013, 014) ✓
+- 4-level taxonomy hierarchy FK chain ✓
+- Stat sheet (`item_stat_base`) with sparse display and `stat_sheet_json` pattern ✓
+- Archive lifecycle, form cascades, browser routing ✓
 
-After this milestone, the CMS can author both modifiers and the objects that use them.
+**Still deferred within this milestone:**
+- Eligible modifier pool view on the Item detail page (reuses
+  `prepareAssignmentPanel()` from the Modifier system — not yet wired in L4/L5)
+- AssetTemplate pattern (shared modifier pool across asset classes)
+- Additional asset types beyond Item (see PDR-006)
 
 ---
 
