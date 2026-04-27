@@ -1,7 +1,7 @@
 # PDR-001: Vision & Scope
 
 **Status:** Active  
-**Last updated:** 2026-04-23
+**Last updated:** 2026-04-27
 
 ---
 
@@ -9,8 +9,10 @@
 
 Sub-atomic-7 is a prototype **Content Management System for RPG game data**. It provides a
 structured way to author, organise, and relate the hierarchical entities that define a role-playing
-game world — game domains, subdomains, categories, subcategories, and the modifiers that
-make entities behave differently from one another.
+game world — game domains, subdomains, categories, subcategories, stats (measurable attributes),
+character classes (player archetypes with configurable stat sheets), items (game objects scoped
+to the hierarchy that carry modifier rolls), and the modifiers that define what gameplay effects
+each item can have.
 
 This is not a game engine. It does not simulate gameplay, resolve dice rolls, or manage player
 state. It is the authoring layer that produces well-structured, relational game data which a
@@ -74,7 +76,7 @@ The prototype does not need to:
 | Production operations (monitoring, SLAs, on-call) | Prototype phase — these concerns belong to a hardening phase |
 | Player-facing runtime API | Game runtime entities (Zone, Enemy, Ability) don't exist yet; GraphQL addition is deferred (see PDR-007) |
 | Authentication hardening | Current auth is placeholder; production auth is a separate phase |
-| Asset system | Dependent on modifier system stability; planned but not yet built (see PDR-006) |
+| AssetTemplate pattern and non-item asset types | The `Item` entity (first concrete asset type) is complete. The AssetTemplate pattern (shared modifier pool declarations) and additional asset types (Enemy assets, Spell assets, Zone assets) remain deferred (see PDR-006) |
 | Full EnemyModifier vertical (L1–L6) | EnemyModifierBinding infra is complete; full EnemyModifier entity (brainstorm needed first) |
 | Zone, Spell, Map modifier types | Extension of the proven factory pattern; deferred after EnemyModifier |
 | Deployment pipeline / CI | Outside prototype scope |
