@@ -54,9 +54,11 @@ src/config/
     ├── game-category/
     ├── game-subcategory/
     ├── stat/
-    ├── character/
-    ├── formula/
+    ├── character-class/
     ├── character-stat-base/
+    ├── formula/
+    ├── item/
+    ├── item-stat-base/
     ├── modifier/
     ├── modifier-tier/
     ├── item-modifier-binding/
@@ -286,8 +288,9 @@ spread directly into a `buildFields()` return array.
 | `modifier-group-field-atom.ts` | `modifier_group` | string | true | false | short (3–50) | Modifier config |
 | `display-template-field-atom.ts` | `display_template` | string | true | false | long (3–5000), textarea | Modifier config |
 | `affix-type-field-atom.ts` | `affix_type` | enum | true | true | values: prefix/suffix, listOrder 20 | ItemModifierBinding config |
-| `character-id-field-atom.ts` | `character_id` | reference | true | false | FK → Character, hidden | CharacterStatBase config |
-| `stat-id-field-atom.ts` | `stat_id` | reference | true | false | FK → Stat, hidden | CharacterStatBase config |
+| `character-id-field-atom.ts` | `character_id` | reference | true | false | FK → CharacterClass, hidden | CharacterStatBase config |
+| `stat-id-field-atom.ts` | `stat_id` | reference | true | false | FK → Stat, hidden | CharacterStatBase config, ItemStatBase config |
+| `item-id-field-atom.ts` | `item_id` | reference | true | false | FK → Item, hidden | ItemStatBase config |
 
 ### `index.ts`
 
@@ -340,8 +343,8 @@ ARCHIVE_FIELDS = [
 ]
 ```
 
-**Used by:** GameDomain, GameSubdomain, GameCategory, GameSubcategory, Stat.
-**Not used by:** Character, Formula, CharacterStatBase (no archive lifecycle on these).
+**Used by:** GameDomain, GameSubdomain, GameCategory, GameSubcategory, Stat, CharacterClass, Item.
+**Not used by:** Formula, CharacterStatBase, ItemStatBase (no archive lifecycle on these).
 **Modifier entities use:** `MODIFIER_ARCHIVE_FIELDS` from `molecules/modifier/` (same shape,
 separate molecule to keep modifier domain self-contained).
 **Layer reads:** L2 Model Service `applyStatusAction()` workflow sets/clears these fields.
@@ -565,9 +568,11 @@ export is what all upstream layers import.
 | `GameCategory` | `GAME_CATEGORY_CONFIG` | ID + domain_ref + subdomain_ref + BASE + ARCHIVE + AUDIT = **11** | GameDomain, GameSubdomain | `status_action`, `status_reason` |
 | `GameSubcategory` | `GAME_SUBCATEGORY_CONFIG` | ID + domain_ref + subdomain_ref + category_ref + BASE + ARCHIVE + AUDIT = **12** | GameDomain, GameSubdomain, GameCategory | `status_action`, `status_reason` |
 | `Stat` | `STAT_CONFIG` | ID + machine_name + name + desc + data_type + value_min + value_max + default_value + category + is_active + ARCHIVE + AUDIT = **14** | none | `status_action`, `status_reason` |
-| `Character` | `CHARACTER_CONFIG` | ID + machine_name + name + desc + is_active + AUDIT = **7** | none | none |
+| `CharacterClass` | `CHARACTER_CLASS_CONFIG` | ID + machine_name + name + desc + is_active + ARCHIVE(2) + AUDIT(2) = **9** | none | `stat_sheet_json`, `status_action`, `status_reason` |
 | `Formula` | `FORMULA_CONFIG` | ID + name + output_stat_id + expression + desc + AUDIT = **7** | Stat (output) | none |
-| `CharacterStatBase` | `CHARACTER_STAT_BASE_CONFIG` | ID + character_id + stat_id + base_value + AUDIT = **6** | Character, Stat | none |
+| `CharacterStatBase` | `CHARACTER_STAT_BASE_CONFIG` | ID + character_id + stat_id + combination_type + base_value + AUDIT(2) = **7** | CharacterClass, Stat | none |
+| `Item` | `ITEM_CONFIG` | ID + MODIFIER_HIERARCHY(4) + machine_name + name + desc + is_active + ARCHIVE(2) + AUDIT(2) = **13** | GameDomain, GameSubdomain, GameCategory, GameSubcategory | `stat_sheet_json`, `status_action`, `status_reason` |
+| `ItemStatBase` | `ITEM_STAT_BASE_CONFIG` | ID + item_id + stat_id + combination_type + base_value + AUDIT(2) = **7** | Item, Stat | none |
 | `Modifier` | `MODIFIER_CONFIG` | ID + MODIFIER_HIERARCHY(4) + machine_name + name + desc + target_stat_id + combination_type + roll_shape + value_min + value_max + modifier_group + display_template + is_active + MODIFIER_ARCHIVE(2) + AUDIT(2) = **20** | GameDomain, GameSubdomain, GameCategory, GameSubcategory | `tiers_json`, `tiers`, `status_action`, `status_reason` |
 | `ModifierTier` | `MODIFIER_TIER_CONFIG` | → delegates to `ModifierTierConfigFactory("Modifier", "modifier")` = **9** | Modifier | (generic factory handles) |
 | `ItemModifierBinding` | `ITEM_MODIFIER_BINDING_CONFIG` | → delegates to `ModifierBindingConfigFactory` + `AFFIX_TYPE_FIELD_ATOM` = **13** | Modifier | (generic factory handles) |
