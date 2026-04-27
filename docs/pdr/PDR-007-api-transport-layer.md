@@ -1,7 +1,7 @@
 # PDR-007: API & Transport Layer
 
 **Status:** Active  
-**Last updated:** 2026-04-23
+**Last updated:** 2026-04-27
 
 ---
 
@@ -71,7 +71,7 @@ spec documents only the machine-readable API contract.
 
 ## Current API Surface
 
-All five entity groups are documented at `GET /openapi` (Scalar UI) and `GET /openapi/json`.
+All eight entity groups are documented at `GET /openapi` (Scalar UI) and `GET /openapi/json`.
 
 | Entity | REST prefix | Tags |
 |---|---|---|
@@ -79,6 +79,9 @@ All five entity groups are documented at `GET /openapi` (Scalar UI) and `GET /op
 | Game Subdomains | `/api/game-subdomains` | `Game Subdomains` |
 | Game Categories | `/api/game-categories` | `Game Categories` |
 | Game Subcategories | `/api/game-subcategories` | `Game Subcategories` |
+| Stats | `/api/stats` | `Stats` |
+| Character Classes | `/api/character-classes` | `Character Classes` |
+| Items | `/api/items` | `Items` |
 | Item Modifiers | `/api/modifiers` | `Item Modifiers` |
 
 Each entity exposes the standard 5 CRUD routes via `createCrudRoutes()` plus entity-specific
