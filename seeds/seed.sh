@@ -18,6 +18,7 @@ FILES=(
   "01-helpers.sql"
   "11-stats.sql"
   "02-hierarchy.sql"
+  "19-enemies-hierarchy.sql"
   "15-modifiers-special.sql"
   "18-modifiers-core.sql"
   "12-characters.sql"
@@ -38,16 +39,22 @@ echo ""
 echo "Verifying counts..."
 psql "$DATABASE_URL" --quiet --tuples-only -c "
   SELECT 'stat:                 ' || count(*) FROM stat
+  UNION ALL SELECT '--- hierarchy ---' || ''
   UNION ALL SELECT 'game_domain:          ' || count(*) FROM game_domain
   UNION ALL SELECT 'game_subdomain:       ' || count(*) FROM game_subdomain
   UNION ALL SELECT 'game_category:        ' || count(*) FROM game_category
   UNION ALL SELECT 'game_subcategory:     ' || count(*) FROM game_subcategory
+  UNION ALL SELECT '  (items domain)      ' || count(*) FROM game_subcategory sc JOIN game_domain d ON sc.game_domain_id = d.id WHERE d.machine_name = 'items'
+  UNION ALL SELECT '  (enemies domain)    ' || count(*) FROM game_subcategory sc JOIN game_domain d ON sc.game_domain_id = d.id WHERE d.machine_name = 'enemies'
+  UNION ALL SELECT '--- modifiers ---' || ''
   UNION ALL SELECT 'modifier:             ' || count(*) FROM modifier
   UNION ALL SELECT 'modifier_tier:        ' || count(*) FROM modifier_tier
   UNION ALL SELECT 'item_modifier_binding:' || count(*) FROM item_modifier_binding
+  UNION ALL SELECT '--- characters ---' || ''
   UNION ALL SELECT 'character_class:      ' || count(*) FROM character_class
   UNION ALL SELECT 'character_stat_base:  ' || count(*) FROM character_stat_base
   UNION ALL SELECT 'formula:              ' || count(*) FROM formula
+  UNION ALL SELECT '--- items ---' || ''
   UNION ALL SELECT 'item:                 ' || count(*) FROM item
   UNION ALL SELECT 'item_stat_base:       ' || count(*) FROM item_stat_base;
 "
