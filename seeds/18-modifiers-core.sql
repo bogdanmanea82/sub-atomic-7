@@ -116,7 +116,7 @@ BEGIN
   -- Pattern B: Boots category included, Heavy Boots excluded.
   -- Dexterity scales with agility — plate boots are too rigid for nimble footwork.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_boots, v_ev_boots,
     'added_dexterity', 'dexterity', 'flat', 'scalar', 3, 35, 'Added Dexterity'
   );
@@ -134,7 +134,7 @@ BEGIN
   -- Pattern A+: 1-Handed and 2-Handed categories included.
   -- Wand and Staff excluded — their damage comes from spell power, not physical strikes.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_wpn, v_1h, v_1h_sword,
     'added_base_damage', 'base_damage', 'flat', 'scalar', 5, 90, 'Added Base Damage'
   );
@@ -155,7 +155,7 @@ BEGIN
   -- Heavy Gloves excluded — gauntlets restrict finger movement.
   -- attack_speed stored as multiplier (100=1.0x); values are % points added.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_gloves, v_ev_gloves,
     'increased_attack_speed', 'attack_speed', 'increased', 'scalar', 5, 20, 'Increased Attack Speed'
   );
@@ -175,7 +175,7 @@ BEGIN
   -- Critical strike multiplier is the province of neck slot theorycrafting.
   -- crit_multiplier stored as percentage (150=150%); values are % points added.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_jewel, v_jewcat, v_amulet,
     'critical_strike_multiplier', 'critical_strike_multiplier', 'increased', 'scalar', 10, 70, 'Increased Critical Strike Multiplier'
   );
@@ -192,7 +192,7 @@ BEGIN
   -- Pattern B: 2-Handed category included; Bow, Crossbow, Staff excluded.
   -- Range is a melee reach stat — ranged weapons have inherent infinite range.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_wpn, v_2h, v_2h_sword,
     'added_attack_range', 'attack_range', 'flat', 'scalar', 1, 4, 'Added Attack Range'
   );
@@ -212,7 +212,7 @@ BEGIN
   -- Pattern F: Body Armour and Helmets included; Energy Shield variants excluded.
   -- Armour and energy shield are opposing defensive types — ES pieces don't add armour.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_body, v_heavy_armour,
     'added_armor_rating', 'armor_rating', 'flat', 'scalar', 20, 400, 'Added Armor Rating'
   );
@@ -233,7 +233,7 @@ BEGIN
   -- Block is mechanically locked to shields; no other slot can block.
   -- block_chance stored as percentage (0–75); values are flat % points.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_wpn, v_offh, v_shield,
     'added_block_chance', 'block_chance', 'flat', 'scalar', 3, 20, 'Added Block Chance'
   );
@@ -251,7 +251,7 @@ BEGIN
   -- Fire protection is core defensive coverage — wide but not universal.
   -- Stored as percentage integer; flat adds directly to the stat.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_body, v_heavy_armour,
     'fire_resistance', 'fire_resistance', 'flat', 'scalar', 10, 50, 'Fire Resistance'
   );
@@ -270,7 +270,7 @@ BEGIN
   -- Pattern A: Boots + Gloves + Belts (extremities and core — cold bites at the edges).
   -- Deliberately distinct from fire (Body+Helm+Belts) for binding variety.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_boots, v_ev_boots,
     'cold_resistance', 'cold_resistance', 'flat', 'scalar', 10, 50, 'Cold Resistance'
   );
@@ -289,7 +289,7 @@ BEGIN
   -- Pattern A: Body Armour + Helmets + Gloves (conducting metal coverage).
   -- Each resistance targets a distinct 3-slot combination for variety.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_body, v_heavy_armour,
     'lightning_resistance', 'lightning_resistance', 'flat', 'scalar', 10, 50, 'Lightning Resistance'
   );
@@ -308,7 +308,7 @@ BEGIN
   -- Pattern A: Helmets + Belts (head protection and core bracing).
   -- A sturdy helmet and a reinforced belt are the classic stun resistance gear.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_helm, v_heavy_helmet,
     'added_stun_threshold', 'stun_threshold', 'flat', 'scalar', 30, 400, 'Added Stun Threshold'
   );

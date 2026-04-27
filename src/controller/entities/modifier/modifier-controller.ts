@@ -14,6 +14,7 @@ import { createCrudRoutes } from "../../molecules/crud-routes";
 import { deriveBodySchema, paginationQuerySchema } from "../../sub-atoms/schema";
 import { ItemModifierPages } from "./modifier-pages";
 import { ItemModifierBindingApi } from "./modifier-binding-api";
+import { EnemyModifierBindingApi } from "./enemy-modifier-binding-api";
 import { ItemModifierTierApi } from "./modifier-tier-api";
 
 const TAGS = ["Item Modifiers"];
@@ -68,6 +69,7 @@ const ModifierApi = new Elysia()
     tags: TAGS,
   }))
   .use(ItemModifierBindingApi)
+  .use(EnemyModifierBindingApi)
   .use(ItemModifierTierApi);
 
 export const ModifierController = new Elysia()

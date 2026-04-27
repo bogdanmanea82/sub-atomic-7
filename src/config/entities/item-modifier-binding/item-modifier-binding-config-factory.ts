@@ -8,7 +8,8 @@ import { AFFIX_TYPE_FIELD_ATOM } from "../../universal/atoms";
 
 export { ModifierBindingConfigFactory };
 export const ITEM_MODIFIER_BINDING_CONFIG = new ModifierBindingConfigFactory(
-  "Modifier",
-  "modifier",
+  "Modifier",          // parent FK entity → Modifier (universal)
+  "modifier",          // parent FK table   → modifier
   [AFFIX_TYPE_FIELD_ATOM],
+  "ItemModifierBinding", // binding entity name → table: item_modifier_binding
 ).create();

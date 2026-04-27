@@ -1,5 +1,5 @@
 -- seeds/15-modifiers-special.sql
--- 12 modifiers demonstrating advanced binding patterns using seed_insert_mod_raw.
+-- 12 modifiers demonstrating advanced binding patterns using seed_insert_modifier_raw.
 -- Each modifier has manually defined tiers (custom level_req, weights) and one or
 -- more explicit item_modifier_binding rows (include/exclude, category/subcategory).
 --
@@ -127,7 +127,7 @@ BEGIN
   -- Pattern A: Body Armour + Helmets + Belts (multiple category inclusions)
   -- Boots and Gloves are deliberately NOT bound — extremities feel less "vital".
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_body, v_heavy_armour,
     'maximum_life', 'life_max', 'flat', 'scalar', 25, 350, 'Maximum Life'
   );
@@ -146,7 +146,7 @@ BEGIN
   -- Pattern A: All 5 armour categories — chaos res is rare and valuable everywhere.
   -- Steep level requirements; T3 needs level 70.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_body, v_heavy_armour,
     'chaos_resistance', 'chaos_resistance', 'increased', 'scalar', 4, 60, 'Chaos Resistance'
   );
@@ -167,7 +167,7 @@ BEGIN
   -- Pattern B: 1-Handed category included, Wand subcategory excluded.
   -- Wands are intelligence weapons — strength is thematically wrong.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_wpn, v_1h, v_1h_sword,
     'added_strength', 'strength', 'flat', 'scalar', 3, 35, 'Added Strength'
   );
@@ -185,7 +185,7 @@ BEGIN
   -- Pattern B: Helmets category included, Heavy Helmet excluded.
   -- Physical strength helmets don't enhance arcane knowledge.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_helm, v_es_helmet,
     'added_intelligence', 'intelligence', 'flat', 'scalar', 3, 35, 'Added Intelligence'
   );
@@ -203,7 +203,7 @@ BEGIN
   -- Pattern B: 2-Handed category included; 2H Sword, 2H Axe, 2H Mace excluded.
   -- Physical melee two-handers don't channel mana — Staff, Bow, Crossbow do.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_wpn, v_2h, v_staff,
     'mana_regeneration', 'mana_regen', 'increased', 'scalar', 8, 120, 'Mana Regeneration'
   );
@@ -223,7 +223,7 @@ BEGIN
   -- Pattern B: Boots category included, Heavy Boots excluded.
   -- Steel-reinforced boots are too heavy for nimble footwork.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_boots, v_ev_boots,
     'movement_speed', 'movement_speed', 'increased', 'scalar', 5, 30, 'Increased Movement Speed'
   );
@@ -242,7 +242,7 @@ BEGIN
   -- The subcategory inclusion overrides the category exclusion for Rings only.
   -- Amulets get neither — effectively Ring-exclusive via explicit hierarchy.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_jewel, v_jewcat, v_ring,
     'maximum_mana', 'mana_max', 'flat', 'scalar', 8, 90, 'Maximum Mana'
   );
@@ -260,7 +260,7 @@ BEGIN
   -- Pattern C: Jewellery category excluded; Amulet subcategory explicitly included.
   -- Mirror of Maximum Mana — Amulet-exclusive via same override pattern.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_jewel, v_jewcat, v_amulet,
     'life_regeneration', 'life_regen', 'flat', 'scalar', 2, 22, 'Life Regeneration'
   );
@@ -278,7 +278,7 @@ BEGIN
   -- Pattern D: Dagger subcategory only. No category binding at all.
   -- High crit values exclusive to the assassin weapon.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_wpn, v_1h, v_dagger,
     'critical_strike_chance', 'critical_strike_chance', 'increased', 'scalar', 10, 90, 'Critical Strike Chance'
   );
@@ -295,7 +295,7 @@ BEGIN
   -- Pattern D: Focus subcategory only. No category binding.
   -- Caster off-hand amplifies spells; Shield and Quiver don't channel arcane energy.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_wpn, v_offh, v_focus,
     'cast_speed', 'cast_speed', 'increased', 'scalar', 8, 50, 'Cast Speed'
   );
@@ -312,7 +312,7 @@ BEGIN
   -- Pattern E: 2-Handed category included AND Quiver subcategory included.
   -- Ranged characters stack accuracy on their weapon AND their ammo pouch.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_wpn, v_2h, v_2h_sword,
     'accuracy_rating', 'accuracy_rating', 'flat', 'scalar', 15, 250, 'Added Accuracy Rating'
   );
@@ -330,7 +330,7 @@ BEGIN
   -- Pattern F: Gloves + Boots categories included; Heavy Gloves + Heavy Boots excluded.
   -- Evasion is for light and magical armour — plate extremities don't dodge.
   -- ══════════════════════════════════════════════════════════════════════════
-  v_mod := seed_insert_mod_raw(
+  v_mod := seed_insert_modifier_raw(
     v_dom, v_armour, v_gloves, v_ev_gloves,
     'evasion_rating', 'evasion_rating', 'flat', 'scalar', 15, 280, 'Evasion Rating'
   );

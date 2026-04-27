@@ -5,6 +5,7 @@
 -- modifier children (all CASCADE, but explicit for clarity)
 DELETE FROM modifier_tier;
 DELETE FROM item_modifier_binding;
+DELETE FROM enemy_modifier_binding;
 DELETE FROM modifier_history;
 
 -- modifier (references stat via RESTRICT)
