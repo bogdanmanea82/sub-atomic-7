@@ -88,6 +88,10 @@ src/model-service/
     ├── game-category/
     ├── game-subcategory/
     ├── stat/
+    ├── character-class/    — complex entity: owns stat sheet (character_stat_base rows)
+    │   └── character-class-service.ts
+    ├── item/               — complex entity: owns sparse stat sheet (item_stat_base rows)
+    │   └── item-service.ts
     └── modifier/           — complex entity: owns tiers + bindings + transactions
         ├── modifier-service.ts
         ├── modifier-binding-service.ts          — item modifier bindings (ItemModifierBindingService)
@@ -619,10 +623,12 @@ No extra latency for pagination metadata.
 
 ## Entity Services — `src/model-service/entities/`
 
-### Standard Method Set (all 6 simple services)
+### Standard Method Set (simple services — GameDomain, GameSubdomain, GameCategory, GameSubcategory, Stat)
 
-Every service for GameDomain, GameSubdomain, GameCategory, GameSubcategory, and Stat
-exposes the same 8 methods with the same signatures. The only variation is scope.
+Every service for the five simple entities exposes the same 8 methods with the same
+signatures. The only variation is the uniqueness scope. CharacterClass and Item also
+expose these same 8 methods but additionally manage owned stat-sheet sub-entities —
+they are covered separately after ModifierService below.
 
 | Method | Signature | Delegates to |
 |---|---|---|
@@ -651,6 +657,8 @@ exposes the same 8 methods with the same signatures. The only variation is scope
 | `GameCategory` | Scoped to `game_subdomain_id` | Global |
 | `GameSubcategory` | Scoped to `game_category_id` | Global |
 | `Stat` | Global (no scope) | Global |
+| `CharacterClass` | Global (no scope) | Global |
+| `Item` | Scoped to `game_subcategory_id` | Global |
 | `Modifier` | Scoped to `game_subcategory_id` | Global |
 
 **Invariant:** `machine_name` is always globally unique. `name` can be scoped — two
@@ -782,6 +790,109 @@ uniqueness and tier-range validation.
 **Target hierarchy:** Enemy categories and subcategories in the `enemies` game domain (seeded
 in `seeds/19-enemies-hierarchy.sql`). The binding does not validate that `target_id` is in
 the enemies domain — that constraint is enforced by the UI and conventions, not the DB FK.
+
+---
+
+### CharacterClassService — Stat Sheet Owner
+
+`CharacterClassService` manages the `CharacterClass` entity and its owned
+`character_stat_base` rows (the character's base stat values). Stat sheet persistence
+uses delete-all-then-reinsert inside a transaction — the same pattern as Modifier tiers.
+
+**Extended return type:**
+```typescript
+export type StatSheetRow = {
+  readonly id: string;
+  readonly stat_id: string;
+  readonly stat_machine_name: string;
+  readonly stat_name: string;
+  readonly stat_data_type: string;
+  readonly stat_value_min: number;
+  readonly stat_value_max: number;
+  readonly stat_default_value: number;
+  readonly stat_category: string;
+  readonly base_value: number;
+};
+
+export type CharacterClassWithStats = CharacterClass & {
+  readonly statSheet: readonly StatSheetRow[];
+};
+```
+`findById` returns `CharacterClassWithStats`. All other methods return `CharacterClass`
+(without the stat sheet) for performance — stat loading is eager only on single-record fetch.
+
+**`stat_sheet_json` pattern:** The HTML form serializes the stat sheet table to a JSON
+string in a hidden `<input name="stat_sheet_json">`. The service's `parseStatSheetFromInput`
+internal helper deserializes it before persistence. `stat_sheet_json` is listed in
+`CHARACTER_CLASS_CONFIG.nonColumnKeys` so the update workflow strips it before building SQL.
+
+**`create`/`update` flow:**
+```
+applyStatusAction(input)
+checkNameAndMachineNameUniqueness(...)   — global scope (no parent FK)
+parseStatSheetFromInput(input)          — deserialize stat_sheet_json → StatSheetInputRow[]
+withTransaction(db, async (txDb) => {
+  INSERT / UPDATE character_class row   (via L1 model)
+  DELETE FROM character_stat_base WHERE character_id = id   (clear existing sheet)
+  INSERT character_stat_base rows       (one per stat with non-default base_value)
+})
+→ selectEntityWorkflow → fetchStatSheet → CharacterClassWithStats
+```
+
+**Exposed methods:** Same 8 as the standard set (`create`, `findById`, `findMany`,
+`findManyPaginated`, `update`, `delete`, `checkNameAvailable`, `checkMachineNameAvailable`)
+plus the stat sheet is embedded in `findById`'s return type automatically.
+
+---
+
+### ItemService — Sparse Stat Sheet Owner
+
+`ItemService` manages the `Item` entity and its owned `item_stat_base` rows. Item stat
+sheets are **sparse**: only rows where `base_value !== 0` are persisted. A stat not
+present in `item_stat_base` is implicitly zero at runtime.
+
+**Extended return type:**
+```typescript
+export type ItemStatSheetRow = {
+  readonly id: string;
+  readonly stat_id: string;
+  readonly stat_machine_name: string;
+  readonly stat_name: string;
+  readonly stat_data_type: string;
+  readonly stat_value_min: number;
+  readonly stat_value_max: number;
+  readonly stat_default_value: number;
+  readonly stat_category: string;
+  readonly combination_type: string;   // ← Item stat sheet adds combination_type
+  readonly base_value: number;
+};
+
+export type ItemWithStats = Item & {
+  readonly statSheet: readonly ItemStatSheetRow[];
+};
+```
+
+**Key differences from CharacterClass stat sheet:**
+| Aspect | CharacterClass | Item |
+|---|---|---|
+| Stat sheet sparsity | All stats stored (uses stat default_value) | Only non-zero rows stored |
+| `combination_type` | Absent (stat grouping only) | Present per row (flat/increased/more) |
+| Hierarchy scope | Top-level (no parent FK) | Scoped to game_subcategory_id |
+| Uniqueness name scope | Global | Scoped to `game_subcategory_id` |
+
+**`create`/`update` flow:**
+```
+applyStatusAction(input)
+checkNameAndMachineNameUniqueness(...)   — scoped to game_subcategory_id
+parseStatSheetFromInput(input)          — deserialize stat_sheet_json → StatSheetInputRow[]
+filter out rows where base_value === 0  — sparse: skip zero-value entries
+withTransaction(db, async (txDb) => {
+  INSERT / UPDATE item row              (via L1 model)
+  DELETE FROM item_stat_base WHERE item_id = id   (clear existing sheet)
+  INSERT item_stat_base rows            (only non-zero rows)
+})
+→ selectEntityWorkflow → fetchStatSheet → ItemWithStats
+```
 
 ---
 
