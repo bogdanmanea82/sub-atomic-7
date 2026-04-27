@@ -91,6 +91,14 @@ src/controller/
     │   ├── stat-controller.ts          — JSON API: CRUD + check-name + check-machine-name
     │   ├── stat-pages.ts               — HTML pages: no hierarchy filters
     │   └── index.ts
+    ├── character-class/
+    │   ├── character-class-controller.ts — JSON API: CRUD + check-name + check-machine-name; passthroughKeys includes stat_sheet_json
+    │   ├── character-class-pages.ts    — HTML pages: stat sheet table + hidden stat_sheet_json input
+    │   └── index.ts
+    ├── item/
+    │   ├── item-controller.ts          — JSON API: CRUD + check-name; passthroughKeys includes stat_sheet_json; 4-level cascade
+    │   ├── item-pages.ts               — HTML pages: cascading hierarchy dropdowns + stat sheet table
+    │   └── index.ts
     ├── modifier/
     │   ├── modifier-controller.ts       — JSON API: CRUD + check-name + nested tier/binding APIs
     │   ├── modifier-pages.ts            — HTML pages: 4-level cascade + tier rows + assignments
@@ -636,6 +644,20 @@ export { EntityController } from "./entity-controller"
 No hierarchy, no cascading. Controller: 2 check endpoints + `createCrudRoutes`. Pages:
 list with pagination + full CRUD page set.
 
+### Stat Sheet Entities (CharacterClass, Item)
+
+Extend the simple/hierarchical pattern with an owned stat sheet sub-entity:
+
+**CharacterClass** (no hierarchy — same topology as GameDomain/Stat):
+- Controller: 2 check endpoints + `createCrudRoutes`; `passthroughKeys` includes `"stat_sheet_json"` from `CHARACTER_CLASS_CONFIG.nonColumnKeys`
+- Pages: same CRUD page set plus an inline stat sheet table rendered from `statSheet` view rows; the table serializes to `<input type="hidden" name="stat_sheet_json">` before form submission
+
+**Item** (has 4-level hierarchy — same topology as Modifier):
+- Controller: `check-name` endpoint (no `check-machine-name` for Item); `createCrudRoutes`; `passthroughKeys` includes `"stat_sheet_json"`; `ITEM_CONFIG.nonColumnKeys` also includes `status_action`, `status_reason`
+- Pages: 4-level cascading dropdowns (same as Modifier pages) + inline stat sheet table with `combination_type` column; sparse — stat rows with `base_value = 0` are not submitted
+
+**Key `passthroughKeys` difference:** `stat_sheet_json` is not a DB column. It must be in `passthroughKeys` so `deriveBodySchema` preserves it in the TypeBox schema as `t.Optional(t.String())`. Without this the body parser would strip it before the service layer reads it.
+
 ### Hierarchical Entities (GameSubdomain, GameCategory, GameSubcategory)
 
 Adds to the simple pattern:
@@ -735,6 +757,8 @@ const app = new Elysia()
   .use(GameSubcategoryController)
   .use(StatController)
   .use(ModifierController)
+  .use(CharacterClassController)
+  .use(ItemController)
   .get("/public/main.js", () => Bun.file("public/main.js"))
   .get("/", async ({ set }) => { ... })   // home page with live counts
   .get("/health", () => ({ status: "healthy", timestamp: ... }))
