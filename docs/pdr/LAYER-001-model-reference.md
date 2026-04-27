@@ -51,6 +51,10 @@ src/model/
     ├── game-category/
     ├── game-subcategory/
     ├── stat/
+    ├── character-class/
+    ├── character-stat-base/
+    ├── item/
+    ├── item-stat-base/
     ├── modifier/
     ├── modifier-tier/
     ├── item-modifier-binding/
@@ -414,7 +418,7 @@ L2 never calls validate/serialize/build separately for create operations.
 Each organism pre-binds one entity config to the universal atoms. L2 imports the model
 and calls named methods — it never imports atoms or molecules directly.
 
-**Standard method set** (9 methods — all hierarchy entities + stat + modifier):
+**Standard method set** (9 methods — all hierarchy entities + Stat + CharacterClass + Item + Modifier):
 
 | Method | Delegates to | Returns |
 |---|---|---|
@@ -431,6 +435,10 @@ and calls named methods — it never imports atoms or molecules directly.
 **ModifierTier** has a reduced method set (6 methods — no pagination, no update):
 Tiers are managed in bulk (delete-all-then-reinsert) by the parent Modifier service in L2.
 Individual tier updates and pagination are not needed.
+
+**CharacterStatBase** and **ItemStatBase** each have a reduced method set (7 methods — no
+pagination, no count): Both are stat-sheet junction tables managed in bulk (delete-all-then-
+reinsert) by their parent service. They include `prepareUpdate` but skip pagination.
 
 **ItemModifierBinding** and **EnemyModifierBinding** each have 7 methods (no pagination,
 but includes update): Bindings support individual CRUD via fetchJson in L6. They need
@@ -450,8 +458,12 @@ These types flow into L2 service return values and L4 view service inputs.
 | `Stat` | `Stat` | 14 | `data_type: string`, `value_min/max/default_value: number`, `category: string` |
 | `Modifier` | `Modifier` | 20 | 4 hierarchy FKs, `target_stat_id: string \| null`, `combination_type`, `roll_shape`, `value_min/max: number`, `modifier_group`, `display_template` |
 | `ModifierTier` | `ModifierTier` | 9 | `modifier_id: string`, `tier_index: number`, `min_value/max_value: number` (deserialized from NUMERIC string) |
-| `ItemModifierBinding` | `ItemModifierBinding` | 12 | `modifier_id`, `target_type: "category" \| "subcategory"`, `is_included: boolean`, nullable overrides; note: `affix_type` is in the L0 config but not yet in the TypeScript type |
+| `ItemModifierBinding` | `ItemModifierBinding` | 13 | `modifier_id`, `affix_type: "prefix" \| "suffix"`, `target_type: "category" \| "subcategory"`, `is_included: boolean`, nullable overrides |
 | `EnemyModifierBinding` | `EnemyModifierBinding` | 12 | `modifier_id`, `target_type: "category" \| "subcategory"`, `is_included: boolean`, nullable overrides |
+| `CharacterClass` | `CharacterClass` | 9 | `machine_name`, `archived_at: Date \| null`, `archived_reason: string \| null` |
+| `CharacterStatBase` | `CharacterStatBase` | 7 | `character_id: string`, `stat_id: string`, `combination_type: string`, `base_value: number` |
+| `Item` | `Item` | 13 | 4 hierarchy FKs, `machine_name`, `archived_at: Date \| null`, `archived_reason: string \| null` |
+| `ItemStatBase` | `ItemStatBase` | 7 | `item_id: string`, `stat_id: string`, `combination_type: string`, `base_value: number` |
 
 All fields are `readonly` — entities from L1 are immutable value objects.
 
