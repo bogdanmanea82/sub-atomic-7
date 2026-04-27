@@ -30,6 +30,8 @@ src/view-service/
 │   ├── tier-view-models.ts         — TierFormRow, TierDetailRow, TierFieldMeta
 │   ├── binding-view-models.ts      — BindingDetailRow, BindingOverrideDisplay
 │   ├── assignment-view-models.ts   — ResolvedAssignment, AssignmentCategoryGroup, AssignmentPanelData
+│   ├── character-class-view-models.ts — StatSheetViewRow, CharacterClassFormView, CharacterClassDetailView
+│   ├── item-view-models.ts         — ItemStatBaseViewRow (+ combination_type), ItemFormView, ItemDetailView
 │   └── index.ts
 ├── sub-atoms/
 │   ├── formatters/
@@ -74,6 +76,12 @@ src/view-service/
     │   └── index.ts
     ├── stat/
     │   ├── stat-view-service.ts
+    │   └── index.ts
+    ├── character-class/
+    │   ├── character-class-view-service.ts
+    │   └── index.ts
+    ├── item/
+    │   ├── item-view-service.ts
     │   └── index.ts
     ├── modifier/
     │   ├── modifier-view-service.ts
@@ -125,6 +133,30 @@ src/view-service/
 | `AssignmentCategoryGroup` | `{ categoryName, categoryBinding, assignments: ResolvedAssignment[] }` | All subcategories under one category |
 | `AssignmentSummary` | `{ totalSubcategories, eligible, excluded, noBinding }` | Count totals for panel header |
 | `AssignmentPanelData` | `{ summary: AssignmentSummary, groups: AssignmentCategoryGroup[] }` | Complete assignments panel data |
+
+### `character-class-view-models.ts`
+
+Extended view model types for the CharacterClass stat sheet. Imported by L5 view organisms
+that render the stat sheet table.
+
+| Type | Shape | Purpose |
+|---|---|---|
+| `StatSheetViewRow` | `{ stat_id, stat_name, stat_category, stat_data_type, stat_value_min, stat_value_max, stat_default_value, base_value, error? }` | One stat row in a character stat sheet form or detail view |
+| `CharacterClassFormView` | `extends FormView` with `statSheet: readonly StatSheetViewRow[]` | Complete create/edit form view with stat sheet rows attached |
+| `CharacterClassDetailView` | `extends DetailView` with `statSheet: readonly StatSheetViewRow[]` | Complete detail page view with stat sheet rows attached |
+
+`error?` on `StatSheetViewRow` carries per-row validation messages (e.g., "base_value out of range").
+
+### `item-view-models.ts`
+
+Extended view model types for the Item stat sheet. Parallel to `character-class-view-models.ts`
+but adds `combination_type` to each stat row — Items store the modifier math bucket per stat.
+
+| Type | Shape | Purpose |
+|---|---|---|
+| `ItemStatBaseViewRow` | `{ stat_id, stat_name, stat_category, stat_data_type, stat_value_min, stat_value_max, stat_default_value, combination_type, base_value, error? }` | One stat row in an item stat sheet (adds `combination_type` vs CharacterClass) |
+| `ItemFormView` | `extends FormView` with `statSheet: readonly ItemStatBaseViewRow[]` | Complete create/edit form view with item stat sheet rows attached |
+| `ItemDetailView` | `extends DetailView` with `statSheet: readonly ItemStatBaseViewRow[]` | Complete detail page view with item stat sheet rows attached |
 
 ---
 
@@ -607,6 +639,83 @@ Groups results by category. Counts `eligible` (included), `excluded`, and `noBin
 
 Returns `AssignmentPanelData` with summary counts and grouped subcategory rows — a read-only
 panel showing where a modifier is currently active across all game content.
+
+---
+
+### Stat Sheet Pattern: `CharacterClassViewService`
+
+Extends the simple pattern (same as GameDomain/Stat) with stat sheet methods. No hierarchy
+— CharacterClass is a top-level entity.
+
+**Extended method signatures:**
+
+```typescript
+prepareCreateForm(
+  values?: Record<string, unknown>,
+  errors?: Record<string, string>,
+  statSheet?: readonly StatSheetViewRow[],
+): CharacterClassFormView
+
+prepareEditForm(
+  currentValues: Record<string, unknown>,
+  errors?: Record<string, string>,
+  statSheet?: readonly StatSheetViewRow[],
+): CharacterClassFormView
+
+prepareDetailView(
+  entity: Record<string, unknown>,
+  referenceLookup?: ReferenceLookup,
+  statSheet?: readonly StatSheetViewRow[],
+): CharacterClassDetailView
+```
+
+`statSheet` defaults to `[]` when omitted. L3 pages load the stat sheet from
+`CharacterClassService.findById(id)` (which returns `CharacterClassWithStats`) and passes
+the `statSheet` array to the view service method.
+
+**`buildStatSheetFromAllStats`** — internal helper used by the view service to build stat
+sheet rows from the full active stats list. For each stat, looks up the character's
+`base_value` from a map (defaulting to `stat.default_value` if not set). Returns
+`StatSheetViewRow[]` sorted by stat category and name.
+
+---
+
+### Stat Sheet Pattern: `ItemViewService`
+
+Extends the hierarchical pattern (same as Modifier) with stat sheet methods. Item is scoped
+to game_subcategory_id — 4-level cascading dropdowns in forms.
+
+**Extended method signatures:**
+
+```typescript
+prepareCreateForm(
+  selectOptions: Record<string, readonly SelectOption[]>,
+  values?: Record<string, unknown>,
+  errors?: Record<string, string>,
+  statSheet?: readonly ItemStatBaseViewRow[],
+): ItemFormView
+
+prepareEditForm(
+  selectOptions: Record<string, readonly SelectOption[]>,
+  currentValues: Record<string, unknown>,
+  errors?: Record<string, string>,
+  statSheet?: readonly ItemStatBaseViewRow[],
+): ItemFormView
+
+prepareDetailView(
+  entity: Record<string, unknown>,
+  referenceLookup?: ReferenceLookup,
+  statSheet?: readonly ItemStatBaseViewRow[],
+): ItemDetailView
+```
+
+**`prepareFilteredListView`** — same as other hierarchical entities: removes the 4 FK
+columns from the list table.
+
+**Key difference from CharacterClass:** Each `ItemStatBaseViewRow` carries `combination_type`
+(flat/increased/more). The L5 stat sheet form renders a `combination_type` select column
+alongside the `base_value` input. Item stat defaults are `0` (not `stat.default_value`) —
+items start with no base stats and the designer sets values explicitly.
 
 ---
 
